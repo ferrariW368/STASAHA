@@ -27,14 +27,23 @@ async function main() {
     create: { id: 'seed-team-b', name: 'Aslanlar' },
   });
 
-  await prisma.player.createMany({
-    data: [
-      { teamId: teamA.id, name: 'Ahmet', number: 9 },
-      { teamId: teamA.id, name: 'Mehmet', number: 7 },
-      { teamId: teamB.id, name: 'Burak', number: 10 },
-      { teamId: teamB.id, name: 'Emre', number: 11 },
-    ],
-  });
+  // NOTE: `skipDuplicates` is not supported by the SQLite connector (Prisma
+  // Client omits it from the generated `createMany` args entirely for this
+  // provider, regardless of Prisma version), so per-row upserts with
+  // deterministic ids are used instead to keep this seed idempotent.
+  const players = [
+    { id: 'seed-player-1', teamId: teamA.id, name: 'Ahmet', number: 9 },
+    { id: 'seed-player-2', teamId: teamA.id, name: 'Mehmet', number: 7 },
+    { id: 'seed-player-3', teamId: teamB.id, name: 'Burak', number: 10 },
+    { id: 'seed-player-4', teamId: teamB.id, name: 'Emre', number: 11 },
+  ];
+  for (const player of players) {
+    await prisma.player.upsert({
+      where: { id: player.id },
+      update: {},
+      create: player,
+    });
+  }
 
   console.log('Seed complete. Admin login: admin / admin123');
 }
