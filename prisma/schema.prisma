@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String  @id @default(cuid())
+  username     String  @unique
+  passwordHash String
+  staBalance   Int     @default(1000)
+  role         String  @default("user") // "user" | "admin"
+  createdAt    DateTime @default(now())
+  bets         Bet[]
+}
+
+model Team {
+  id      String   @id @default(cuid())
+  name    String
+  players Player[]
+  homeMatches Match[] @relation("HomeTeam")
+  awayMatches Match[] @relation("AwayTeam")
+}
+
+model Player {
+  id      String @id @default(cuid())
+  teamId  String
+  team    Team   @relation(fields: [teamId], references: [id])
+  name    String
+  number  Int?
+  playerGoals PlayerGoal[]
+}
+
+model Match {
+  id             String   @id @default(cuid())
+  homeTeamId     String
+  awayTeamId     String
+  homeTeam       Team     @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeam       Team     @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  kickoffTime    DateTime
+  status         String   @default("upcoming") // "upcoming" | "locked" | "finished"
+  finalHomeScore Int?
+  finalAwayScore Int?
+  odds           Odds[]
+  bets           Bet[]
+  playerGoals    PlayerGoal[]
+}
+
+model PlayerGoal {
+  id        String @id @default(cuid())
+  matchId   String
+  match     Match  @relation(fields: [matchId], references: [id])
+  playerId  String
+  player    Player @relation(fields: [playerId], references: [id])
+  goalCount Int
+
+  @@unique([matchId, playerId])
+}
+
+model Odds {
+  id            String @id @default(cuid())
+  matchId       String
+  match         Match  @relation(fields: [matchId], references: [id])
+  market        String // "1X2" | "SCORE" | "OU_GOALS" | "PLAYER_GOALS"
+  selectionKey  String // e.g. "1", "2-1", "OVER_4.5", "player:<id>:2+"
+  oddsValue     Float
+
+  @@unique([matchId, market, selectionKey])
+}
+
+model Bet {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  matchId       String
+  match         Match    @relation(fields: [matchId], references: [id])
+  stake         Int
+  totalOdds     Float
+  potentialWin  Int
+  status        String   @default("pending") // "pending" | "won" | "lost"
+  createdAt     DateTime @default(now())
+  selections    BetSelection[]
+
+  @@unique([userId, matchId])
+}
+
+model BetSelection {
+  id             String @id @default(cuid())
+  betId          String
+  bet            Bet    @relation(fields: [betId], references: [id])
+  market         String
+  selectionKey   String
+  oddsValueAtBet Float
+}
