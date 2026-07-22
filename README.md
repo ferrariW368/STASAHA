@@ -1,36 +1,31 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Hali Saha İddaa Sitesi
 
-## Getting Started
+Arkadaş grubu maçları için eğlence amaçlı, gerçek para karşılığı olmayan STA para birimiyle çalışan tahmin sitesi.
 
-First, run the development server:
+## Yerelde çalıştırma
 
 ```bash
+npm install
+cp .env.example .env
+npx prisma migrate dev
+npx prisma db seed
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Seed admin girişi: kullanıcı adı `admin`, şifre `admin123` (canlıya almadan önce mutlaka değiştir).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Testler
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm test
+```
 
-## Learn More
+## Canlıya alma (Vercel + Neon)
 
-To learn more about Next.js, take a look at the following resources:
+Bu adımlar senin kendi hesaplarınla yapman gereken adımlardır:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. [neon.tech](https://neon.tech) üzerinde ücretsiz bir Postgres veritabanı oluştur, bağlantı dizesini kopyala.
+2. `prisma/schema.prisma` dosyasında `datasource db` bloğundaki `provider`'ı `"postgresql"` yap.
+3. Vercel projenin ortam değişkenlerine `DATABASE_URL` (Neon bağlantı dizesi), `NEXTAUTH_SECRET` (rastgele uzun bir gizli anahtar) ve `NEXTAUTH_URL` (canlı site adresin) ekle.
+4. Vercel'e bu repoyu bağla ve deploy et; ilk deploy sonrası `npx prisma migrate deploy` çalıştırılmasını sağla (Vercel build komutuna ekleyebilirsin: `prisma migrate deploy && next build`).
+5. Deploy sonrası bir kere `npx prisma db seed` çalıştırarak admin hesabını oluştur, ardından admin şifresini `/admin/users` üzerinden değiştir (not: şifre değiştirme UI'ı bu sürümde yok — gerekirse admin şifresini doğrudan veritabanından güncelle).
