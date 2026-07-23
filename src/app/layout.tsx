@@ -5,7 +5,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
 export const metadata: Metadata = {
-  title: 'Hali Saha İddaa',
+  title: 'STASAHA',
   description: 'Arkadaş grubu için eğlence amaçlı STA para birimiyle tahmin oyunu',
 };
 
@@ -17,7 +17,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="bg-gray-100 text-gray-900">
         <header className="sticky top-0 z-20 border-b border-gray-200 bg-white/95 px-4 py-3 backdrop-blur">
           <div className="mx-auto flex max-w-lg items-center justify-between">
-            <Link href="/" className="font-bold text-green-700">⚽ Hali Saha İddaa</Link>
+            <Link href="/" className="font-bold text-green-700">⚽ STASAHA</Link>
             <nav className="flex items-center gap-2 text-sm">
               {session?.user ? (
                 <>

@@ -16,7 +16,7 @@ export default async function HomePage() {
 
   return (
     <main className="mx-auto max-w-lg px-4 py-6">
-      <h1 className="mb-4 text-2xl font-bold">Hali Saha İddaa</h1>
+      <h1 className="mb-4 text-2xl font-bold">STASAHA</h1>
 
       <section className="mb-8">
         <h2 className="mb-2 text-lg font-semibold">Yaklaşan Maçlar</h2>

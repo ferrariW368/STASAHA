@@ -1,4 +1,4 @@
-# Hali Saha İddaa Sitesi
+# STASAHA
 
 Arkadaş grubu maçları için eğlence amaçlı, gerçek para karşılığı olmayan STA para birimiyle çalışan tahmin sitesi.
 
