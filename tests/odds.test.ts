@@ -65,13 +65,17 @@ describe('computeMatchOdds', () => {
     }
   });
 
-  it('produces fixed-odds novelty markets for red card and pitch invasion', () => {
+  it('produces fixed-odds novelty markets for red card, pitch invasion, referee argument, and abandonment', () => {
     const novelty = odds.filter((o) => o.market === 'NOVELTY');
     expect(novelty.map((o) => o.selectionKey).sort()).toEqual([
+      'MATCH_ABANDONED_NO',
+      'MATCH_ABANDONED_YES',
       'PITCH_INVASION_NO',
       'PITCH_INVASION_YES',
       'RED_CARD_NO',
       'RED_CARD_YES',
+      'REFEREE_ARGUMENT_NO',
+      'REFEREE_ARGUMENT_YES',
     ]);
   });
 

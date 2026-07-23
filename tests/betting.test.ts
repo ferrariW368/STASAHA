@@ -44,6 +44,16 @@ describe('isSelectionCorrect', () => {
   it('defaults novelty flags to false when not reported', () => {
     expect(isSelectionCorrect({ market: 'NOVELTY', selectionKey: 'RED_CARD_NO' }, result)).toBe(true);
     expect(isSelectionCorrect({ market: 'NOVELTY', selectionKey: 'PITCH_INVASION_NO' }, result)).toBe(true);
+    expect(isSelectionCorrect({ market: 'NOVELTY', selectionKey: 'REFEREE_ARGUMENT_NO' }, result)).toBe(true);
+    expect(isSelectionCorrect({ market: 'NOVELTY', selectionKey: 'MATCH_ABANDONED_NO' }, result)).toBe(true);
+  });
+
+  it('evaluates the referee-argument and match-abandoned novelty markets', () => {
+    const withEvents = { ...result, refereeArgument: true, matchAbandoned: false };
+    expect(isSelectionCorrect({ market: 'NOVELTY', selectionKey: 'REFEREE_ARGUMENT_YES' }, withEvents)).toBe(true);
+    expect(isSelectionCorrect({ market: 'NOVELTY', selectionKey: 'REFEREE_ARGUMENT_NO' }, withEvents)).toBe(false);
+    expect(isSelectionCorrect({ market: 'NOVELTY', selectionKey: 'MATCH_ABANDONED_NO' }, withEvents)).toBe(true);
+    expect(isSelectionCorrect({ market: 'NOVELTY', selectionKey: 'MATCH_ABANDONED_YES' }, withEvents)).toBe(false);
   });
 
   it('evaluates per-player fight and late-arrival markets', () => {

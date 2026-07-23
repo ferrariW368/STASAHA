@@ -4,6 +4,8 @@ export type MatchResult = {
   playerGoals: Record<string, number>; // playerId -> goal count
   redCard?: boolean;
   pitchInvasion?: boolean;
+  refereeArgument?: boolean;
+  matchAbandoned?: boolean;
   fights?: Record<string, boolean>; // playerId -> did they fight
   lateArrivals?: Record<string, boolean>; // playerId -> did they arrive late
 };
@@ -15,7 +17,17 @@ export type Selection = {
 
 export function isSelectionCorrect(selection: Selection, result: MatchResult): boolean {
   const { market, selectionKey } = selection;
-  const { homeScore, awayScore, playerGoals, redCard, pitchInvasion, fights, lateArrivals } = result;
+  const {
+    homeScore,
+    awayScore,
+    playerGoals,
+    redCard,
+    pitchInvasion,
+    refereeArgument,
+    matchAbandoned,
+    fights,
+    lateArrivals,
+  } = result;
 
   if (market === '1X2') {
     const outcome = homeScore > awayScore ? '1' : homeScore === awayScore ? 'X' : '2';
@@ -52,6 +64,12 @@ export function isSelectionCorrect(selection: Selection, result: MatchResult): b
     }
     if (selectionKey.startsWith('PITCH_INVASION')) {
       return selectionKey === (pitchInvasion ? 'PITCH_INVASION_YES' : 'PITCH_INVASION_NO');
+    }
+    if (selectionKey.startsWith('REFEREE_ARGUMENT')) {
+      return selectionKey === (refereeArgument ? 'REFEREE_ARGUMENT_YES' : 'REFEREE_ARGUMENT_NO');
+    }
+    if (selectionKey.startsWith('MATCH_ABANDONED')) {
+      return selectionKey === (matchAbandoned ? 'MATCH_ABANDONED_YES' : 'MATCH_ABANDONED_NO');
     }
     return false;
   }

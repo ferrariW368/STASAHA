@@ -13,6 +13,8 @@ export async function settleMatch(
   playerGoals: { playerId: string; goalCount: number }[],
   redCard: boolean,
   pitchInvasion: boolean,
+  refereeArgument: boolean,
+  matchAbandoned: boolean,
   fightPlayerIds: string[],
   latePlayerIds: string[]
 ) {
@@ -22,6 +24,7 @@ export async function settleMatch(
   const match = await prisma.match.findUnique({ where: { id: matchId } });
   if (!match) return { error: 'Maç bulunamadı.' };
   if (match.status === 'finished') return { error: 'Bu maç zaten sonuçlandırıldı.' };
+  if (match.status === 'cancelled') return { error: 'İptal edilmiş bir maç sonuçlandırılamaz.' };
 
   const playerGoalMap: Record<string, number> = {};
   for (const pg of playerGoals) playerGoalMap[pg.playerId] = pg.goalCount;
@@ -41,7 +44,15 @@ export async function settleMatch(
   await prisma.$transaction([
     prisma.match.update({
       where: { id: matchId },
-      data: { status: 'finished', finalHomeScore: homeScore, finalAwayScore: awayScore, redCard, pitchInvasion },
+      data: {
+        status: 'finished',
+        finalHomeScore: homeScore,
+        finalAwayScore: awayScore,
+        redCard,
+        pitchInvasion,
+        refereeArgument,
+        matchAbandoned,
+      },
     }),
     ...playerGoals.map((pg) =>
       prisma.playerGoal.upsert({
@@ -65,7 +76,17 @@ export async function settleMatch(
     ...bets.flatMap((bet) => {
       const outcome = evaluateBet(
         bet.selections.map((s) => ({ market: s.market as never, selectionKey: s.selectionKey })),
-        { homeScore, awayScore, playerGoals: playerGoalMap, redCard, pitchInvasion, fights, lateArrivals }
+        {
+          homeScore,
+          awayScore,
+          playerGoals: playerGoalMap,
+          redCard,
+          pitchInvasion,
+          refereeArgument,
+          matchAbandoned,
+          fights,
+          lateArrivals,
+        }
       );
       const updates: Prisma.PrismaPromise<unknown>[] = [
         prisma.bet.update({ where: { id: bet.id }, data: { status: outcome } }),

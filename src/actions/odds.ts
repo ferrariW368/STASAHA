@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth';
+import { isMatchLocked } from '@/lib/matchLock';
 import { revalidatePath } from 'next/cache';
 
 export async function updateOdds(matchId: string, updates: { oddsId: string; oddsValue: number }[]) {
@@ -11,6 +12,8 @@ export async function updateOdds(matchId: string, updates: { oddsId: string; odd
   const match = await prisma.match.findUnique({ where: { id: matchId } });
   if (!match) return { error: 'Maç bulunamadı.' };
   if (match.status === 'finished') return { error: 'Sonuçlandırılmış bir maçın oranları değiştirilemez.' };
+  if (match.status === 'cancelled') return { error: 'İptal edilmiş bir maçın oranları değiştirilemez.' };
+  if (isMatchLocked(match.kickoffTime)) return { error: 'Maç saati geçti, oranlar kilitlendi.' };
 
   // Only update odds rows that actually belong to this match — never trust
   // client-submitted ids blindly.

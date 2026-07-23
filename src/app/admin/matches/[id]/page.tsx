@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma';
 import { settleMatch } from '@/actions/settlement';
+import { cancelMatch } from '@/actions/matches';
 import { updateOdds } from '@/actions/odds';
+import { isMatchLocked } from '@/lib/matchLock';
 import { redirect } from 'next/navigation';
 
 const marketLabel: Record<string, string> = {
@@ -28,6 +30,7 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
 
   const allPlayers = [...match.homeTeam.players, ...match.awayTeam.players];
   const playerNameById = new Map(allPlayers.map((p) => [p.id, p.name]));
+  const locked = isMatchLocked(match.kickoffTime);
 
   function describeOddsSelection(market: string, selectionKey: string) {
     if (market === 'PLAYER_GOALS' || market === 'FIGHT' || market === 'LATE') {
@@ -47,13 +50,21 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
       <h1 className="mb-4 text-xl font-bold">{match.homeTeam.name} vs {match.awayTeam.name}</h1>
       <p className="mb-4 text-sm text-gray-500">Durum: {match.status}</p>
 
-      {match.status === 'finished' ? (
+      {match.status === 'finished' && (
         <div className="text-sm">
           <p>Sonuç: {match.finalHomeScore} - {match.finalAwayScore}</p>
           <p>Kırmızı kart: {match.redCard ? 'Evet' : 'Hayır'}</p>
           <p>Sahaya giriş: {match.pitchInvasion ? 'Evet' : 'Hayır'}</p>
+          <p>Hakem tartışması: {match.refereeArgument ? 'Evet' : 'Hayır'}</p>
+          <p>Maç yarıda kaldı: {match.matchAbandoned ? 'Evet' : 'Hayır'}</p>
         </div>
-      ) : (
+      )}
+
+      {match.status === 'cancelled' && (
+        <p className="text-sm text-gray-500">Bu maç iptal edildi, bekleyen kuponlar iade edildi.</p>
+      )}
+
+      {match.status !== 'finished' && match.status !== 'cancelled' && (
         <>
           <form
             action={async (formData) => {
@@ -66,6 +77,8 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
               }));
               const redCard = formData.get('redCard') === 'on';
               const pitchInvasion = formData.get('pitchInvasion') === 'on';
+              const refereeArgument = formData.get('refereeArgument') === 'on';
+              const matchAbandoned = formData.get('matchAbandoned') === 'on';
               const fightPlayerIds = allPlayers
                 .filter((p) => formData.get(`fight_${p.id}`) === 'on')
                 .map((p) => p.id);
@@ -79,12 +92,14 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
                 playerGoals,
                 redCard,
                 pitchInvasion,
+                refereeArgument,
+                matchAbandoned,
                 fightPlayerIds,
                 latePlayerIds
               );
               if (!('error' in result)) redirect('/admin');
             }}
-            className="mb-8 flex flex-col gap-4"
+            className="mb-6 flex flex-col gap-4"
           >
             <div className="flex gap-2">
               <input name="homeScore" type="number" min={0} placeholder="Ev sahibi skor" className="w-1/2 rounded border px-3 py-2" required />
@@ -109,6 +124,12 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
               <label className="mb-2 flex items-center gap-2 text-sm">
                 <input type="checkbox" name="pitchInvasion" /> Sahaya izinsiz biri girdi mi?
               </label>
+              <label className="mb-2 flex items-center gap-2 text-sm">
+                <input type="checkbox" name="refereeArgument" /> Hakem tartışması çıktı mı?
+              </label>
+              <label className="mb-2 flex items-center gap-2 text-sm">
+                <input type="checkbox" name="matchAbandoned" /> Maç yarıda mı kaldı?
+              </label>
               <p className="mb-1 mt-3 text-xs font-semibold text-gray-500">Kavgaya karışanlar</p>
               {allPlayers.map((p) => (
                 <label key={p.id} className="flex items-center gap-2 text-sm">
@@ -128,49 +149,67 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
             </button>
           </form>
 
-          <div className="rounded border p-3">
-            <h2 className="mb-2 font-semibold">Oranları Düzenle</h2>
-            <form
-              action={async (formData) => {
-                'use server';
-                const updates = match.odds
-                  .map((o) => {
-                    const raw = formData.get(`odds_${o.id}`) as string;
-                    const value = parseFloat(raw);
-                    return { oddsId: o.id, oddsValue: value };
-                  })
-                  .filter((u) => Number.isFinite(u.oddsValue));
-                await updateOdds(match.id, updates);
-              }}
-              className="flex flex-col gap-3"
-            >
-              {[...oddsByMarket.entries()].map(([market, rows]) => (
-                <div key={market}>
-                  <p className="mb-1 text-xs font-semibold text-gray-500">{marketLabel[market] ?? market}</p>
-                  <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
-                    {rows.map((o) => (
-                      <div key={o.id} className="flex items-center justify-between gap-2">
-                        <span className="truncate text-xs text-gray-600">
-                          {describeOddsSelection(o.market, o.selectionKey)}
-                        </span>
-                        <input
-                          name={`odds_${o.id}`}
-                          type="number"
-                          step="0.01"
-                          min="1.01"
-                          defaultValue={o.oddsValue}
-                          className="w-20 rounded border px-2 py-1 text-xs"
-                        />
-                      </div>
-                    ))}
+          {locked ? (
+            <p className="mb-6 rounded border border-gray-200 bg-gray-50 p-3 text-sm text-gray-500">
+              Maç saati geçti, oranlar kilitlendi — sadece sonuçlandırma yapılabilir.
+            </p>
+          ) : (
+            <div className="mb-6 rounded border p-3">
+              <h2 className="mb-2 font-semibold">Oranları Düzenle</h2>
+              <form
+                action={async (formData) => {
+                  'use server';
+                  const updates = match.odds
+                    .map((o) => {
+                      const raw = formData.get(`odds_${o.id}`) as string;
+                      const value = parseFloat(raw);
+                      return { oddsId: o.id, oddsValue: value };
+                    })
+                    .filter((u) => Number.isFinite(u.oddsValue));
+                  await updateOdds(match.id, updates);
+                }}
+                className="flex flex-col gap-3"
+              >
+                {[...oddsByMarket.entries()].map(([market, rows]) => (
+                  <div key={market}>
+                    <p className="mb-1 text-xs font-semibold text-gray-500">{marketLabel[market] ?? market}</p>
+                    <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
+                      {rows.map((o) => (
+                        <div key={o.id} className="flex items-center justify-between gap-2">
+                          <span className="truncate text-xs text-gray-600">
+                            {describeOddsSelection(o.market, o.selectionKey)}
+                          </span>
+                          <input
+                            name={`odds_${o.id}`}
+                            type="number"
+                            step="0.01"
+                            min="1.01"
+                            defaultValue={o.oddsValue}
+                            className="w-20 rounded border px-2 py-1 text-xs"
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
-              <button className="rounded bg-gray-700 px-4 py-2 text-sm font-semibold text-white">
-                Oranları Kaydet
-              </button>
-            </form>
-          </div>
+                ))}
+                <button className="rounded bg-gray-700 px-4 py-2 text-sm font-semibold text-white">
+                  Oranları Kaydet
+                </button>
+              </form>
+            </div>
+          )}
+
+          <form
+            action={async () => {
+              'use server';
+              const result = await cancelMatch(match.id);
+              if (!('error' in result)) redirect('/admin');
+            }}
+          >
+            <button className="w-full rounded border border-red-300 px-4 py-2 text-sm font-semibold text-red-600">
+              Maçı İptal Et (oynanmadı, bekleyen kuponları iade eder)
+            </button>
+          </form>
         </>
       )}
     </div>

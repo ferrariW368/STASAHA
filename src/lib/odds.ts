@@ -110,6 +110,10 @@ function computeNoveltyMarkets(): OddsRow[] {
     { market: 'NOVELTY', selectionKey: 'RED_CARD_NO', oddsValue: 1.3 },
     { market: 'NOVELTY', selectionKey: 'PITCH_INVASION_YES', oddsValue: 15.0 },
     { market: 'NOVELTY', selectionKey: 'PITCH_INVASION_NO', oddsValue: 1.05 },
+    { market: 'NOVELTY', selectionKey: 'REFEREE_ARGUMENT_YES', oddsValue: 2.5 },
+    { market: 'NOVELTY', selectionKey: 'REFEREE_ARGUMENT_NO', oddsValue: 1.45 },
+    { market: 'NOVELTY', selectionKey: 'MATCH_ABANDONED_YES', oddsValue: 20.0 },
+    { market: 'NOVELTY', selectionKey: 'MATCH_ABANDONED_NO', oddsValue: 1.03 },
   ];
 }
 

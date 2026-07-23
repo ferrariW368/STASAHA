@@ -42,11 +42,13 @@ model Match {
   homeTeam       Team     @relation("HomeTeam", fields: [homeTeamId], references: [id])
   awayTeam       Team     @relation("AwayTeam", fields: [awayTeamId], references: [id])
   kickoffTime    DateTime
-  status         String   @default("upcoming") // "upcoming" | "locked" | "finished"
+  status         String   @default("upcoming") // "upcoming" | "locked" | "finished" | "cancelled"
   finalHomeScore Int?
   finalAwayScore Int?
   redCard        Boolean?
   pitchInvasion  Boolean?
+  refereeArgument Boolean?
+  matchAbandoned  Boolean?
   odds           Odds[]
   bets           Bet[]
   playerGoals    PlayerGoal[]
@@ -96,7 +98,7 @@ model Bet {
   stake         Int
   totalOdds     Float
   potentialWin  Int
-  status        String   @default("pending") // "pending" | "won" | "lost"
+  status        String   @default("pending") // "pending" | "won" | "lost" | "refunded"
   createdAt     DateTime @default(now())
   selections    BetSelection[]
 

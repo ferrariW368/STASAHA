@@ -257,7 +257,7 @@ export default function MatchDetailPage() {
             {...oddsButtonProps(findOdds(match.odds, 'NOVELTY', 'RED_CARD_NO'))}
           />
         </div>
-        <div className="flex gap-2">
+        <div className="mb-2 flex gap-2">
           <OddsButton
             odds={findOdds(match.odds, 'NOVELTY', 'PITCH_INVASION_YES')}
             label="🏃 Sahaya Dalan Olur"
@@ -267,6 +267,30 @@ export default function MatchDetailPage() {
             odds={findOdds(match.odds, 'NOVELTY', 'PITCH_INVASION_NO')}
             label="🏃 Olmaz"
             {...oddsButtonProps(findOdds(match.odds, 'NOVELTY', 'PITCH_INVASION_NO'))}
+          />
+        </div>
+        <div className="mb-2 flex gap-2">
+          <OddsButton
+            odds={findOdds(match.odds, 'NOVELTY', 'REFEREE_ARGUMENT_YES')}
+            label="🗣️ Hakemle Tartışılır"
+            {...oddsButtonProps(findOdds(match.odds, 'NOVELTY', 'REFEREE_ARGUMENT_YES'))}
+          />
+          <OddsButton
+            odds={findOdds(match.odds, 'NOVELTY', 'REFEREE_ARGUMENT_NO')}
+            label="🗣️ Sakin Geçer"
+            {...oddsButtonProps(findOdds(match.odds, 'NOVELTY', 'REFEREE_ARGUMENT_NO'))}
+          />
+        </div>
+        <div className="flex gap-2">
+          <OddsButton
+            odds={findOdds(match.odds, 'NOVELTY', 'MATCH_ABANDONED_YES')}
+            label="🚨 Maç Yarıda Kalır"
+            {...oddsButtonProps(findOdds(match.odds, 'NOVELTY', 'MATCH_ABANDONED_YES'))}
+          />
+          <OddsButton
+            odds={findOdds(match.odds, 'NOVELTY', 'MATCH_ABANDONED_NO')}
+            label="🚨 Sonuna Kadar Oynanır"
+            {...oddsButtonProps(findOdds(match.odds, 'NOVELTY', 'MATCH_ABANDONED_NO'))}
           />
         </div>
       </section>

@@ -43,3 +43,28 @@ export async function createMatch(
   revalidatePath('/');
   return { matchId: match.id };
 }
+
+export async function cancelMatch(matchId: string) {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
+  const match = await prisma.match.findUnique({ where: { id: matchId } });
+  if (!match) return { error: 'Maç bulunamadı.' };
+  if (match.status === 'finished') return { error: 'Sonuçlandırılmış bir maç iptal edilemez.' };
+  if (match.status === 'cancelled') return { error: 'Bu maç zaten iptal edilmiş.' };
+
+  const bets = await prisma.bet.findMany({ where: { matchId, status: 'pending' } });
+
+  await prisma.$transaction([
+    prisma.match.update({ where: { id: matchId }, data: { status: 'cancelled' } }),
+    ...bets.flatMap((bet) => [
+      prisma.bet.update({ where: { id: bet.id }, data: { status: 'refunded' } }),
+      prisma.user.update({ where: { id: bet.userId }, data: { staBalance: { increment: bet.stake } } }),
+    ]),
+  ]);
+
+  revalidatePath('/admin');
+  revalidatePath('/');
+  revalidatePath('/bets');
+  return {};
+}
