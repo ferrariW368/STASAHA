@@ -1,5 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
+import AdBanner from '@/components/AdBanner';
+import { isMatchLocked } from '@/lib/matchLock';
 
 export default async function HomePage() {
   const matches = await prisma.match.findMany({
@@ -8,7 +10,15 @@ export default async function HomePage() {
     orderBy: { kickoffTime: 'asc' },
   });
 
+  const finishedMatches = await prisma.match.findMany({
+    where: { status: 'finished' },
+    include: { homeTeam: true, awayTeam: true },
+    orderBy: { kickoffTime: 'desc' },
+    take: 5,
+  });
+
   const topUsers = await prisma.user.findMany({
+    where: { role: 'user' },
     orderBy: { staBalance: 'desc' },
     take: 3,
     select: { username: true, staBalance: true },
@@ -21,24 +31,33 @@ export default async function HomePage() {
       <section className="mb-8">
         <h2 className="mb-2 text-lg font-semibold">Yaklaşan Maçlar</h2>
         <ul className="flex flex-col gap-2">
-          {matches.map((m) => (
-            <li key={m.id}>
-              <Link
-                href={`/matches/${m.id}`}
-                className="flex items-center justify-between rounded-xl bg-white p-3 shadow-sm transition-shadow active:shadow-none"
-              >
-                <div>
-                  <div className="font-medium">{m.homeTeam.name} vs {m.awayTeam.name}</div>
-                  <div className="text-sm text-gray-500">
-                    {m.kickoffTime.toLocaleString('tr-TR', { dateStyle: 'medium', timeStyle: 'short' })}
+          {matches.map((m) => {
+            const locked = isMatchLocked(m.kickoffTime);
+            return (
+              <li key={m.id}>
+                <Link
+                  href={`/matches/${m.id}`}
+                  className="flex items-center justify-between rounded-xl bg-white p-3 shadow-sm transition-shadow active:shadow-none"
+                >
+                  <div>
+                    <div className="font-medium">{m.homeTeam.name} vs {m.awayTeam.name}</div>
+                    <div className="text-sm text-gray-500">
+                      {m.kickoffTime.toLocaleString('tr-TR', { dateStyle: 'medium', timeStyle: 'short' })}
+                    </div>
                   </div>
-                </div>
-                <span className="rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700">
-                  Kupon Yap
-                </span>
-              </Link>
-            </li>
-          ))}
+                  {locked ? (
+                    <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-500">
+                      Kilitli
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700">
+                      Kupon Yap
+                    </span>
+                  )}
+                </Link>
+              </li>
+            );
+          })}
           {matches.length === 0 && (
             <li className="rounded-xl bg-white p-4 text-center text-sm text-gray-400 shadow-sm">
               Şu an yaklaşan maç yok.
@@ -46,6 +65,29 @@ export default async function HomePage() {
           )}
         </ul>
       </section>
+
+      <AdBanner />
+
+      {finishedMatches.length > 0 && (
+        <section className="mb-8">
+          <h2 className="mb-2 text-lg font-semibold">Geçmiş Maçlar</h2>
+          <ul className="flex flex-col gap-2">
+            {finishedMatches.map((m) => (
+              <li key={m.id} className="rounded-xl bg-white p-3 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">{m.homeTeam.name} vs {m.awayTeam.name}</span>
+                  <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-700">
+                    {m.finalHomeScore} - {m.finalAwayScore}
+                  </span>
+                </div>
+                <div className="text-sm text-gray-500">
+                  {m.kickoffTime.toLocaleString('tr-TR', { dateStyle: 'medium', timeStyle: 'short' })}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section>
         <div className="mb-2 flex items-center justify-between">

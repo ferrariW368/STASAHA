@@ -23,6 +23,27 @@ export async function updateTeamName(teamId: string, name: string) {
   return {};
 }
 
+export async function deleteTeam(teamId: string) {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
+  const matchCount = await prisma.match.count({
+    where: { OR: [{ homeTeamId: teamId }, { awayTeamId: teamId }] },
+  });
+  if (matchCount > 0) {
+    return { error: 'Bu takımın maçları var, önce o maçları silmeden takım silinemez.' };
+  }
+
+  await prisma.$transaction([
+    prisma.player.deleteMany({ where: { teamId } }),
+    prisma.team.delete({ where: { id: teamId } }),
+  ]);
+  revalidatePath('/admin/teams');
+  revalidatePath('/admin/matches/new');
+  revalidatePath('/');
+  return {};
+}
+
 export async function addPlayer(teamId: string, name: string, number?: number) {
   const authError = await requireAdmin();
   if (authError) return authError;
