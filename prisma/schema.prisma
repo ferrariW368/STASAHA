@@ -65,7 +65,7 @@ model Odds {
   matchId       String
   match         Match  @relation(fields: [matchId], references: [id])
   market        String // "1X2" | "SCORE" | "OU_GOALS" | "PLAYER_GOALS"
-  selectionKey  String // e.g. "1", "2-1", "OVER_4.5", "player:<id>:2+"
+  selectionKey  String // e.g. "1", "2-1", "OVER_4.5", "<playerId>:2+"
   oddsValue     Float
 
   @@unique([matchId, market, selectionKey])

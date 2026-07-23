@@ -2,9 +2,12 @@
 
 import { prisma } from '@/lib/prisma';
 import { computeMatchOdds } from '@/lib/odds';
+import { requireAdmin } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 
 export async function createMatch(homeTeamId: string, awayTeamId: string, kickoffTime: Date) {
+  const authError = await requireAdmin();
+  if (authError) return authError;
   if (homeTeamId === awayTeamId) {
     return { error: 'Ev sahibi ve deplasman takımı aynı olamaz.' };
   }

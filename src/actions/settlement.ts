@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { evaluateBet } from '@/lib/betting';
+import { requireAdmin } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import { Prisma } from '@prisma/client';
 
@@ -11,6 +12,9 @@ export async function settleMatch(
   awayScore: number,
   playerGoals: { playerId: string; goalCount: number }[]
 ) {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
   const match = await prisma.match.findUnique({ where: { id: matchId } });
   if (!match) return { error: 'Maç bulunamadı.' };
   if (match.status === 'finished') return { error: 'Bu maç zaten sonuçlandırıldı.' };

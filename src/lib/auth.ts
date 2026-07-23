@@ -1,5 +1,6 @@
 import type { AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { getServerSession } from 'next-auth';
 import bcrypt from 'bcryptjs';
 import { prisma } from './prisma';
 
@@ -34,3 +35,16 @@ export const authOptions: AuthOptions = {
     },
   },
 };
+
+/**
+ * Server Actions are public POST endpoints keyed by action ID — the `/admin/*`
+ * middleware only gates the page that renders the form, not the action itself.
+ * Every admin-only Server Action must call this first, independent of middleware.
+ */
+export async function requireAdmin(): Promise<{ error: string } | null> {
+  const session = await getServerSession(authOptions);
+  if (session?.user?.role !== 'admin') {
+    return { error: 'Bu işlem için yönetici girişi gerekli.' };
+  }
+  return null;
+}

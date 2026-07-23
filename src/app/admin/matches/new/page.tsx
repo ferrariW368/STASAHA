@@ -15,7 +15,7 @@ export default async function NewMatchPage() {
           const awayTeamId = formData.get('awayTeamId') as string;
           const kickoff = formData.get('kickoffTime') as string;
           const result = await createMatch(homeTeamId, awayTeamId, new Date(kickoff));
-          if (!result.error) redirect('/admin');
+          if (!('error' in result)) redirect('/admin');
         }}
         className="flex flex-col gap-4"
       >

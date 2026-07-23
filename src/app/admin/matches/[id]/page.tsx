@@ -33,7 +33,7 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
               goalCount: parseInt((formData.get(`goals_${p.id}`) as string) || '0', 10),
             }));
             const result = await settleMatch(match.id, homeScore, awayScore, playerGoals);
-            if (!result.error) redirect('/admin');
+            if (!('error' in result)) redirect('/admin');
           }}
           className="flex flex-col gap-4"
         >
