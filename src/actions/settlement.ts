@@ -10,7 +10,11 @@ export async function settleMatch(
   matchId: string,
   homeScore: number,
   awayScore: number,
-  playerGoals: { playerId: string; goalCount: number }[]
+  playerGoals: { playerId: string; goalCount: number }[],
+  redCard: boolean,
+  pitchInvasion: boolean,
+  fightPlayerIds: string[],
+  latePlayerIds: string[]
 ) {
   const authError = await requireAdmin();
   if (authError) return authError;
@@ -22,12 +26,22 @@ export async function settleMatch(
   const playerGoalMap: Record<string, number> = {};
   for (const pg of playerGoals) playerGoalMap[pg.playerId] = pg.goalCount;
 
+  const allPlayerIds = playerGoals.map((pg) => pg.playerId);
+  const fightSet = new Set(fightPlayerIds);
+  const lateSet = new Set(latePlayerIds);
+  const fights: Record<string, boolean> = {};
+  const lateArrivals: Record<string, boolean> = {};
+  for (const playerId of allPlayerIds) {
+    fights[playerId] = fightSet.has(playerId);
+    lateArrivals[playerId] = lateSet.has(playerId);
+  }
+
   const bets = await prisma.bet.findMany({ where: { matchId }, include: { selections: true } });
 
   await prisma.$transaction([
     prisma.match.update({
       where: { id: matchId },
-      data: { status: 'finished', finalHomeScore: homeScore, finalAwayScore: awayScore },
+      data: { status: 'finished', finalHomeScore: homeScore, finalAwayScore: awayScore, redCard, pitchInvasion },
     }),
     ...playerGoals.map((pg) =>
       prisma.playerGoal.upsert({
@@ -36,10 +50,22 @@ export async function settleMatch(
         create: { matchId, playerId: pg.playerId, goalCount: pg.goalCount },
       })
     ),
+    ...allPlayerIds.flatMap((playerId) => [
+      prisma.playerEvent.upsert({
+        where: { matchId_playerId_eventType: { matchId, playerId, eventType: 'FIGHT' } },
+        update: { happened: fights[playerId] },
+        create: { matchId, playerId, eventType: 'FIGHT', happened: fights[playerId] },
+      }),
+      prisma.playerEvent.upsert({
+        where: { matchId_playerId_eventType: { matchId, playerId, eventType: 'LATE' } },
+        update: { happened: lateArrivals[playerId] },
+        create: { matchId, playerId, eventType: 'LATE', happened: lateArrivals[playerId] },
+      }),
+    ]),
     ...bets.flatMap((bet) => {
       const outcome = evaluateBet(
         bet.selections.map((s) => ({ market: s.market as never, selectionKey: s.selectionKey })),
-        { homeScore, awayScore, playerGoals: playerGoalMap }
+        { homeScore, awayScore, playerGoals: playerGoalMap, redCard, pitchInvasion, fights, lateArrivals }
       );
       const updates: Prisma.PrismaPromise<unknown>[] = [
         prisma.bet.update({ where: { id: bet.id }, data: { status: outcome } }),

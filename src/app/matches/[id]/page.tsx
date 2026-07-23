@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { placeBet } from '@/actions/bets';
+import AdBanner from '@/components/AdBanner';
 
 type Odds = { market: string; selectionKey: string; oddsValue: number };
 type PlayerData = { id: string; name: string; number: number | null };
@@ -16,6 +17,33 @@ type MatchData = {
 
 function findOdds(list: Odds[], market: string, selectionKey: string) {
   return list.find((o) => o.market === market && o.selectionKey === selectionKey);
+}
+
+function OddsButton({
+  odds,
+  label,
+  active,
+  onClick,
+}: {
+  odds: Odds | undefined;
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  if (!odds) return null;
+  return (
+    <button
+      onClick={onClick}
+      className={`flex flex-1 flex-col items-center rounded-lg border py-2 text-sm transition-colors ${
+        active
+          ? 'border-green-600 bg-green-600 text-white'
+          : 'border-gray-300 bg-white text-gray-800 active:bg-gray-100'
+      }`}
+    >
+      <span className="text-xs">{label}</span>
+      <span className="font-bold">{odds?.oddsValue.toFixed(2)}</span>
+    </button>
+  );
 }
 
 export default function MatchDetailPage() {
@@ -58,6 +86,10 @@ export default function MatchDetailPage() {
     return selected.some((s) => s.market === o.market && s.selectionKey === o.selectionKey);
   }
 
+  function oddsButtonProps(o: Odds | undefined) {
+    return { active: o ? isSelected(o) : false, onClick: () => toggleSelection(o) };
+  }
+
   function toggleSelection(o: Odds | undefined) {
     if (!o) return;
     setSelected((prev) => {
@@ -93,24 +125,6 @@ export default function MatchDetailPage() {
   const ouGoals = match.odds.filter((o) => o.market === 'OU_GOALS');
   const oneXTwoLabels: Record<string, string> = { '1': match.homeTeam.name, X: 'Berabere', '2': match.awayTeam.name };
 
-  function OddsButton({ odds, label }: { odds: Odds | undefined; label: string }) {
-    if (!odds) return null;
-    const active = isSelected(odds);
-    return (
-      <button
-        onClick={() => toggleSelection(odds)}
-        className={`flex flex-1 flex-col items-center rounded-lg border py-2 text-sm transition-colors ${
-          active
-            ? 'border-green-600 bg-green-600 text-white'
-            : 'border-gray-300 bg-white text-gray-800 active:bg-gray-100'
-        }`}
-      >
-        <span className="text-xs">{label}</span>
-        <span className="font-bold">{odds.oddsValue.toFixed(2)}</span>
-      </button>
-    );
-  }
-
   return (
     <main className="mx-auto max-w-lg px-4 pb-40 pt-6">
       <div className="mb-5 rounded-xl bg-white p-4 text-center shadow-sm">
@@ -126,7 +140,12 @@ export default function MatchDetailPage() {
         <h2 className="mb-2 text-sm font-semibold text-gray-600">Maç Sonucu</h2>
         <div className="flex gap-2">
           {oneXTwo.map((o) => (
-            <OddsButton key={o.selectionKey} odds={o} label={oneXTwoLabels[o.selectionKey] ?? o.selectionKey} />
+            <OddsButton
+              key={o.selectionKey}
+              odds={o}
+              label={oneXTwoLabels[o.selectionKey] ?? o.selectionKey}
+              {...oddsButtonProps(o)}
+            />
           ))}
         </div>
       </section>
@@ -139,10 +158,13 @@ export default function MatchDetailPage() {
               key={o.selectionKey}
               odds={o}
               label={o.selectionKey.startsWith('OVER') ? `${o.selectionKey.split('_')[1]} Üst` : `${o.selectionKey.split('_')[1]} Alt`}
+              {...oddsButtonProps(o)}
             />
           ))}
         </div>
       </section>
+
+      <AdBanner />
 
       <section className="mb-5">
         <h2 className="mb-2 text-sm font-semibold text-gray-600">Skor Tahmini</h2>
@@ -194,10 +216,9 @@ export default function MatchDetailPage() {
               <p className="mb-2 text-xs font-semibold text-gray-500">{teamLabel}</p>
               <div className="flex flex-col gap-2">
                 {team.players.map((p) => {
-                  const zero = findOdds(match.odds, 'PLAYER_GOALS', `${p.id}:0`);
-                  const one = findOdds(match.odds, 'PLAYER_GOALS', `${p.id}:1`);
+                  const onePlus = findOdds(match.odds, 'PLAYER_GOALS', `${p.id}:1+`);
                   const twoPlus = findOdds(match.odds, 'PLAYER_GOALS', `${p.id}:2+`);
-                  if (!zero && !one && !twoPlus) return null;
+                  if (!onePlus && !twoPlus) return null;
                   return (
                     <div key={p.id} className="flex items-center gap-2">
                       <span className="w-20 shrink-0 truncate text-xs text-gray-700">
@@ -205,9 +226,71 @@ export default function MatchDetailPage() {
                         {p.number ? ` (#${p.number})` : ''}
                       </span>
                       <div className="flex flex-1 gap-1">
-                        <OddsButton odds={zero} label="0 Gol" />
-                        <OddsButton odds={one} label="1 Gol" />
-                        <OddsButton odds={twoPlus} label="2+ Gol" />
+                        <OddsButton odds={onePlus} label="Gol Atar" {...oddsButtonProps(onePlus)} />
+                        <OddsButton odds={twoPlus} label="2+ Gol" {...oddsButtonProps(twoPlus)} />
+                      </div>
+                    </div>
+                  );
+                })}
+                {team.players.length === 0 && <p className="text-xs text-gray-400">Kadro girilmemiş.</p>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="mb-5">
+        <h2 className="mb-2 text-sm font-semibold text-gray-600">🎉 Eğlenceli Bahisler</h2>
+        <div className="mb-2 flex gap-2">
+          <OddsButton odds={findOdds(match.odds, 'BTS', 'YES')} label="KG Var" {...oddsButtonProps(findOdds(match.odds, 'BTS', 'YES'))} />
+          <OddsButton odds={findOdds(match.odds, 'BTS', 'NO')} label="KG Yok" {...oddsButtonProps(findOdds(match.odds, 'BTS', 'NO'))} />
+        </div>
+        <div className="mb-2 flex gap-2">
+          <OddsButton
+            odds={findOdds(match.odds, 'NOVELTY', 'RED_CARD_YES')}
+            label="🟥 Kart Çıkar"
+            {...oddsButtonProps(findOdds(match.odds, 'NOVELTY', 'RED_CARD_YES'))}
+          />
+          <OddsButton
+            odds={findOdds(match.odds, 'NOVELTY', 'RED_CARD_NO')}
+            label="🟥 Kart Çıkmaz"
+            {...oddsButtonProps(findOdds(match.odds, 'NOVELTY', 'RED_CARD_NO'))}
+          />
+        </div>
+        <div className="flex gap-2">
+          <OddsButton
+            odds={findOdds(match.odds, 'NOVELTY', 'PITCH_INVASION_YES')}
+            label="🏃 Sahaya Dalan Olur"
+            {...oddsButtonProps(findOdds(match.odds, 'NOVELTY', 'PITCH_INVASION_YES'))}
+          />
+          <OddsButton
+            odds={findOdds(match.odds, 'NOVELTY', 'PITCH_INVASION_NO')}
+            label="🏃 Olmaz"
+            {...oddsButtonProps(findOdds(match.odds, 'NOVELTY', 'PITCH_INVASION_NO'))}
+          />
+        </div>
+      </section>
+
+      <section className="mb-5">
+        <h2 className="mb-2 text-sm font-semibold text-gray-600">🥊 Kavga & Geç Kalma</h2>
+        <div className="flex flex-col gap-3">
+          {[
+            { team: match.homeTeam, teamLabel: match.homeTeam.name },
+            { team: match.awayTeam, teamLabel: match.awayTeam.name },
+          ].map(({ team, teamLabel }) => (
+            <div key={teamLabel} className="rounded-lg border border-gray-200 bg-white p-3">
+              <p className="mb-2 text-xs font-semibold text-gray-500">{teamLabel}</p>
+              <div className="flex flex-col gap-2">
+                {team.players.map((p) => {
+                  const fightYes = findOdds(match.odds, 'FIGHT', `${p.id}:YES`);
+                  const lateYes = findOdds(match.odds, 'LATE', `${p.id}:YES`);
+                  if (!fightYes && !lateYes) return null;
+                  return (
+                    <div key={p.id} className="flex items-center gap-2">
+                      <span className="w-20 shrink-0 truncate text-xs text-gray-700">{p.name}</span>
+                      <div className="flex flex-1 gap-1">
+                        <OddsButton odds={fightYes} label="Kavga Eder" {...oddsButtonProps(fightYes)} />
+                        <OddsButton odds={lateYes} label="Geç Kalır" {...oddsButtonProps(lateYes)} />
                       </div>
                     </div>
                   );

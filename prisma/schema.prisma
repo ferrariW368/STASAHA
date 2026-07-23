@@ -32,6 +32,7 @@ model Player {
   name    String
   number  Int?
   playerGoals PlayerGoal[]
+  playerEvents PlayerEvent[]
 }
 
 model Match {
@@ -44,9 +45,12 @@ model Match {
   status         String   @default("upcoming") // "upcoming" | "locked" | "finished"
   finalHomeScore Int?
   finalAwayScore Int?
+  redCard        Boolean?
+  pitchInvasion  Boolean?
   odds           Odds[]
   bets           Bet[]
   playerGoals    PlayerGoal[]
+  playerEvents   PlayerEvent[]
 }
 
 model PlayerGoal {
@@ -60,11 +64,23 @@ model PlayerGoal {
   @@unique([matchId, playerId])
 }
 
+model PlayerEvent {
+  id        String  @id @default(cuid())
+  matchId   String
+  match     Match   @relation(fields: [matchId], references: [id])
+  playerId  String
+  player    Player  @relation(fields: [playerId], references: [id])
+  eventType String  // "FIGHT" | "LATE"
+  happened  Boolean
+
+  @@unique([matchId, playerId, eventType])
+}
+
 model Odds {
   id            String @id @default(cuid())
   matchId       String
   match         Match  @relation(fields: [matchId], references: [id])
-  market        String // "1X2" | "SCORE" | "OU_GOALS" | "PLAYER_GOALS"
+  market        String // "1X2" | "SCORE" | "OU_GOALS" | "PLAYER_GOALS" | "BTS" | "NOVELTY" | "FIGHT" | "LATE"
   selectionKey  String // e.g. "1", "2-1", "OVER_4.5", "<playerId>:2+"
   oddsValue     Float
 

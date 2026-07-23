@@ -21,9 +21,43 @@ describe('isSelectionCorrect', () => {
   });
 
   it('evaluates player goal bands correctly', () => {
-    expect(isSelectionCorrect({ market: 'PLAYER_GOALS', selectionKey: 'p1:1' }, result)).toBe(true);
-    expect(isSelectionCorrect({ market: 'PLAYER_GOALS', selectionKey: 'p4:0' }, result)).toBe(true);
+    expect(isSelectionCorrect({ market: 'PLAYER_GOALS', selectionKey: 'p1:1+' }, result)).toBe(true);
+    expect(isSelectionCorrect({ market: 'PLAYER_GOALS', selectionKey: 'p4:1+' }, result)).toBe(false);
     expect(isSelectionCorrect({ market: 'PLAYER_GOALS', selectionKey: 'p1:2+' }, result)).toBe(false);
+  });
+
+  it('evaluates both-teams-to-score correctly', () => {
+    expect(isSelectionCorrect({ market: 'BTS', selectionKey: 'YES' }, result)).toBe(true);
+    expect(isSelectionCorrect({ market: 'BTS', selectionKey: 'NO' }, result)).toBe(false);
+    const noAwayGoal = { ...result, awayScore: 0 };
+    expect(isSelectionCorrect({ market: 'BTS', selectionKey: 'NO' }, noAwayGoal)).toBe(true);
+  });
+
+  it('evaluates novelty markets against the admin-reported flags', () => {
+    const withEvents = { ...result, redCard: true, pitchInvasion: false };
+    expect(isSelectionCorrect({ market: 'NOVELTY', selectionKey: 'RED_CARD_YES' }, withEvents)).toBe(true);
+    expect(isSelectionCorrect({ market: 'NOVELTY', selectionKey: 'RED_CARD_NO' }, withEvents)).toBe(false);
+    expect(isSelectionCorrect({ market: 'NOVELTY', selectionKey: 'PITCH_INVASION_NO' }, withEvents)).toBe(true);
+    expect(isSelectionCorrect({ market: 'NOVELTY', selectionKey: 'PITCH_INVASION_YES' }, withEvents)).toBe(false);
+  });
+
+  it('defaults novelty flags to false when not reported', () => {
+    expect(isSelectionCorrect({ market: 'NOVELTY', selectionKey: 'RED_CARD_NO' }, result)).toBe(true);
+    expect(isSelectionCorrect({ market: 'NOVELTY', selectionKey: 'PITCH_INVASION_NO' }, result)).toBe(true);
+  });
+
+  it('evaluates per-player fight and late-arrival markets', () => {
+    const withEvents = { ...result, fights: { p1: true }, lateArrivals: { p3: true } };
+    expect(isSelectionCorrect({ market: 'FIGHT', selectionKey: 'p1:YES' }, withEvents)).toBe(true);
+    expect(isSelectionCorrect({ market: 'FIGHT', selectionKey: 'p1:NO' }, withEvents)).toBe(false);
+    expect(isSelectionCorrect({ market: 'FIGHT', selectionKey: 'p2:NO' }, withEvents)).toBe(true);
+    expect(isSelectionCorrect({ market: 'LATE', selectionKey: 'p3:YES' }, withEvents)).toBe(true);
+    expect(isSelectionCorrect({ market: 'LATE', selectionKey: 'p4:NO' }, withEvents)).toBe(true);
+  });
+
+  it('defaults fight/late to NO when not reported for a player', () => {
+    expect(isSelectionCorrect({ market: 'FIGHT', selectionKey: 'p1:NO' }, result)).toBe(true);
+    expect(isSelectionCorrect({ market: 'LATE', selectionKey: 'p1:NO' }, result)).toBe(true);
   });
 });
 
