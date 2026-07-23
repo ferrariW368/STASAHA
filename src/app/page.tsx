@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import AdBanner from '@/components/AdBanner';
 import { isMatchLocked } from '@/lib/matchLock';
+import { computeUserScore } from '@/lib/score';
 
 export default async function HomePage() {
   const matches = await prisma.match.findMany({
@@ -17,12 +18,14 @@ export default async function HomePage() {
     take: 5,
   });
 
-  const topUsers = await prisma.user.findMany({
+  const usersForScore = await prisma.user.findMany({
     where: { role: 'user' },
-    orderBy: { staBalance: 'desc' },
-    take: 3,
-    select: { username: true, staBalance: true },
+    select: { username: true, bets: { select: { status: true, stake: true, potentialWin: true } } },
   });
+  const topUsers = usersForScore
+    .map((u) => ({ username: u.username, score: computeUserScore(u.bets) }))
+    .sort((a, b) => b.score.net - a.score.net)
+    .slice(0, 3);
 
   return (
     <main className="mx-auto max-w-lg px-4 py-6">
@@ -73,16 +76,21 @@ export default async function HomePage() {
           <h2 className="mb-2 text-lg font-semibold">Geçmiş Maçlar</h2>
           <ul className="flex flex-col gap-2">
             {finishedMatches.map((m) => (
-              <li key={m.id} className="rounded-xl bg-white p-3 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">{m.homeTeam.name} vs {m.awayTeam.name}</span>
-                  <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-700">
-                    {m.finalHomeScore} - {m.finalAwayScore}
-                  </span>
-                </div>
-                <div className="text-sm text-gray-500">
-                  {m.kickoffTime.toLocaleString('tr-TR', { dateStyle: 'medium', timeStyle: 'short' })}
-                </div>
+              <li key={m.id}>
+                <Link
+                  href={`/matches/${m.id}`}
+                  className="block rounded-xl bg-white p-3 shadow-sm transition-shadow active:shadow-none"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">{m.homeTeam.name} vs {m.awayTeam.name}</span>
+                    <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-700">
+                      {m.finalHomeScore} - {m.finalAwayScore}
+                    </span>
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {m.kickoffTime.toLocaleString('tr-TR', { dateStyle: 'medium', timeStyle: 'short' })}
+                  </div>
+                </Link>
               </li>
             ))}
           </ul>
@@ -101,7 +109,9 @@ export default async function HomePage() {
                 <span className="mr-1 text-gray-400">{i + 1}.</span>
                 {u.username}
               </span>
-              <span className="font-semibold text-green-700">{u.staBalance} STA</span>
+              <span className={`font-semibold ${u.score.net > 0 ? 'text-green-700' : u.score.net < 0 ? 'text-red-600' : 'text-gray-500'}`}>
+                {u.score.net > 0 ? '+' : ''}{u.score.net} puan
+              </span>
             </li>
           ))}
           {topUsers.length === 0 && (
