@@ -5,11 +5,19 @@ import { computeMatchOdds } from '@/lib/odds';
 import { requireAdmin } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 
-export async function createMatch(homeTeamId: string, awayTeamId: string, kickoffTime: Date) {
+export async function createMatch(
+  homeTeamId: string,
+  awayTeamId: string,
+  kickoffTime: Date,
+  ouLine: number
+) {
   const authError = await requireAdmin();
   if (authError) return authError;
   if (homeTeamId === awayTeamId) {
     return { error: 'Ev sahibi ve deplasman takımı aynı olamaz.' };
+  }
+  if (!Number.isFinite(ouLine) || ouLine <= 0) {
+    return { error: 'Geçerli bir toplam gol çizgisi gir (örn. 9.5).' };
   }
 
   const [homePlayers, awayPlayers] = await Promise.all([
@@ -23,7 +31,8 @@ export async function createMatch(homeTeamId: string, awayTeamId: string, kickof
 
   const oddsRows = computeMatchOdds(
     homePlayers.map((p) => p.id),
-    awayPlayers.map((p) => p.id)
+    awayPlayers.map((p) => p.id),
+    ouLine
   );
 
   await prisma.odds.createMany({

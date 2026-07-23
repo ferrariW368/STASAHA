@@ -85,4 +85,13 @@ describe('computeMatchOdds', () => {
       expect(late.some((o) => o.selectionKey === `${pid}:NO`)).toBe(true);
     }
   });
+
+  it('respects an admin-chosen OU line instead of the 9.5 default', () => {
+    const customOdds = computeMatchOdds(['p1', 'p2'], ['p3', 'p4'], 12.5);
+    const ou = customOdds.filter((o) => o.market === 'OU_GOALS');
+    expect(ou.map((o) => o.selectionKey).sort()).toEqual(['OVER_12.5', 'UNDER_12.5']);
+    for (const o of ou) {
+      expect(o.oddsValue).toBeGreaterThan(1.0);
+    }
+  });
 });

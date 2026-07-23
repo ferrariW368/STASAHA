@@ -5,8 +5,9 @@ export type OddsRow = {
 };
 
 const HOUSE_MARGIN = 1.07; // ~7% overround
-const MAX_GOALS_PER_SIDE = 5; // scores computed for 0..5 goals per side
-const OU_LINE = 9.5; // hali saha matches run high-scoring, so a 4.5 line was nearly always "over"
+const MAX_GOALS_PER_SIDE = 5; // SCORE grid computed for 0..5 goals per side
+const OU_MAX_GOALS_PER_SIDE = 20; // wider bound so the OU sum stays accurate at any admin-chosen line
+const DEFAULT_OU_LINE = 9.5; // hali saha matches run high-scoring, so a 4.5 line was nearly always "over"
 
 function factorial(n: number): number {
   let result = 1;
@@ -72,17 +73,17 @@ function computeScores(): OddsRow[] {
   return rows;
 }
 
-function computeOverUnder(): OddsRow[] {
+function computeOverUnder(ouLine: number): OddsRow[] {
   let pUnder = 0;
-  for (let h = 0; h <= MAX_GOALS_PER_SIDE; h++) {
-    for (let a = 0; a <= MAX_GOALS_PER_SIDE; a++) {
-      if (h + a < OU_LINE) pUnder += poissonPmf(GOALS_HOME_LAMBDA, h) * poissonPmf(GOALS_AWAY_LAMBDA, a);
+  for (let h = 0; h <= OU_MAX_GOALS_PER_SIDE; h++) {
+    for (let a = 0; a <= OU_MAX_GOALS_PER_SIDE; a++) {
+      if (h + a < ouLine) pUnder += poissonPmf(GOALS_HOME_LAMBDA, h) * poissonPmf(GOALS_AWAY_LAMBDA, a);
     }
   }
   const pOver = 1 - pUnder;
   return [
-    { market: 'OU_GOALS', selectionKey: `OVER_${OU_LINE}`, oddsValue: oddsFromProbability(pOver) },
-    { market: 'OU_GOALS', selectionKey: `UNDER_${OU_LINE}`, oddsValue: oddsFromProbability(pUnder) },
+    { market: 'OU_GOALS', selectionKey: `OVER_${ouLine}`, oddsValue: oddsFromProbability(pOver) },
+    { market: 'OU_GOALS', selectionKey: `UNDER_${ouLine}`, oddsValue: oddsFromProbability(pUnder) },
   ];
 }
 
@@ -150,11 +151,15 @@ function computePlayerGoals(homePlayerIds: string[], awayPlayerIds: string[]): O
   return rows;
 }
 
-export function computeMatchOdds(homePlayerIds: string[], awayPlayerIds: string[]): OddsRow[] {
+export function computeMatchOdds(
+  homePlayerIds: string[],
+  awayPlayerIds: string[],
+  ouLine: number = DEFAULT_OU_LINE
+): OddsRow[] {
   return [
     ...compute1X2(),
     ...computeScores(),
-    ...computeOverUnder(),
+    ...computeOverUnder(ouLine),
     ...computeBothTeamsScore(),
     ...computeNoveltyMarkets(),
     ...computePlayerNoveltyMarkets(homePlayerIds, awayPlayerIds),
