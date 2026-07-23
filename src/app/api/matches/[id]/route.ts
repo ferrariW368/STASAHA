@@ -5,7 +5,11 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const { id } = await params;
   const match = await prisma.match.findUnique({
     where: { id },
-    include: { homeTeam: true, awayTeam: true, odds: true },
+    include: {
+      homeTeam: { include: { players: true } },
+      awayTeam: { include: { players: true } },
+      odds: true,
+    },
   });
   if (!match) return NextResponse.json({ error: 'not found' }, { status: 404 });
   return NextResponse.json(match);

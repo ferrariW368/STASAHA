@@ -15,19 +15,29 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="tr">
       <body className="bg-gray-100 text-gray-900">
-        <header className="border-b bg-white px-4 py-3">
+        <header className="sticky top-0 z-20 border-b border-gray-200 bg-white/95 px-4 py-3 backdrop-blur">
           <div className="mx-auto flex max-w-lg items-center justify-between">
-            <Link href="/" className="font-bold text-green-700">Hali Saha İddaa</Link>
-            <nav className="flex gap-3 text-sm">
+            <Link href="/" className="font-bold text-green-700">⚽ Hali Saha İddaa</Link>
+            <nav className="flex items-center gap-2 text-sm">
               {session?.user ? (
                 <>
-                  {session.user.role === 'admin' && <Link href="/admin">Admin</Link>}
-                  <Link href="/leaderboard">Liderlik</Link>
+                  {session.user.role === 'admin' && (
+                    <Link href="/admin" className="rounded-full px-3 py-1.5 font-medium text-gray-700 active:bg-gray-100">
+                      Admin
+                    </Link>
+                  )}
+                  <Link href="/leaderboard" className="rounded-full px-3 py-1.5 font-medium text-gray-700 active:bg-gray-100">
+                    Liderlik
+                  </Link>
                 </>
               ) : (
                 <>
-                  <Link href="/login">Giriş</Link>
-                  <Link href="/register">Kayıt Ol</Link>
+                  <Link href="/login" className="rounded-full px-3 py-1.5 font-medium text-gray-700 active:bg-gray-100">
+                    Giriş
+                  </Link>
+                  <Link href="/register" className="rounded-full bg-green-600 px-3 py-1.5 font-medium text-white active:bg-green-700">
+                    Kayıt Ol
+                  </Link>
                 </>
               )}
             </nav>
