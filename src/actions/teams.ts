@@ -13,6 +13,16 @@ export async function createTeam(name: string) {
   return {};
 }
 
+export async function updateTeamName(teamId: string, name: string) {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+  if (!name || name.trim().length < 2) return { error: 'Takım adı en az 2 karakter olmalı.' };
+  await prisma.team.update({ where: { id: teamId }, data: { name: name.trim() } });
+  revalidatePath('/admin/teams');
+  revalidatePath('/');
+  return {};
+}
+
 export async function addPlayer(teamId: string, name: string, number?: number) {
   const authError = await requireAdmin();
   if (authError) return authError;

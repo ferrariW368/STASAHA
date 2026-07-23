@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { createTeam, addPlayer, removePlayer } from '@/actions/teams';
+import { createTeam, updateTeamName, addPlayer, removePlayer } from '@/actions/teams';
 
 export default async function AdminTeamsPage() {
   const teams = await prisma.team.findMany({ include: { players: true }, orderBy: { name: 'asc' } });
@@ -22,7 +22,20 @@ export default async function AdminTeamsPage() {
       <div className="flex flex-col gap-6">
         {teams.map((team) => (
           <div key={team.id} className="rounded border p-4">
-            <h2 className="mb-2 font-semibold">{team.name}</h2>
+            <form
+              action={async (formData) => {
+                'use server';
+                await updateTeamName(team.id, formData.get('teamName') as string);
+              }}
+              className="mb-2 flex gap-2"
+            >
+              <input
+                name="teamName"
+                defaultValue={team.name}
+                className="flex-1 rounded border px-2 py-1 font-semibold"
+              />
+              <button className="rounded bg-gray-700 px-3 py-1 text-sm text-white">Kaydet</button>
+            </form>
             <ul className="mb-3 flex flex-col gap-1">
               {team.players.map((p) => (
                 <li key={p.id} className="flex items-center justify-between text-sm">
