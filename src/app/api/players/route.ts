@@ -13,6 +13,7 @@ export async function GET() {
       number: p.number,
       position: p.position,
       teamName: p.team?.name ?? null,
+      styleInspiration: p.styleInspiration,
     }))
   );
 }

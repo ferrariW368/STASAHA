@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { createLineup } from '@/actions/lineups';
 import { getFormation, VALID_FORMATS, type Position } from '@/lib/formation';
 
-type PlayerOption = { id: string; name: string; number: number | null; position: string | null; teamName: string | null };
+type PlayerOption = { id: string; name: string; number: number | null; position: string | null; teamName: string | null; styleInspiration: string | null };
 type Slot = { position: Position; slotOrder: number; playerId: string | null };
 
 const positionLabel: Record<Position, string> = { GK: 'Kaleci', DEF: 'Defans', MID: 'Orta Saha', FWD: 'Forvet' };
@@ -17,6 +17,7 @@ export default function LineupBuilderPage() {
   const [pickerSlot, setPickerSlot] = useState<{ position: Position; slotOrder: number } | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [showInspiration, setShowInspiration] = useState(false);
 
   useEffect(() => {
     fetch('/api/players').then((r) => r.json()).then(setPlayers);
@@ -24,6 +25,10 @@ export default function LineupBuilderPage() {
 
   const playerById = useMemo(() => new Map(players.map((p) => [p.id, p])), [players]);
   const usedPlayerIds = useMemo(() => new Set(slots.map((s) => s.playerId).filter(Boolean) as string[]), [slots]);
+
+  function displayName(p: PlayerOption) {
+    return showInspiration && p.styleInspiration ? p.styleInspiration : p.name;
+  }
 
   function chooseFormat(f: number) {
     const formation = getFormation(f);
@@ -104,6 +109,13 @@ export default function LineupBuilderPage() {
             className="mb-3 w-full rounded-xl border-2 border-gray-200 px-3 py-2 text-sm font-semibold"
           />
 
+          <button
+            onClick={() => setShowInspiration((v) => !v)}
+            className={`mb-3 w-full rounded-xl border-2 py-2 text-xs font-bold ${showInspiration ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-gray-200 text-gray-500'}`}
+          >
+            {showInspiration ? '⭐ İlham Alınan Futbolcular Gösteriliyor' : 'İlham Alınan Futbolcuları Göster'}
+          </button>
+
           <div className="mb-4 rounded-2xl bg-gradient-to-b from-green-600 via-green-700 to-green-800 p-4 shadow-lg">
             <div className="flex flex-col gap-6 rounded-xl border-2 border-white/30 p-3">
               {displayRows.map((row) => (
@@ -121,7 +133,7 @@ export default function LineupBuilderPage() {
                       >
                         {player ? (
                           <>
-                            <span className="text-xs font-bold text-green-800 truncate w-full">{player.name}</span>
+                            <span className="text-xs font-bold text-green-800 truncate w-full">{displayName(player)}</span>
                             <span className="text-[9px] text-green-600">{player.number ? `#${player.number}` : ''}</span>
                           </>
                         ) : (
@@ -148,21 +160,29 @@ export default function LineupBuilderPage() {
               </div>
               <div className="flex max-h-64 flex-col gap-1 overflow-y-auto">
                 {players
-                  .filter((p) => p.position === pickerSlot.position && !usedPlayerIds.has(p.id))
+                  .filter((p) => !usedPlayerIds.has(p.id))
+                  .sort((a, b) => {
+                    const aMatch = a.position === pickerSlot.position ? 0 : 1;
+                    const bMatch = b.position === pickerSlot.position ? 0 : 1;
+                    return aMatch - bMatch || a.name.localeCompare(b.name);
+                  })
                   .map((p) => (
                     <button
                       key={p.id}
                       onClick={() => assignPlayer(pickerSlot.position, pickerSlot.slotOrder, p.id)}
                       className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-left text-sm active:bg-gray-100"
                     >
-                      <span>{p.name} {p.number ? `#${p.number}` : ''}</span>
+                      <span>
+                        {displayName(p)} {p.number ? `#${p.number}` : ''}
+                        {p.position && p.position !== pickerSlot.position && (
+                          <span className="ml-1 text-[10px] text-amber-600">({positionLabel[p.position as Position]})</span>
+                        )}
+                      </span>
                       <span className="text-xs text-gray-400">{p.teamName ?? 'Serbest'}</span>
                     </button>
                   ))}
-                {players.filter((p) => p.position === pickerSlot.position && !usedPlayerIds.has(p.id)).length === 0 && (
-                  <p className="px-3 py-2 text-xs text-gray-400">
-                    Bu mevkide uygun oyuncu yok — admin panelinden oyunculara mevki atanmalı.
-                  </p>
+                {players.filter((p) => !usedPlayerIds.has(p.id)).length === 0 && (
+                  <p className="px-3 py-2 text-xs text-gray-400">Uygun oyuncu kalmadı.</p>
                 )}
               </div>
             </div>
