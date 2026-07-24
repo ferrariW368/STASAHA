@@ -1,6 +1,7 @@
-# STASAHA
+# FERRARI BET (STASAHA)
 
 Arkadaş grubu maçları için eğlence amaçlı, gerçek para karşılığı olmayan STA para birimiyle çalışan tahmin sitesi.
+Site içi marka adı "FERRARI BET"; canlı adres hâlâ stasaha.vercel.app (Vercel proje adı değişmedi).
 
 Veritabanı: Postgres (Neon). Canlı ortam Vercel üzerinde çalışır.
 

@@ -8,7 +8,7 @@ import LogoutButton from '@/components/LogoutButton';
 import FerrariBetBanner from '@/components/FerrariBetBanner';
 
 export const metadata: Metadata = {
-  title: 'STASAHA',
+  title: 'FERRARI BET',
   description: 'Arkadaş grubu için eğlence amaçlı STA para birimiyle tahmin oyunu',
 };
 
@@ -27,7 +27,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="bg-gray-100 text-gray-900">
         <header className="sticky top-0 z-20 bg-neutral-900 px-4 py-3">
           <div className="mx-auto flex max-w-lg items-center justify-between gap-2">
-            <Link href="/" className="shrink-0 font-bold text-amber-400">⚽ STASAHA</Link>
+            <Link href="/" className="shrink-0 font-bold text-amber-400">🎰 FERRARI BET</Link>
             <nav className="flex flex-nowrap items-center gap-1.5 overflow-x-auto text-sm">
               {session?.user ? (
                 <>
@@ -41,6 +41,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                       Admin
                     </Link>
                   )}
+                  <Link href="/players" className="shrink-0 rounded-full px-3 py-1.5 font-medium text-neutral-200 active:bg-neutral-800">
+                    Oyuncular
+                  </Link>
                   <Link href="/bets" className="shrink-0 rounded-full px-3 py-1.5 font-medium text-neutral-200 active:bg-neutral-800">
                     Kuponlarım
                   </Link>
@@ -53,6 +56,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 </>
               ) : (
                 <>
+                  <Link href="/players" className="shrink-0 rounded-full px-3 py-1.5 font-medium text-neutral-200 active:bg-neutral-800">
+                    Oyuncular
+                  </Link>
                   <Link href="/login" className="shrink-0 rounded-full px-3 py-1.5 font-medium text-neutral-200 active:bg-neutral-800">
                     Giriş
                   </Link>

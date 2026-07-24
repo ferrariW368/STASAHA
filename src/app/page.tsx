@@ -4,6 +4,13 @@ import AdBanner from '@/components/AdBanner';
 import { isMatchLocked } from '@/lib/matchLock';
 import { computeUserScore } from '@/lib/score';
 
+const transferStageLabel: Record<string, { text: string; className: string }> = {
+  RUMOR: { text: 'Söylenti', className: 'bg-gray-100 text-gray-600' },
+  ADVANCED: { text: 'Büyük Oranda Bitti', className: 'bg-amber-50 text-amber-700' },
+  FAILED: { text: 'Gerçekleşmedi', className: 'bg-red-50 text-red-600' },
+  SIGNED: { text: 'İmza Atıldı', className: 'bg-green-50 text-green-700' },
+};
+
 export default async function HomePage() {
   const matches = await prisma.match.findMany({
     where: { status: { in: ['upcoming', 'locked'] } },
@@ -27,9 +34,15 @@ export default async function HomePage() {
     .sort((a, b) => b.score.net - a.score.net)
     .slice(0, 3);
 
+  const transferNews = await prisma.transferNews.findMany({
+    include: { player: true, fromTeam: true, toTeam: true },
+    orderBy: { updatedAt: 'desc' },
+    take: 5,
+  });
+
   return (
     <main className="mx-auto max-w-lg px-4 py-6">
-      <h1 className="mb-4 text-2xl font-bold">STASAHA</h1>
+      <h1 className="mb-4 text-2xl font-bold">🎰 FERRARI BET</h1>
 
       <section className="mb-8">
         <h2 className="mb-2 text-lg font-semibold">Yaklaşan Maçlar</h2>
@@ -93,6 +106,33 @@ export default async function HomePage() {
                 </Link>
               </li>
             ))}
+          </ul>
+        </section>
+      )}
+
+      {transferNews.length > 0 && (
+        <section className="mb-8">
+          <h2 className="mb-2 text-lg font-semibold">📰 Transfer Haberleri</h2>
+          <ul className="flex flex-col gap-2">
+            {transferNews.map((n) => {
+              const stage = transferStageLabel[n.stage] ?? transferStageLabel.RUMOR;
+              return (
+                <li key={n.id} className="rounded-xl bg-white p-3 shadow-sm">
+                  <div className="mb-1 flex items-center justify-between">
+                    <Link href={`/players/${n.playerId}`} className="font-medium text-gray-900">
+                      {n.player.name}
+                    </Link>
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${stage.className}`}>
+                      {stage.text}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    {n.fromTeam?.name ?? 'Serbest'} → {n.toTeam?.name ?? 'Serbest'}
+                  </p>
+                  {n.note && <p className="mt-1 text-xs text-gray-500">{n.note}</p>}
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}
