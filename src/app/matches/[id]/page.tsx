@@ -4,9 +4,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { placeBet } from '@/actions/bets';
 import AdBanner from '@/components/AdBanner';
+import SquadPitch, { type PitchPlayer } from './SquadPitch';
 
 type Odds = { market: string; selectionKey: string; oddsValue: number };
-type PlayerData = { id: string; name: string; number: number | null };
+type PlayerData = PitchPlayer;
 type MatchData = {
   id: string;
   homeTeam: { name: string; players: PlayerData[] };
@@ -135,6 +136,13 @@ export default function MatchDetailPage() {
           {new Date(match.kickoffTime).toLocaleString('tr-TR', { dateStyle: 'medium', timeStyle: 'short' })}
         </p>
       </div>
+
+      <SquadPitch
+        homeTeamName={match.homeTeam.name}
+        awayTeamName={match.awayTeam.name}
+        homePlayers={match.homeTeam.players}
+        awayPlayers={match.awayTeam.players}
+      />
 
       <section className="mb-5">
         <h2 className="mb-2 text-sm font-semibold text-gray-600">Maç Sonucu</h2>
