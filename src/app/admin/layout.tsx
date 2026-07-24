@@ -8,6 +8,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <Link href="/admin/teams" className="text-green-700">Takımlar</Link>
         <Link href="/admin/players" className="text-green-700">Oyuncular</Link>
         <Link href="/admin/transfers" className="text-green-700">Transferler</Link>
+        <Link href="/admin/lineups" className="text-green-700">Kadro Onayları</Link>
         <Link href="/admin/matches/new" className="text-green-700">Yeni Maç</Link>
         <Link href="/admin/users" className="text-green-700">Kullanıcılar</Link>
       </nav>

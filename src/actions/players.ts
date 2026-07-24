@@ -9,10 +9,13 @@ function clampAttribute(value: number | null | undefined): number | null {
   return Math.max(1, Math.min(99, Math.round(value)));
 }
 
+const VALID_POSITIONS = ['GK', 'DEF', 'MID', 'FWD'];
+
 export async function updatePlayerProfile(
   playerId: string,
   profile: {
     styleInspiration: string;
+    position: string | null;
     pace: number | null;
     shooting: number | null;
     passing: number | null;
@@ -29,6 +32,7 @@ export async function updatePlayerProfile(
     where: { id: playerId },
     data: {
       styleInspiration: profile.styleInspiration.trim() || null,
+      position: profile.position && VALID_POSITIONS.includes(profile.position) ? profile.position : null,
       pace: clampAttribute(profile.pace),
       shooting: clampAttribute(profile.shooting),
       passing: clampAttribute(profile.passing),

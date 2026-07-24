@@ -48,6 +48,7 @@ export default async function AdminPlayersPage() {
                 };
                 await updatePlayerProfile(p.id, {
                   styleInspiration: (formData.get('styleInspiration') as string) ?? '',
+                  position: (formData.get('position') as string) || null,
                   pace: parseNum('pace'),
                   shooting: parseNum('shooting'),
                   passing: parseNum('passing'),
@@ -75,12 +76,21 @@ export default async function AdminPlayersPage() {
                 </select>
               </div>
 
-              <input
-                name="styleInspiration"
-                placeholder="Oyun stili esini (örn. Lionel Messi)"
-                defaultValue={p.styleInspiration ?? ''}
-                className="rounded border px-2 py-1 text-sm"
-              />
+              <div className="flex gap-2">
+                <input
+                  name="styleInspiration"
+                  placeholder="Oyun stili esini (örn. Lionel Messi)"
+                  defaultValue={p.styleInspiration ?? ''}
+                  className="flex-1 rounded border px-2 py-1 text-sm"
+                />
+                <select name="position" defaultValue={p.position ?? ''} className="rounded border px-2 py-1 text-sm">
+                  <option value="">Mevki seç</option>
+                  <option value="GK">Kaleci</option>
+                  <option value="DEF">Defans</option>
+                  <option value="MID">Orta Saha</option>
+                  <option value="FWD">Forvet</option>
+                </select>
+              </div>
 
               <div className="grid grid-cols-3 gap-2 text-xs">
                 {(['pace', 'shooting', 'passing', 'dribbling', 'defending', 'physical'] as const).map((key) => (

@@ -44,6 +44,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   <Link href="/players" className="shrink-0 rounded-full px-3 py-1.5 font-medium text-neutral-200 active:bg-neutral-800">
                     Oyuncular
                   </Link>
+                  <Link href="/kadro-plani" className="shrink-0 rounded-full px-3 py-1.5 font-medium text-neutral-200 active:bg-neutral-800">
+                    Kadro Planla
+                  </Link>
                   <Link href="/bets" className="shrink-0 rounded-full px-3 py-1.5 font-medium text-neutral-200 active:bg-neutral-800">
                     Kuponlarım
                   </Link>

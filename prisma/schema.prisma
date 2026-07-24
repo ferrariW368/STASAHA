@@ -15,6 +15,7 @@ model User {
   role         String  @default("user") // "user" | "admin"
   createdAt    DateTime @default(now())
   bets         Bet[]
+  lineups      Lineup[]
 }
 
 model Team {
@@ -33,9 +34,11 @@ model Player {
   team    Team?   @relation(fields: [teamId], references: [id])
   name    String
   number  Int?
+  position String? // "GK" | "DEF" | "MID" | "FWD" — used to place the player on the lineup-builder pitch
   playerGoals PlayerGoal[]
   playerEvents PlayerEvent[]
   transferNews TransferNews[]
+  lineupSlots LineupSlot[]
 
   // Mackolik/Transfermarkt-style profile — all fields below are admin-entered
   // flavor stats (inspired by a real footballer's playing style), never
@@ -142,4 +145,30 @@ model TransferNews {
   note       String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+// A user-submitted fantasy-style squad + pitch formation, pending admin
+// approval. Approving one creates a real Team and transfers the selected
+// players onto it, so it's ready to pick when admin sets up the next match.
+model Lineup {
+  id            String   @id @default(cuid())
+  squadName     String
+  format        Int      // players per side including GK: 5, 6, 7, or 8
+  submittedById String
+  submittedBy   User     @relation(fields: [submittedById], references: [id])
+  status        String   @default("pending") // "pending" | "approved" | "rejected"
+  createdAt     DateTime @default(now())
+  slots         LineupSlot[]
+}
+
+model LineupSlot {
+  id        String @id @default(cuid())
+  lineupId  String
+  lineup    Lineup @relation(fields: [lineupId], references: [id])
+  playerId  String
+  player    Player @relation(fields: [playerId], references: [id])
+  position  String // "GK" | "DEF" | "MID" | "FWD"
+  slotOrder Int    // left-to-right order within that position row, for layout
+
+  @@unique([lineupId, playerId])
 }
