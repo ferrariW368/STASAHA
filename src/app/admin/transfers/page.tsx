@@ -6,6 +6,7 @@ const stageOptions = [
   { value: 'ADVANCED', label: 'Büyük Oranda Bitti' },
   { value: 'FAILED', label: 'Gerçekleşmedi' },
   { value: 'SIGNED', label: 'İmza Atıldı' },
+  { value: 'CANCELLED', label: 'İptal Edildi / Transfer Yattı' },
 ];
 
 export default async function AdminTransfersPage() {

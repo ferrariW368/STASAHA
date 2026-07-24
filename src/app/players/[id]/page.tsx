@@ -15,6 +15,7 @@ const stageLabel: Record<string, { text: string; className: string }> = {
   ADVANCED: { text: 'Büyük Oranda Bitti', className: 'bg-amber-50 text-amber-700' },
   FAILED: { text: 'Gerçekleşmedi', className: 'bg-red-50 text-red-600' },
   SIGNED: { text: 'İmza Atıldı', className: 'bg-green-50 text-green-700' },
+  CANCELLED: { text: 'İptal Edildi', className: 'bg-red-50 text-red-600' },
 };
 
 export default async function PlayerProfilePage({ params }: { params: Promise<{ id: string }> }) {

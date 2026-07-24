@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 
-const VALID_STAGES = ['RUMOR', 'ADVANCED', 'FAILED', 'SIGNED'];
+const VALID_STAGES = ['RUMOR', 'ADVANCED', 'FAILED', 'SIGNED', 'CANCELLED'];
 
 export async function createTransferNews(
   playerId: string,
