@@ -23,16 +23,32 @@ model Team {
   players Player[]
   homeMatches Match[] @relation("HomeTeam")
   awayMatches Match[] @relation("AwayTeam")
+  transfersFrom TransferNews[] @relation("TransferFrom")
+  transfersTo   TransferNews[] @relation("TransferTo")
 }
 
 model Player {
-  id      String @id @default(cuid())
-  teamId  String
-  team    Team   @relation(fields: [teamId], references: [id])
+  id      String  @id @default(cuid())
+  teamId  String? // null = free agent / unattached, so players can be transferred between teams
+  team    Team?   @relation(fields: [teamId], references: [id])
   name    String
   number  Int?
   playerGoals PlayerGoal[]
   playerEvents PlayerEvent[]
+  transferNews TransferNews[]
+
+  // Mackolik/Transfermarkt-style profile — all fields below are admin-entered
+  // flavor stats (inspired by a real footballer's playing style), never
+  // scraped or copied from any real database, and never include real
+  // biographical facts (birthplace, real career, real clubs).
+  styleInspiration String? // e.g. "Lionel Messi" — just a fun label
+  pace             Int?    // 1-99, FIFA-card style attribute
+  shooting         Int?
+  passing          Int?
+  dribbling        Int?
+  defending        Int?
+  physical         Int?
+  marketValue      Int?    // fictional value in STA, not real money
 }
 
 model Match {
@@ -112,4 +128,18 @@ model BetSelection {
   market         String
   selectionKey   String
   oddsValueAtBet Float
+}
+
+model TransferNews {
+  id         String   @id @default(cuid())
+  playerId   String
+  player     Player   @relation(fields: [playerId], references: [id])
+  fromTeamId String?
+  fromTeam   Team?    @relation("TransferFrom", fields: [fromTeamId], references: [id])
+  toTeamId   String?
+  toTeam     Team?    @relation("TransferTo", fields: [toTeamId], references: [id])
+  stage      String   // "RUMOR" | "ADVANCED" | "FAILED" | "SIGNED"
+  note       String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }

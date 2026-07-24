@@ -35,21 +35,25 @@ export async function deleteTeam(teamId: string) {
   }
 
   await prisma.$transaction([
-    prisma.player.deleteMany({ where: { teamId } }),
+    // Free the players instead of deleting them — their profile/stats and
+    // transfer history are worth keeping even if their team goes away.
+    prisma.player.updateMany({ where: { teamId }, data: { teamId: null } }),
     prisma.team.delete({ where: { id: teamId } }),
   ]);
   revalidatePath('/admin/teams');
+  revalidatePath('/admin/players');
   revalidatePath('/admin/matches/new');
   revalidatePath('/');
   return {};
 }
 
-export async function addPlayer(teamId: string, name: string, number?: number) {
+export async function addPlayer(teamId: string | null, name: string, number?: number) {
   const authError = await requireAdmin();
   if (authError) return authError;
   if (!name || name.trim().length < 2) return { error: 'Oyuncu adı en az 2 karakter olmalı.' };
   await prisma.player.create({ data: { teamId, name: name.trim(), number: number ?? null } });
   revalidatePath('/admin/teams');
+  revalidatePath('/admin/players');
   return {};
 }
 
