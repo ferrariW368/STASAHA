@@ -17,7 +17,8 @@ export type PitchPlayer = {
   defending: number | null;
   physical: number | null;
   marketValue: number | null;
-  playerGoals: { goalCount: number }[];
+  playerGoals: { matchId: string; goalCount: number }[];
+  playerEvents: { matchId: string; happened: boolean }[];
 };
 
 type Row = 'GK' | 'DEF' | 'MID' | 'FWD' | 'OTHER';
@@ -45,14 +46,37 @@ function Stars({ rating }: { rating: number | null }) {
   );
 }
 
-function PlayerChip({ player, displayName, onClick }: { player: PitchPlayer; displayName: string; onClick: () => void }) {
+function PlayerChip({
+  player,
+  displayName,
+  isGoalkeeper,
+  matchGoals,
+  hasYellowCard,
+  onClick,
+}: {
+  player: PitchPlayer;
+  displayName: string;
+  isGoalkeeper: boolean;
+  matchGoals: number;
+  hasYellowCard: boolean;
+  onClick: () => void;
+}) {
   return (
     <button
       onClick={onClick}
-      className="flex w-16 flex-col items-center gap-0.5 rounded-lg border-2 border-white/50 bg-white/90 px-1 py-1.5 text-center active:bg-neutral-900"
+      className={`pop-interactive flex w-16 flex-col items-center gap-0.5 rounded-lg border-2 px-1 py-1.5 text-center active:bg-neutral-900 ${
+        isGoalkeeper ? 'border-amber-400 bg-amber-50' : 'border-white/50 bg-white/90'
+      }`}
     >
+      {isGoalkeeper && <span className="text-[9px] leading-none">🧤</span>}
       <span className="text-[10px] font-bold text-green-800 leading-tight line-clamp-2">{displayName}</span>
       <span className="text-[8px] text-green-400">{player.number ? `#${player.number}` : ''}</span>
+      {(matchGoals > 0 || hasYellowCard) && (
+        <span className="text-[9px] leading-none">
+          {matchGoals > 0 && `⚽×${matchGoals} `}
+          {hasYellowCard && '🟨'}
+        </span>
+      )}
     </button>
   );
 }
@@ -62,12 +86,16 @@ function TeamHalf({
   players,
   order,
   showInspiration,
+  matchId,
+  showMatchEvents,
   onSelectPlayer,
 }: {
   teamName: string;
   players: PitchPlayer[];
   order: Row[];
   showInspiration: boolean;
+  matchId: string;
+  showMatchEvents: boolean;
   onSelectPlayer: (p: PitchPlayer) => void;
 }) {
   const groups = groupByPosition(players);
@@ -86,6 +114,9 @@ function TeamHalf({
                 key={p.id}
                 player={p}
                 displayName={showInspiration && p.styleInspiration ? p.styleInspiration : p.name}
+                isGoalkeeper={row === 'GK'}
+                matchGoals={showMatchEvents ? p.playerGoals.filter((g) => g.matchId === matchId).reduce((s, g) => s + g.goalCount, 0) : 0}
+                hasYellowCard={showMatchEvents && p.playerEvents.some((e) => e.matchId === matchId && e.happened)}
                 onClick={() => onSelectPlayer(p)}
               />
             ))}
@@ -98,11 +129,15 @@ function TeamHalf({
 }
 
 export default function SquadPitch({
+  matchId,
+  matchStatus,
   homeTeamName,
   awayTeamName,
   homePlayers,
   awayPlayers,
 }: {
+  matchId: string;
+  matchStatus: string;
   homeTeamName: string;
   awayTeamName: string;
   homePlayers: PitchPlayer[];
@@ -110,6 +145,7 @@ export default function SquadPitch({
 }) {
   const [showInspiration, setShowInspiration] = useState(false);
   const [selected, setSelected] = useState<PitchPlayer | null>(null);
+  const showMatchEvents = matchStatus === 'finished';
 
   return (
     <section className="mb-5">
@@ -129,6 +165,8 @@ export default function SquadPitch({
           players={awayPlayers}
           order={ORDER_FROM_EDGE}
           showInspiration={showInspiration}
+          matchId={matchId}
+          showMatchEvents={showMatchEvents}
           onSelectPlayer={setSelected}
         />
         <div className="mx-3 flex items-center gap-2">
@@ -141,6 +179,8 @@ export default function SquadPitch({
           players={homePlayers}
           order={[...ORDER_FROM_EDGE].reverse()}
           showInspiration={showInspiration}
+          matchId={matchId}
+          showMatchEvents={showMatchEvents}
           onSelectPlayer={setSelected}
         />
       </div>
@@ -151,7 +191,7 @@ export default function SquadPitch({
           onClick={() => setSelected(null)}
         >
           <div
-            className="w-full max-w-sm rounded-xl bg-neutral-900 p-4 shadow-lg"
+            className="fade-slide-in w-full max-w-sm rounded-xl bg-neutral-900 p-4 shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-2 flex items-start justify-between">
