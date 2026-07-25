@@ -26,6 +26,10 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
       team: true,
       playerGoals: true,
       transferNews: { include: { fromTeam: true, toTeam: true }, orderBy: { createdAt: 'desc' } },
+      appearances: {
+        include: { team: true, match: true },
+        orderBy: { match: { kickoffTime: 'asc' } },
+      },
     },
   });
 
@@ -38,6 +42,8 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
   }
 
   const totalGoals = player.playerGoals.reduce((sum, g) => sum + g.goalCount, 0);
+  const playedAppearances = player.appearances.filter((a) => a.match.status === 'finished');
+  const teamsPlayedFor = [...new Set(player.appearances.map((a) => a.team.name))];
   const values = [player.pace, player.shooting, player.passing, player.dribbling, player.defending, player.physical].filter(
     (v): v is number => v !== null
   );
@@ -95,7 +101,13 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
 
       <div className="mb-4 rounded-xl bg-white p-4 shadow-sm">
         <h2 className="mb-2 text-sm font-semibold text-gray-600">Hali Saha Karnesi</h2>
+        <p className="text-sm">Maç sayısı: <span className="font-semibold">{playedAppearances.length}</span></p>
         <p className="text-sm">Toplam gol: <span className="font-semibold">{totalGoals}</span></p>
+        {teamsPlayedFor.length > 0 && (
+          <p className="mt-1 text-sm">
+            Oynadığı takımlar: <span className="font-semibold">{teamsPlayedFor.join(', ')}</span>
+          </p>
+        )}
       </div>
 
       {player.transferNews.length > 0 && (

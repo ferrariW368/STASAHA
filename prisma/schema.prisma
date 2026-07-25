@@ -26,6 +26,7 @@ model Team {
   awayMatches Match[] @relation("AwayTeam")
   transfersFrom TransferNews[] @relation("TransferFrom")
   transfersTo   TransferNews[] @relation("TransferTo")
+  appearances   MatchAppearance[]
 }
 
 model Player {
@@ -39,6 +40,7 @@ model Player {
   playerEvents PlayerEvent[]
   transferNews TransferNews[]
   lineupSlots LineupSlot[]
+  appearances MatchAppearance[]
 
   // Mackolik/Transfermarkt-style profile — all fields below are admin-entered
   // flavor stats (inspired by a real footballer's playing style), never
@@ -72,6 +74,22 @@ model Match {
   bets           Bet[]
   playerGoals    PlayerGoal[]
   playerEvents   PlayerEvent[]
+  appearances    MatchAppearance[]
+}
+
+// Snapshots which players were on each team's roster when a match was
+// created, so a player's profile can show a real "matches played" count and
+// team history even after they later transfer elsewhere.
+model MatchAppearance {
+  id       String @id @default(cuid())
+  matchId  String
+  match    Match  @relation(fields: [matchId], references: [id])
+  playerId String
+  player   Player @relation(fields: [playerId], references: [id])
+  teamId   String
+  team     Team   @relation(fields: [teamId], references: [id])
+
+  @@unique([matchId, playerId])
 }
 
 model PlayerGoal {

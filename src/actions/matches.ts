@@ -39,6 +39,13 @@ export async function createMatch(
     data: oddsRows.map((o) => ({ matchId: match.id, market: o.market, selectionKey: o.selectionKey, oddsValue: o.oddsValue })),
   });
 
+  await prisma.matchAppearance.createMany({
+    data: [
+      ...homePlayers.map((p) => ({ matchId: match.id, playerId: p.id, teamId: homeTeamId })),
+      ...awayPlayers.map((p) => ({ matchId: match.id, playerId: p.id, teamId: awayTeamId })),
+    ],
+  });
+
   revalidatePath('/admin');
   revalidatePath('/');
   return { matchId: match.id };
