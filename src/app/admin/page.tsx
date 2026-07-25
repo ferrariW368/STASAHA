@@ -13,10 +13,10 @@ export default async function AdminDashboard() {
       <ul className="flex flex-col gap-2">
         {matches.map((m) => (
           <li key={m.id} className="rounded border p-3 text-sm">
-            <Link href={`/admin/matches/${m.id}`} className="font-medium text-green-700">
+            <Link href={`/admin/matches/${m.id}`} className="font-medium text-green-400">
               {m.homeTeam.name} vs {m.awayTeam.name}
             </Link>
-            <div className="text-gray-500">
+            <div className="text-neutral-500">
               {m.kickoffTime.toLocaleString('tr-TR')} — durum: {m.status}
               {m.status === 'finished' ? ` (${m.finalHomeScore}-${m.finalAwayScore})` : ''}
             </div>

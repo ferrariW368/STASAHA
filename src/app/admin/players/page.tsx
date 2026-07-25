@@ -11,7 +11,7 @@ export default async function AdminPlayersPage() {
   return (
     <div>
       <h1 className="mb-1 text-xl font-bold">Oyuncu Havuzu</h1>
-      <p className="mb-4 text-xs text-gray-500">
+      <p className="mb-4 text-xs text-neutral-500">
         Profil bilgileri (özellikler, piyasa değeri, oyun stili esini) tamamen senin girdiğin, gerçek bir
         futbolcunun verisi kopyalanmadan sadece esin olarak kullanılan değerlerdir.
       </p>
@@ -124,13 +124,13 @@ export default async function AdminPlayersPage() {
                 />
               </label>
 
-              <button className="mt-1 self-start rounded bg-gray-700 px-3 py-1.5 text-xs font-semibold text-white">
+              <button className="mt-1 self-start rounded bg-neutral-700 px-3 py-1.5 text-xs font-semibold text-white">
                 Kaydet
               </button>
             </form>
           </div>
         ))}
-        {players.length === 0 && <p className="text-sm text-gray-400">Henüz oyuncu yok.</p>}
+        {players.length === 0 && <p className="text-sm text-neutral-600">Henüz oyuncu yok.</p>}
       </div>
     </div>
   );

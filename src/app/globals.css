@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 /*
- * This site is intentionally light-only. Without this, Chromium-based
- * browsers' "force dark" auto-inversion (and this file's now-removed
- * prefers-color-scheme override) mis-colors text that has no explicit
- * Tailwind text-color class, making it unreadable against our white cards.
+ * Dark casino theme, deliberately. Every card/text element carries an
+ * explicit Tailwind dark-palette class (see the neutral-9xx / neutral-1xx
+ * scale used throughout src/app), so Chromium's "force dark" auto-inversion
+ * has nothing unstyled left to mis-color.
  */
 :root {
-  color-scheme: light;
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+  --background: #0a0a0a;
+  --foreground: #f5f5f5;
 }
 
 @theme inline {
@@ -23,4 +23,26 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Subtle Ferrari-red racing-stripe watermark behind every page. */
+body {
+  background-image:
+    repeating-linear-gradient(
+      120deg,
+      rgba(220, 0, 0, 0.05) 0px,
+      rgba(220, 0, 0, 0.05) 2px,
+      transparent 2px,
+      transparent 140px
+    );
+  background-attachment: fixed;
+}
+
+@keyframes race-across {
+  from { transform: translateX(-30vw); }
+  to { transform: translateX(130vw); }
+}
+
+.race-car-loader {
+  animation: race-across 1.1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }

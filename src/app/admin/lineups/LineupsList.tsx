@@ -7,9 +7,9 @@ import type { Position } from '@/lib/formation';
 const positionLabel: Record<Position, string> = { GK: 'Kaleci', DEF: 'Defans', MID: 'Orta Saha', FWD: 'Forvet' };
 
 const statusLabel: Record<string, { text: string; className: string }> = {
-  pending: { text: 'Onay Bekliyor', className: 'bg-amber-50 text-amber-700' },
-  approved: { text: 'Onaylandı', className: 'bg-green-50 text-green-700' },
-  rejected: { text: 'Reddedildi', className: 'bg-red-50 text-red-600' },
+  pending: { text: 'Onay Bekliyor', className: 'bg-amber-400/10 text-amber-400' },
+  approved: { text: 'Onaylandı', className: 'bg-green-500/10 text-green-400' },
+  rejected: { text: 'Reddedildi', className: 'bg-red-500/10 text-red-400' },
 };
 
 type SlotData = { position: Position; slotOrder: number; playerName: string; styleInspiration: string | null };
@@ -29,7 +29,7 @@ export default function LineupsList({ lineups }: { lineups: LineupData[] }) {
     <div>
       <button
         onClick={() => setShowInspiration((v) => !v)}
-        className={`mb-4 rounded-lg border-2 px-3 py-1.5 text-xs font-bold ${showInspiration ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-gray-200 text-gray-500'}`}
+        className={`mb-4 rounded-lg border-2 px-3 py-1.5 text-xs font-bold ${showInspiration ? 'border-amber-500 bg-amber-400/10 text-amber-400' : 'border-neutral-800 text-neutral-500'}`}
       >
         {showInspiration ? '⭐ İlham Alınan Futbolcular Gösteriliyor' : 'İlham Alınan Futbolcuları Göster'}
       </button>
@@ -42,7 +42,7 @@ export default function LineupsList({ lineups }: { lineups: LineupData[] }) {
               <div className="mb-2 flex items-center justify-between">
                 <div>
                   <span className="font-semibold">{lineup.squadName}</span>
-                  <span className="ml-2 text-xs text-gray-500">
+                  <span className="ml-2 text-xs text-neutral-500">
                     {lineup.format}v{lineup.format} · {lineup.submittedByUsername}
                   </span>
                 </div>
@@ -54,8 +54,8 @@ export default function LineupsList({ lineups }: { lineups: LineupData[] }) {
               <div className="mb-3 flex flex-col gap-1">
                 {lineup.rows.map((row) => (
                   <div key={row.position} className="flex items-center gap-2 text-xs">
-                    <span className="w-16 shrink-0 font-semibold text-gray-500">{positionLabel[row.position]}</span>
-                    <span className="text-gray-700">
+                    <span className="w-16 shrink-0 font-semibold text-neutral-500">{positionLabel[row.position]}</span>
+                    <span className="text-neutral-300">
                       {row.slots
                         .map((s) => (showInspiration && s.styleInspiration ? s.styleInspiration : s.playerName))
                         .join(', ')}
@@ -72,7 +72,7 @@ export default function LineupsList({ lineups }: { lineups: LineupData[] }) {
                     </button>
                   </form>
                   <form action={async () => { await rejectLineup(lineup.id); }}>
-                    <button className="rounded border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-600">
+                    <button className="rounded border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-400">
                       Reddet
                     </button>
                   </form>
@@ -81,7 +81,7 @@ export default function LineupsList({ lineups }: { lineups: LineupData[] }) {
             </div>
           );
         })}
-        {lineups.length === 0 && <p className="text-sm text-gray-400">Henüz kadro önerisi yok.</p>}
+        {lineups.length === 0 && <p className="text-sm text-neutral-600">Henüz kadro önerisi yok.</p>}
       </div>
     </div>
   );

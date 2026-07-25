@@ -49,10 +49,10 @@ function PlayerChip({ player, displayName, onClick }: { player: PitchPlayer; dis
   return (
     <button
       onClick={onClick}
-      className="flex w-16 flex-col items-center gap-0.5 rounded-lg border-2 border-white/50 bg-white/90 px-1 py-1.5 text-center active:bg-white"
+      className="flex w-16 flex-col items-center gap-0.5 rounded-lg border-2 border-white/50 bg-white/90 px-1 py-1.5 text-center active:bg-neutral-900"
     >
       <span className="text-[10px] font-bold text-green-800 leading-tight line-clamp-2">{displayName}</span>
-      <span className="text-[8px] text-green-600">{player.number ? `#${player.number}` : ''}</span>
+      <span className="text-[8px] text-green-400">{player.number ? `#${player.number}` : ''}</span>
     </button>
   );
 }
@@ -114,10 +114,10 @@ export default function SquadPitch({
   return (
     <section className="mb-5">
       <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-gray-600">Kadrolar</h2>
+        <h2 className="text-sm font-semibold text-neutral-400">Kadrolar</h2>
         <button
           onClick={() => setShowInspiration((v) => !v)}
-          className={`rounded-lg border-2 px-2 py-1 text-[10px] font-bold ${showInspiration ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-gray-200 text-gray-500'}`}
+          className={`rounded-lg border-2 px-2 py-1 text-[10px] font-bold ${showInspiration ? 'border-amber-500 bg-amber-400/10 text-amber-400' : 'border-neutral-800 text-neutral-500'}`}
         >
           {showInspiration ? '⭐ İlham Alınan Futbolcular' : 'İlham Alınan İsimleri Göster'}
         </button>
@@ -151,21 +151,21 @@ export default function SquadPitch({
           onClick={() => setSelected(null)}
         >
           <div
-            className="w-full max-w-sm rounded-xl bg-white p-4 shadow-lg"
+            className="w-full max-w-sm rounded-xl bg-neutral-900 p-4 shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-2 flex items-start justify-between">
               <div>
                 <h3 className="text-lg font-bold">
-                  {selected.name} {selected.number ? <span className="text-gray-400">#{selected.number}</span> : null}
+                  {selected.name} {selected.number ? <span className="text-neutral-600">#{selected.number}</span> : null}
                 </h3>
                 {selected.styleInspiration && (
-                  <p className="text-xs italic text-gray-400">Oyun stili esini: {selected.styleInspiration}</p>
+                  <p className="text-xs italic text-neutral-600">Oyun stili esini: {selected.styleInspiration}</p>
                 )}
               </div>
-              <button onClick={() => setSelected(null)} className="text-xs text-gray-400">Kapat</button>
+              <button onClick={() => setSelected(null)} className="text-xs text-neutral-600">Kapat</button>
             </div>
-            <div className="flex flex-col gap-1 text-sm text-gray-700">
+            <div className="flex flex-col gap-1 text-sm text-neutral-300">
               <p>Mevki: <span className="font-semibold">
                 {selected.position === 'GK' || selected.position === 'DEF' || selected.position === 'MID' || selected.position === 'FWD'
                   ? ROW_LABEL[selected.position]
@@ -177,7 +177,7 @@ export default function SquadPitch({
                 <p>Piyasa Değeri: <span className="font-semibold">{selected.marketValue} STA</span></p>
               )}
             </div>
-            <Link href={`/players/${selected.id}`} className="mt-3 block text-center text-xs font-semibold text-green-700">
+            <Link href={`/players/${selected.id}`} className="mt-3 block text-center text-xs font-semibold text-green-400">
               Tam Profili Gör ›
             </Link>
           </div>

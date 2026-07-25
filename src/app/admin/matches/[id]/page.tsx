@@ -48,7 +48,7 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
   return (
     <div>
       <h1 className="mb-4 text-xl font-bold">{match.homeTeam.name} vs {match.awayTeam.name}</h1>
-      <p className="mb-4 text-sm text-gray-500">Durum: {match.status}</p>
+      <p className="mb-4 text-sm text-neutral-500">Durum: {match.status}</p>
 
       {match.status === 'finished' && (
         <div className="text-sm">
@@ -61,7 +61,7 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
       )}
 
       {match.status === 'cancelled' && (
-        <p className="text-sm text-gray-500">Bu maç iptal edildi, bekleyen kuponlar iade edildi.</p>
+        <p className="text-sm text-neutral-500">Bu maç iptal edildi, bekleyen kuponlar iade edildi.</p>
       )}
 
       {match.status !== 'finished' && match.status !== 'cancelled' && (
@@ -130,13 +130,13 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
               <label className="mb-2 flex items-center gap-2 text-sm">
                 <input type="checkbox" name="matchAbandoned" /> Maç yarıda mı kaldı?
               </label>
-              <p className="mb-1 mt-3 text-xs font-semibold text-gray-500">Kavgaya karışanlar</p>
+              <p className="mb-1 mt-3 text-xs font-semibold text-neutral-500">Kavgaya karışanlar</p>
               {allPlayers.map((p) => (
                 <label key={p.id} className="flex items-center gap-2 text-sm">
                   <input type="checkbox" name={`fight_${p.id}`} /> {p.name}
                 </label>
               ))}
-              <p className="mb-1 mt-3 text-xs font-semibold text-gray-500">Sahaya geç kalanlar</p>
+              <p className="mb-1 mt-3 text-xs font-semibold text-neutral-500">Sahaya geç kalanlar</p>
               {allPlayers.map((p) => (
                 <label key={p.id} className="flex items-center gap-2 text-sm">
                   <input type="checkbox" name={`late_${p.id}`} /> {p.name}
@@ -150,7 +150,7 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
           </form>
 
           {locked ? (
-            <p className="mb-6 rounded border border-gray-200 bg-gray-50 p-3 text-sm text-gray-500">
+            <p className="mb-6 rounded border border-neutral-800 bg-neutral-800 p-3 text-sm text-neutral-500">
               Maç saati geçti, oranlar kilitlendi — sadece sonuçlandırma yapılabilir.
             </p>
           ) : (
@@ -172,11 +172,11 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
               >
                 {[...oddsByMarket.entries()].map(([market, rows]) => (
                   <div key={market}>
-                    <p className="mb-1 text-xs font-semibold text-gray-500">{marketLabel[market] ?? market}</p>
+                    <p className="mb-1 text-xs font-semibold text-neutral-500">{marketLabel[market] ?? market}</p>
                     <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
                       {rows.map((o) => (
                         <div key={o.id} className="flex items-center justify-between gap-2">
-                          <span className="truncate text-xs text-gray-600">
+                          <span className="truncate text-xs text-neutral-400">
                             {describeOddsSelection(o.market, o.selectionKey)}
                           </span>
                           <input
@@ -192,7 +192,7 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
                     </div>
                   </div>
                 ))}
-                <button className="rounded bg-gray-700 px-4 py-2 text-sm font-semibold text-white">
+                <button className="rounded bg-neutral-700 px-4 py-2 text-sm font-semibold text-white">
                   Oranları Kaydet
                 </button>
               </form>
@@ -206,7 +206,7 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
               if (!('error' in result)) redirect('/admin');
             }}
           >
-            <button className="w-full rounded border border-red-300 px-4 py-2 text-sm font-semibold text-red-600">
+            <button className="w-full rounded border border-red-300 px-4 py-2 text-sm font-semibold text-red-400">
               Maçı İptal Et (oynanmadı, bekleyen kuponları iade eder)
             </button>
           </form>

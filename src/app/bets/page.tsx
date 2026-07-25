@@ -8,7 +8,7 @@ export default async function MyBetsPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.name) {
     return (
-      <main className="mx-auto max-w-lg px-4 py-10 text-center text-sm text-gray-500">
+      <main className="mx-auto max-w-lg px-4 py-10 text-center text-sm text-neutral-500">
         Kuponlarını görmek için giriş yapmalısın.
       </main>
     );
@@ -36,7 +36,7 @@ export default async function MyBetsPage() {
             <Link
               key={bet.id}
               href={`/bets/${bet.id}`}
-              className="flex items-center justify-between rounded-xl bg-white p-4 shadow-sm transition-shadow active:shadow-none"
+              className="flex items-center justify-between rounded-xl bg-neutral-900 p-4 shadow-sm transition-shadow active:shadow-none"
             >
               <div>
                 <div className="mb-1 flex items-center gap-2">
@@ -47,16 +47,16 @@ export default async function MyBetsPage() {
                     {status.text}
                   </span>
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-neutral-500">
                   {bet.selections.length} seçim · {bet.stake} STA · Oran {bet.totalOdds.toFixed(2)}
                 </p>
               </div>
-              <span className="shrink-0 text-gray-300">›</span>
+              <span className="shrink-0 text-neutral-700">›</span>
             </Link>
           );
         })}
         {bets.length === 0 && (
-          <p className="rounded-xl bg-white p-4 text-center text-sm text-gray-400 shadow-sm">
+          <p className="rounded-xl bg-neutral-900 p-4 text-center text-sm text-neutral-600 shadow-sm">
             Henüz kupon yapmadın.
           </p>
         )}

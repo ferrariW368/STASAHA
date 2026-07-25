@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  colorScheme: 'light',
+  colorScheme: 'dark',
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -24,7 +24,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="tr">
-      <body className="bg-gray-100 text-gray-900">
+      <body className="bg-neutral-950 text-neutral-100">
         <header className="sticky top-0 z-20 bg-neutral-900 px-4 py-3">
           <div className="mx-auto flex max-w-lg items-center justify-between gap-2">
             <Link href="/" className="shrink-0 font-bold text-amber-400">🎰 FERRARI BET</Link>

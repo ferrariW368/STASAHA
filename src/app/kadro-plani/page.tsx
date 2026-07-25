@@ -81,19 +81,19 @@ export default function LineupBuilderPage() {
   return (
     <main className="mx-auto max-w-lg px-4 py-6">
       <h1 className="mb-1 text-2xl font-bold">⚽ Kadro Planla</h1>
-      <p className="mb-4 text-xs text-gray-500">
+      <p className="mb-4 text-xs text-neutral-500">
         Hayalindeki kadroyu kur, admin onaylarsa yeni maç kurulurken hazır bekler.
       </p>
 
       {!format ? (
-        <div className="rounded-xl bg-white p-4 shadow-sm">
-          <h2 className="mb-3 text-sm font-semibold text-gray-600">Kaça kaça oynanacak?</h2>
+        <div className="rounded-xl bg-neutral-900 p-4 shadow-sm">
+          <h2 className="mb-3 text-sm font-semibold text-neutral-400">Kaça kaça oynanacak?</h2>
           <div className="grid grid-cols-4 gap-2">
             {VALID_FORMATS.map((f) => (
               <button
                 key={f}
                 onClick={() => chooseFormat(f)}
-                className="rounded-xl border-2 border-green-600 py-4 text-lg font-black text-green-700 active:bg-green-50"
+                className="rounded-xl border-2 border-green-600 py-4 text-lg font-black text-green-400 active:bg-green-500/10"
               >
                 {f}v{f}
               </button>
@@ -106,12 +106,12 @@ export default function LineupBuilderPage() {
             value={squadName}
             onChange={(e) => setSquadName(e.target.value)}
             placeholder="Takımına bir isim ver"
-            className="mb-3 w-full rounded-xl border-2 border-gray-200 px-3 py-2 text-sm font-semibold"
+            className="mb-3 w-full rounded-xl border-2 border-neutral-800 px-3 py-2 text-sm font-semibold"
           />
 
           <button
             onClick={() => setShowInspiration((v) => !v)}
-            className={`mb-3 w-full rounded-xl border-2 py-2 text-xs font-bold ${showInspiration ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-gray-200 text-gray-500'}`}
+            className={`mb-3 w-full rounded-xl border-2 py-2 text-xs font-bold ${showInspiration ? 'border-amber-500 bg-amber-400/10 text-amber-400' : 'border-neutral-800 text-neutral-500'}`}
           >
             {showInspiration ? '⭐ İlham Alınan Futbolcular Gösteriliyor' : 'İlham Alınan Futbolcuları Göster'}
           </button>
@@ -134,7 +134,7 @@ export default function LineupBuilderPage() {
                         {player ? (
                           <>
                             <span className="text-xs font-bold text-green-800 truncate w-full">{displayName(player)}</span>
-                            <span className="text-[9px] text-green-600">{player.number ? `#${player.number}` : ''}</span>
+                            <span className="text-[9px] text-green-400">{player.number ? `#${player.number}` : ''}</span>
                           </>
                         ) : (
                           <>
@@ -151,12 +151,12 @@ export default function LineupBuilderPage() {
           </div>
 
           {pickerSlot && (
-            <div className="mb-4 rounded-xl bg-white p-3 shadow-sm">
+            <div className="mb-4 rounded-xl bg-neutral-900 p-3 shadow-sm">
               <div className="mb-2 flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-gray-600">
+                <h2 className="text-sm font-semibold text-neutral-400">
                   {positionLabel[pickerSlot.position]} seç
                 </h2>
-                <button onClick={() => setPickerSlot(null)} className="text-xs text-gray-400">Kapat</button>
+                <button onClick={() => setPickerSlot(null)} className="text-xs text-neutral-600">Kapat</button>
               </div>
               <div className="flex max-h-64 flex-col gap-1 overflow-y-auto">
                 {players
@@ -170,19 +170,19 @@ export default function LineupBuilderPage() {
                     <button
                       key={p.id}
                       onClick={() => assignPlayer(pickerSlot.position, pickerSlot.slotOrder, p.id)}
-                      className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-left text-sm active:bg-gray-100"
+                      className="flex items-center justify-between rounded-lg bg-neutral-800 px-3 py-2 text-left text-sm active:bg-neutral-950"
                     >
                       <span>
                         {displayName(p)} {p.number ? `#${p.number}` : ''}
                         {p.position && p.position !== pickerSlot.position && (
-                          <span className="ml-1 text-[10px] text-amber-600">({positionLabel[p.position as Position]})</span>
+                          <span className="ml-1 text-[10px] text-amber-400">({positionLabel[p.position as Position]})</span>
                         )}
                       </span>
-                      <span className="text-xs text-gray-400">{p.teamName ?? 'Serbest'}</span>
+                      <span className="text-xs text-neutral-600">{p.teamName ?? 'Serbest'}</span>
                     </button>
                   ))}
                 {players.filter((p) => !usedPlayerIds.has(p.id)).length === 0 && (
-                  <p className="px-3 py-2 text-xs text-gray-400">Uygun oyuncu kalmadı.</p>
+                  <p className="px-3 py-2 text-xs text-neutral-600">Uygun oyuncu kalmadı.</p>
                 )}
               </div>
             </div>
@@ -194,7 +194,7 @@ export default function LineupBuilderPage() {
                 setFormat(null);
                 setSlots([]);
               }}
-              className="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-600"
+              className="rounded-xl border border-neutral-700 px-4 py-2 text-sm font-semibold text-neutral-400"
             >
               Vazgeç
             </button>
@@ -210,7 +210,7 @@ export default function LineupBuilderPage() {
       )}
 
       {message && (
-        <p className="mt-4 rounded-xl bg-white p-3 text-center text-sm shadow-sm">{message}</p>
+        <p className="mt-4 rounded-xl bg-neutral-900 p-3 text-center text-sm shadow-sm">{message}</p>
       )}
     </main>
   );

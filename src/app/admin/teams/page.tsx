@@ -13,7 +13,7 @@ export default async function AdminTeamsPage({
   return (
     <div>
       <h1 className="mb-4 text-xl font-bold">Takımlar & Kadro</h1>
-      {err && <p className="mb-4 rounded bg-red-50 p-2 text-sm text-red-600">{err}</p>}
+      {err && <p className="mb-4 rounded bg-red-500/10 p-2 text-sm text-red-400">{err}</p>}
 
       <form
         action={async (formData) => {
@@ -42,7 +42,7 @@ export default async function AdminTeamsPage({
                   defaultValue={team.name}
                   className="flex-1 rounded border px-2 py-1 font-semibold"
                 />
-                <button className="rounded bg-gray-700 px-3 py-1 text-sm text-white">Kaydet</button>
+                <button className="rounded bg-neutral-700 px-3 py-1 text-sm text-white">Kaydet</button>
               </form>
               <form
                 action={async () => {
@@ -53,7 +53,7 @@ export default async function AdminTeamsPage({
                   }
                 }}
               >
-                <button className="rounded border border-red-300 px-3 py-1 text-sm text-red-600">Takımı Sil</button>
+                <button className="rounded border border-red-300 px-3 py-1 text-sm text-red-400">Takımı Sil</button>
               </form>
             </div>
             <ul className="mb-3 flex flex-col gap-1">
@@ -66,7 +66,7 @@ export default async function AdminTeamsPage({
                       await removePlayer(p.id);
                     }}
                   >
-                    <button className="text-red-600">Sil</button>
+                    <button className="text-red-400">Sil</button>
                   </form>
                 </li>
               ))}
@@ -85,7 +85,7 @@ export default async function AdminTeamsPage({
             >
               <input name="playerName" placeholder="Oyuncu adı" className="flex-1 rounded border px-2 py-1 text-sm" />
               <input name="number" placeholder="No" className="w-16 rounded border px-2 py-1 text-sm" />
-              <button className="rounded bg-gray-700 px-3 py-1 text-sm text-white">Ekle</button>
+              <button className="rounded bg-neutral-700 px-3 py-1 text-sm text-white">Ekle</button>
             </form>
           </div>
         ))}
