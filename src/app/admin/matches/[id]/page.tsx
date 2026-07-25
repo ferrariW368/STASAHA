@@ -9,6 +9,7 @@ const marketLabel: Record<string, string> = {
   '1X2': 'Maç Sonucu',
   SCORE: 'Skor',
   OU_GOALS: 'Toplam Gol',
+  HT_OU_GOALS: 'İlk Yarı Toplam Gol',
   BTS: 'KG Var/Yok',
   NOVELTY: 'Eğlenceli Bahisler',
   PLAYER_GOALS: 'Oyuncu Golü',
@@ -53,6 +54,7 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
       {match.status === 'finished' && (
         <div className="text-sm">
           <p>Sonuç: {match.finalHomeScore} - {match.finalAwayScore}</p>
+          <p>İlk yarı: {match.htHomeScore} - {match.htAwayScore}</p>
           <p>Kırmızı kart: {match.redCard ? 'Evet' : 'Hayır'}</p>
           <p>Sahaya giriş: {match.pitchInvasion ? 'Evet' : 'Hayır'}</p>
           <p>Hakem tartışması: {match.refereeArgument ? 'Evet' : 'Hayır'}</p>
@@ -71,6 +73,8 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
               'use server';
               const homeScore = parseInt(formData.get('homeScore') as string, 10);
               const awayScore = parseInt(formData.get('awayScore') as string, 10);
+              const htHomeScore = parseInt(formData.get('htHomeScore') as string, 10);
+              const htAwayScore = parseInt(formData.get('htAwayScore') as string, 10);
               const playerGoals = allPlayers.map((p) => ({
                 playerId: p.id,
                 goalCount: parseInt((formData.get(`goals_${p.id}`) as string) || '0', 10),
@@ -85,17 +89,23 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
               const latePlayerIds = allPlayers
                 .filter((p) => formData.get(`late_${p.id}`) === 'on')
                 .map((p) => p.id);
+              const yellowCardPlayerIds = allPlayers
+                .filter((p) => formData.get(`yellow_${p.id}`) === 'on')
+                .map((p) => p.id);
               const result = await settleMatch(
                 match.id,
                 homeScore,
                 awayScore,
+                htHomeScore,
+                htAwayScore,
                 playerGoals,
                 redCard,
                 pitchInvasion,
                 refereeArgument,
                 matchAbandoned,
                 fightPlayerIds,
-                latePlayerIds
+                latePlayerIds,
+                yellowCardPlayerIds
               );
               if (!('error' in result)) redirect('/admin');
             }}
@@ -104,6 +114,10 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
             <div className="flex gap-2">
               <input name="homeScore" type="number" min={0} placeholder="Ev sahibi skor" className="w-1/2 rounded border px-3 py-2" required />
               <input name="awayScore" type="number" min={0} placeholder="Deplasman skor" className="w-1/2 rounded border px-3 py-2" required />
+            </div>
+            <div className="flex gap-2">
+              <input name="htHomeScore" type="number" min={0} placeholder="İlk yarı ev sahibi skor" className="w-1/2 rounded border px-3 py-2" required />
+              <input name="htAwayScore" type="number" min={0} placeholder="İlk yarı deplasman skor" className="w-1/2 rounded border px-3 py-2" required />
             </div>
 
             <div>
@@ -140,6 +154,12 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
               {allPlayers.map((p) => (
                 <label key={p.id} className="flex items-center gap-2 text-sm">
                   <input type="checkbox" name={`late_${p.id}`} /> {p.name}
+                </label>
+              ))}
+              <p className="mb-1 mt-3 text-xs font-semibold text-neutral-500">🟨 Sarı kart görenler</p>
+              {allPlayers.map((p) => (
+                <label key={p.id} className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" name={`yellow_${p.id}`} /> {p.name}
                 </label>
               ))}
             </div>

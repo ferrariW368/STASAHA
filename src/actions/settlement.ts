@@ -10,13 +10,16 @@ export async function settleMatch(
   matchId: string,
   homeScore: number,
   awayScore: number,
+  htHomeScore: number,
+  htAwayScore: number,
   playerGoals: { playerId: string; goalCount: number }[],
   redCard: boolean,
   pitchInvasion: boolean,
   refereeArgument: boolean,
   matchAbandoned: boolean,
   fightPlayerIds: string[],
-  latePlayerIds: string[]
+  latePlayerIds: string[],
+  yellowCardPlayerIds: string[]
 ) {
   const authError = await requireAdmin();
   if (authError) return authError;
@@ -32,11 +35,14 @@ export async function settleMatch(
   const allPlayerIds = playerGoals.map((pg) => pg.playerId);
   const fightSet = new Set(fightPlayerIds);
   const lateSet = new Set(latePlayerIds);
+  const yellowSet = new Set(yellowCardPlayerIds);
   const fights: Record<string, boolean> = {};
   const lateArrivals: Record<string, boolean> = {};
+  const yellowCards: Record<string, boolean> = {};
   for (const playerId of allPlayerIds) {
     fights[playerId] = fightSet.has(playerId);
     lateArrivals[playerId] = lateSet.has(playerId);
+    yellowCards[playerId] = yellowSet.has(playerId);
   }
 
   const bets = await prisma.bet.findMany({ where: { matchId }, include: { selections: true } });
@@ -48,6 +54,8 @@ export async function settleMatch(
         status: 'finished',
         finalHomeScore: homeScore,
         finalAwayScore: awayScore,
+        htHomeScore,
+        htAwayScore,
         redCard,
         pitchInvasion,
         refereeArgument,
@@ -72,6 +80,11 @@ export async function settleMatch(
         update: { happened: lateArrivals[playerId] },
         create: { matchId, playerId, eventType: 'LATE', happened: lateArrivals[playerId] },
       }),
+      prisma.playerEvent.upsert({
+        where: { matchId_playerId_eventType: { matchId, playerId, eventType: 'YELLOW' } },
+        update: { happened: yellowCards[playerId] },
+        create: { matchId, playerId, eventType: 'YELLOW', happened: yellowCards[playerId] },
+      }),
     ]),
     ...bets.flatMap((bet) => {
       const outcome = evaluateBet(
@@ -79,6 +92,8 @@ export async function settleMatch(
         {
           homeScore,
           awayScore,
+          htHomeScore,
+          htAwayScore,
           playerGoals: playerGoalMap,
           redCard,
           pitchInvasion,

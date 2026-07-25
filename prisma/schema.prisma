@@ -66,6 +66,8 @@ model Match {
   status         String   @default("upcoming") // "upcoming" | "locked" | "finished" | "cancelled"
   finalHomeScore Int?
   finalAwayScore Int?
+  htHomeScore    Int?
+  htAwayScore    Int?
   redCard        Boolean?
   pitchInvasion  Boolean?
   refereeArgument Boolean?

@@ -15,7 +15,8 @@ export default async function NewMatchPage() {
           const awayTeamId = formData.get('awayTeamId') as string;
           const kickoff = formData.get('kickoffTime') as string;
           const ouLine = parseFloat(formData.get('ouLine') as string);
-          const result = await createMatch(homeTeamId, awayTeamId, new Date(kickoff), ouLine);
+          const htOuLine = parseFloat(formData.get('htOuLine') as string);
+          const result = await createMatch(homeTeamId, awayTeamId, new Date(kickoff), ouLine, htOuLine);
           if (!('error' in result)) redirect('/admin');
         }}
         className="flex flex-col gap-4"
@@ -47,6 +48,18 @@ export default async function NewMatchPage() {
           <p className="mt-1 text-xs text-neutral-600">
             Buçuklu bir sayı kullan (örn. 9.5) — tam sayıda beraberlik ihtimali oluşur.
           </p>
+        </div>
+        <div>
+          <label className="mb-1 block text-sm text-neutral-400">İlk Yarı Toplam Gol Alt/Üst Çizgisi</label>
+          <input
+            type="number"
+            name="htOuLine"
+            step="0.5"
+            min="0.5"
+            defaultValue={4.5}
+            className="w-full rounded border px-3 py-2"
+            required
+          />
         </div>
         <button className="rounded bg-green-600 px-4 py-2 font-semibold text-white">Maçı Oluştur</button>
       </form>

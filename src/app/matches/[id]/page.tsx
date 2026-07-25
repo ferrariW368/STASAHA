@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { placeBet } from '@/actions/bets';
 import AdBanner from '@/components/AdBanner';
 import SquadPitch, { type PitchPlayer } from './SquadPitch';
+import MatchStats from './MatchStats';
 import { MAX_GOALS_PER_SIDE } from '@/lib/odds';
 import F1Car from '@/components/F1Car';
 
@@ -12,6 +13,9 @@ type Odds = { market: string; selectionKey: string; oddsValue: number };
 type PlayerData = PitchPlayer;
 type MatchData = {
   id: string;
+  status: string;
+  finalHomeScore: number | null;
+  finalAwayScore: number | null;
   homeTeam: { name: string; players: PlayerData[] };
   awayTeam: { name: string; players: PlayerData[] };
   kickoffTime: string;
@@ -37,7 +41,7 @@ function OddsButton({
   return (
     <button
       onClick={onClick}
-      className={`flex flex-1 flex-col items-center rounded-lg border py-2 text-sm transition-colors ${
+      className={`pop-interactive flex flex-1 flex-col items-center rounded-lg border py-2 text-sm transition-colors ${
         active
           ? 'border-green-600 bg-green-600 text-white'
           : 'border-neutral-700 bg-neutral-900 text-neutral-200 active:bg-neutral-950'
@@ -127,6 +131,7 @@ export default function MatchDetailPage() {
 
   const oneXTwo = match.odds.filter((o) => o.market === '1X2');
   const ouGoals = match.odds.filter((o) => o.market === 'OU_GOALS');
+  const htOuGoals = match.odds.filter((o) => o.market === 'HT_OU_GOALS');
   const oneXTwoLabels: Record<string, string> = { '1': match.homeTeam.name, X: 'Berabere', '2': match.awayTeam.name };
 
   return (
@@ -141,11 +146,23 @@ export default function MatchDetailPage() {
       </div>
 
       <SquadPitch
+        matchId={match.id}
+        matchStatus={match.status}
         homeTeamName={match.homeTeam.name}
         awayTeamName={match.awayTeam.name}
         homePlayers={match.homeTeam.players}
         awayPlayers={match.awayTeam.players}
       />
+
+      {match.status === 'finished' && (
+        <MatchStats
+          homeTeamName={match.homeTeam.name}
+          awayTeamName={match.awayTeam.name}
+          homeScore={match.finalHomeScore ?? 0}
+          awayScore={match.finalAwayScore ?? 0}
+          matchId={match.id}
+        />
+      )}
 
       <section className="mb-5">
         <h2 className="mb-2 text-sm font-semibold text-neutral-400">Maç Sonucu</h2>
@@ -174,6 +191,22 @@ export default function MatchDetailPage() {
           ))}
         </div>
       </section>
+
+      {htOuGoals.length > 0 && (
+      <section className="mb-5">
+        <h2 className="mb-2 text-sm font-semibold text-neutral-400">İlk Yarı Toplam Gol</h2>
+        <div className="flex gap-2">
+          {htOuGoals.map((o) => (
+            <OddsButton
+              key={o.selectionKey}
+              odds={o}
+              label={o.selectionKey.startsWith('OVER') ? `${o.selectionKey.split('_')[1]} Üst` : `${o.selectionKey.split('_')[1]} Alt`}
+              {...oddsButtonProps(o)}
+            />
+          ))}
+        </div>
+      </section>
+      )}
 
       <AdBanner />
 
@@ -364,7 +397,7 @@ export default function MatchDetailPage() {
             <button
               onClick={submit}
               disabled={submitting || selected.length === 0 || stake <= 0}
-              className="flex-1 rounded-lg bg-green-600 py-2 text-sm font-semibold text-white disabled:opacity-40"
+              className="pop-interactive flex-1 rounded-lg bg-green-600 py-2 text-sm font-semibold text-white disabled:opacity-40"
             >
               {submitting ? 'Gönderiliyor...' : `Kuponu Onayla${potentialWin ? ` · Kazanç ${potentialWin} STA` : ''}`}
             </button>

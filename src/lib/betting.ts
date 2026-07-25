@@ -1,6 +1,8 @@
 export type MatchResult = {
   homeScore: number;
   awayScore: number;
+  htHomeScore?: number;
+  htAwayScore?: number;
   playerGoals: Record<string, number>; // playerId -> goal count
   redCard?: boolean;
   pitchInvasion?: boolean;
@@ -11,7 +13,7 @@ export type MatchResult = {
 };
 
 export type Selection = {
-  market: '1X2' | 'SCORE' | 'OU_GOALS' | 'PLAYER_GOALS' | 'BTS' | 'NOVELTY' | 'FIGHT' | 'LATE';
+  market: '1X2' | 'SCORE' | 'OU_GOALS' | 'HT_OU_GOALS' | 'PLAYER_GOALS' | 'BTS' | 'NOVELTY' | 'FIGHT' | 'LATE';
   selectionKey: string;
 };
 
@@ -42,6 +44,13 @@ export function isSelectionCorrect(selection: Selection, result: MatchResult): b
     const [side, lineStr] = selectionKey.split('_');
     const line = parseFloat(lineStr);
     const total = homeScore + awayScore;
+    return side === 'OVER' ? total > line : total < line;
+  }
+
+  if (market === 'HT_OU_GOALS') {
+    const [side, lineStr] = selectionKey.split('_');
+    const line = parseFloat(lineStr);
+    const total = (result.htHomeScore ?? 0) + (result.htAwayScore ?? 0);
     return side === 'OVER' ? total > line : total < line;
   }
 

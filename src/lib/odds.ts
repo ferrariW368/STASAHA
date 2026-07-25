@@ -1,5 +1,5 @@
 export type OddsRow = {
-  market: '1X2' | 'SCORE' | 'OU_GOALS' | 'PLAYER_GOALS' | 'BTS' | 'NOVELTY' | 'FIGHT' | 'LATE';
+  market: '1X2' | 'SCORE' | 'OU_GOALS' | 'HT_OU_GOALS' | 'PLAYER_GOALS' | 'BTS' | 'NOVELTY' | 'FIGHT' | 'LATE';
   selectionKey: string;
   oddsValue: number;
 };
@@ -8,6 +8,8 @@ const HOUSE_MARGIN = 1.07; // ~7% overround
 export const MAX_GOALS_PER_SIDE = 10; // SCORE grid computed for 0..10 goals per side - hali saha blowouts (12-0, 14-2) easily hit double digits on one side
 const OU_MAX_GOALS_PER_SIDE = 20; // wider bound so the OU sum stays accurate at any admin-chosen line
 const DEFAULT_OU_LINE = 9.5; // hali saha matches run high-scoring, so a 4.5 line was nearly always "over"
+const DEFAULT_HT_OU_LINE = 4.5; // first-half line, roughly half the full-match line
+const MAX_SCORE_ODDS = 40; // correct-score grid odds are capped here - an uncapped 0-0 on this high-scoring lambda would show 5-digit "odds" that just look broken, not long-shot
 
 function factorial(n: number): number {
   let result = 1;
@@ -63,7 +65,8 @@ function computeScores(): OddsRow[] {
   for (let h = 0; h <= MAX_GOALS_PER_SIDE; h++) {
     for (let a = 0; a <= MAX_GOALS_PER_SIDE; a++) {
       const p = poissonPmf(GOALS_HOME_LAMBDA, h) * poissonPmf(GOALS_AWAY_LAMBDA, a);
-      rows.push({ market: 'SCORE', selectionKey: `${h}-${a}`, oddsValue: oddsFromProbability(p) });
+      const oddsValue = Math.min(oddsFromProbability(p), MAX_SCORE_ODDS);
+      rows.push({ market: 'SCORE', selectionKey: `${h}-${a}`, oddsValue });
     }
   }
   return rows;
@@ -80,6 +83,25 @@ function computeOverUnder(ouLine: number): OddsRow[] {
   return [
     { market: 'OU_GOALS', selectionKey: `OVER_${ouLine}`, oddsValue: oddsFromProbability(pOver) },
     { market: 'OU_GOALS', selectionKey: `UNDER_${ouLine}`, oddsValue: oddsFromProbability(pUnder) },
+  ];
+}
+
+// First-half total goals - modeled as half the full-match lambda, on the
+// simplifying assumption that goals split roughly evenly across the two
+// halves.
+function computeHalfTimeOverUnder(htOuLine: number): OddsRow[] {
+  const htHomeLambda = GOALS_HOME_LAMBDA / 2;
+  const htAwayLambda = GOALS_AWAY_LAMBDA / 2;
+  let pUnder = 0;
+  for (let h = 0; h <= OU_MAX_GOALS_PER_SIDE; h++) {
+    for (let a = 0; a <= OU_MAX_GOALS_PER_SIDE; a++) {
+      if (h + a < htOuLine) pUnder += poissonPmf(htHomeLambda, h) * poissonPmf(htAwayLambda, a);
+    }
+  }
+  const pOver = 1 - pUnder;
+  return [
+    { market: 'HT_OU_GOALS', selectionKey: `OVER_${htOuLine}`, oddsValue: oddsFromProbability(pOver) },
+    { market: 'HT_OU_GOALS', selectionKey: `UNDER_${htOuLine}`, oddsValue: oddsFromProbability(pUnder) },
   ];
 }
 
@@ -154,12 +176,14 @@ function computePlayerGoals(homePlayerIds: string[], awayPlayerIds: string[]): O
 export function computeMatchOdds(
   homePlayerIds: string[],
   awayPlayerIds: string[],
-  ouLine: number = DEFAULT_OU_LINE
+  ouLine: number = DEFAULT_OU_LINE,
+  htOuLine: number = DEFAULT_HT_OU_LINE
 ): OddsRow[] {
   return [
     ...compute1X2(),
     ...computeScores(),
     ...computeOverUnder(ouLine),
+    ...computeHalfTimeOverUnder(htOuLine),
     ...computeBothTeamsScore(),
     ...computeNoveltyMarkets(),
     ...computePlayerNoveltyMarkets(homePlayerIds, awayPlayerIds),

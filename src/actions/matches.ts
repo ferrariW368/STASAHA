@@ -9,7 +9,8 @@ export async function createMatch(
   homeTeamId: string,
   awayTeamId: string,
   kickoffTime: Date,
-  ouLine: number
+  ouLine: number,
+  htOuLine: number
 ) {
   const authError = await requireAdmin();
   if (authError) return authError;
@@ -18,6 +19,9 @@ export async function createMatch(
   }
   if (!Number.isFinite(ouLine) || ouLine <= 0) {
     return { error: 'Geçerli bir toplam gol çizgisi gir (örn. 9.5).' };
+  }
+  if (!Number.isFinite(htOuLine) || htOuLine <= 0) {
+    return { error: 'Geçerli bir ilk yarı gol çizgisi gir (örn. 4.5).' };
   }
 
   const [homePlayers, awayPlayers] = await Promise.all([
@@ -32,7 +36,8 @@ export async function createMatch(
   const oddsRows = computeMatchOdds(
     homePlayers.map((p) => p.id),
     awayPlayers.map((p) => p.id),
-    ouLine
+    ouLine,
+    htOuLine
   );
 
   await prisma.odds.createMany({
