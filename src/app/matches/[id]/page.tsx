@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { placeBet } from '@/actions/bets';
 import AdBanner from '@/components/AdBanner';
 import SquadPitch, { type PitchPlayer } from './SquadPitch';
+import { MAX_GOALS_PER_SIDE } from '@/lib/odds';
 
 type Odds = { market: string; selectionKey: string; oddsValue: number };
 type PlayerData = PitchPlayer;
@@ -65,9 +66,9 @@ export default function MatchDetailPage() {
   const scoreGrid = useMemo(() => {
     if (!match) return [];
     const rows: { home: number; cells: (Odds | undefined)[] }[] = [];
-    for (let h = 0; h <= 5; h++) {
+    for (let h = 0; h <= MAX_GOALS_PER_SIDE; h++) {
       const cells: (Odds | undefined)[] = [];
-      for (let a = 0; a <= 5; a++) {
+      for (let a = 0; a <= MAX_GOALS_PER_SIDE; a++) {
         cells.push(findOdds(match.odds, 'SCORE', `${h}-${a}`));
       }
       rows.push({ home: h, cells });
@@ -181,7 +182,7 @@ export default function MatchDetailPage() {
             <thead>
               <tr>
                 <th className="border-b border-r border-gray-200 bg-gray-50 p-1 text-[10px] text-gray-400">Ev \ Dep</th>
-                {[0, 1, 2, 3, 4, 5].map((a) => (
+                {Array.from({ length: MAX_GOALS_PER_SIDE + 1 }, (_, a) => a).map((a) => (
                   <th key={a} className="border-b border-gray-200 bg-gray-50 p-1 text-gray-500">{a}</th>
                 ))}
               </tr>

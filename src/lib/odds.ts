@@ -5,7 +5,7 @@ export type OddsRow = {
 };
 
 const HOUSE_MARGIN = 1.07; // ~7% overround
-const MAX_GOALS_PER_SIDE = 5; // SCORE grid computed for 0..5 goals per side
+export const MAX_GOALS_PER_SIDE = 10; // SCORE grid computed for 0..10 goals per side - hali saha blowouts (12-0, 14-2) easily hit double digits on one side
 const OU_MAX_GOALS_PER_SIDE = 20; // wider bound so the OU sum stays accurate at any admin-chosen line
 const DEFAULT_OU_LINE = 9.5; // hali saha matches run high-scoring, so a 4.5 line was nearly always "over"
 
@@ -24,24 +24,20 @@ function oddsFromProbability(p: number): number {
   return Math.round(raw * HOUSE_MARGIN * 100) / 100;
 }
 
-// Two lambda pairs model different things, deliberately decoupled:
-//
 // RESULT_* is calibrated to feel like a close World Cup final (~2.9 home,
 // ~3.4 draw, ~3.4 away) — used for the match-winner and both-teams-to-score
-// markets, where a realistic draw chance matters.
+// markets, where a realistic draw/no-show chance matters more than raw goal
+// count.
 //
-// SCORE_* is calibrated for the visible 0-5 score grid and per-player goal
-// bands, where the individual cells need to land on sane, non-extreme odds.
-//
-// GOALS_* is calibrated so the over/under 9.5 line sits near a 50/50 split,
-// reflecting that hali saha (5/7-a-side) matches run much higher-scoring
-// than a full-size match.
+// GOALS_* drives every other goal-count-based market (score grid, over/under,
+// both-teams-to-score, per-player goal bands) from one shared lambda pair, so
+// they stay statistically consistent with each other — hali saha (5/7-a-side)
+// matches run much higher-scoring than a full-size match, with blowouts
+// (12-0, 14-2) common, so a 0-0 or 1-1 correctly gets very long odds here.
 const RESULT_HOME_LAMBDA = 1.0;
 const RESULT_AWAY_LAMBDA = 0.9;
-const SCORE_HOME_LAMBDA = 2.9;
-const SCORE_AWAY_LAMBDA = 2.6;
-const GOALS_HOME_LAMBDA = 5.0;
-const GOALS_AWAY_LAMBDA = 4.6;
+const GOALS_HOME_LAMBDA = 5.5;
+const GOALS_AWAY_LAMBDA = 5.0;
 
 function compute1X2(): OddsRow[] {
   let pHome = 0;
@@ -66,7 +62,7 @@ function computeScores(): OddsRow[] {
   const rows: OddsRow[] = [];
   for (let h = 0; h <= MAX_GOALS_PER_SIDE; h++) {
     for (let a = 0; a <= MAX_GOALS_PER_SIDE; a++) {
-      const p = poissonPmf(SCORE_HOME_LAMBDA, h) * poissonPmf(SCORE_AWAY_LAMBDA, a);
+      const p = poissonPmf(GOALS_HOME_LAMBDA, h) * poissonPmf(GOALS_AWAY_LAMBDA, a);
       rows.push({ market: 'SCORE', selectionKey: `${h}-${a}`, oddsValue: oddsFromProbability(p) });
     }
   }
@@ -137,8 +133,8 @@ function computePlayerNoveltyMarkets(homePlayerIds: string[], awayPlayerIds: str
 function computePlayerGoals(homePlayerIds: string[], awayPlayerIds: string[]): OddsRow[] {
   const rows: OddsRow[] = [];
   const sides: [string[], number][] = [
-    [homePlayerIds, SCORE_HOME_LAMBDA],
-    [awayPlayerIds, SCORE_AWAY_LAMBDA],
+    [homePlayerIds, GOALS_HOME_LAMBDA],
+    [awayPlayerIds, GOALS_AWAY_LAMBDA],
   ];
   for (const [playerIds, teamLambda] of sides) {
     if (playerIds.length === 0) continue;
