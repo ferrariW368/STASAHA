@@ -93,7 +93,7 @@ export default function LineupBuilderPage() {
               <button
                 key={f}
                 onClick={() => chooseFormat(f)}
-                className="rounded-xl border-2 border-green-600 py-4 text-lg font-black text-green-400 active:bg-green-500/10"
+                className="pop-interactive rounded-xl border-2 border-green-600 py-4 text-lg font-black text-green-400 active:bg-green-500/10"
               >
                 {f}v{f}
               </button>

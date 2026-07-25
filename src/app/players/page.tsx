@@ -26,7 +26,7 @@ export default async function PlayersPage() {
             <Link
               key={p.id}
               href={`/players/${p.id}`}
-              className="flex items-center justify-between rounded-xl bg-neutral-900 p-3 shadow-sm transition-shadow active:shadow-none"
+              className="pop-interactive flex items-center justify-between rounded-xl bg-neutral-900 p-3 shadow-sm"
             >
               <div>
                 <div className="font-medium">

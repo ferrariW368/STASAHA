@@ -64,7 +64,7 @@ export default async function HomePage() {
               <li key={m.id}>
                 <Link
                   href={`/matches/${m.id}`}
-                  className="flex items-center justify-between rounded-xl bg-neutral-900 p-3 shadow-sm transition-shadow active:shadow-none"
+                  className="pop-interactive flex items-center justify-between rounded-xl bg-neutral-900 p-3 shadow-sm"
                 >
                   <div>
                     <div className="font-medium">{m.homeTeam.name} vs {m.awayTeam.name}</div>
@@ -103,7 +103,7 @@ export default async function HomePage() {
               <li key={m.id}>
                 <Link
                   href={`/matches/${m.id}`}
-                  className="block rounded-xl bg-neutral-900 p-3 shadow-sm transition-shadow active:shadow-none"
+                  className="pop-interactive block rounded-xl bg-neutral-900 p-3 shadow-sm"
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-medium">{m.homeTeam.name} vs {m.awayTeam.name}</span>

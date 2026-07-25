@@ -4,12 +4,13 @@ const items = [
   { emoji: '💰', text: 'JACKPOT: STA YAĞMURU' },
   { emoji: '🏆', text: 'RESMİ SPONSOR: EFSANE HALI SAHA' },
   { emoji: '🔥', text: 'ORANLAR ATEŞ GİBİ' },
+  { emoji: '🏈', text: 'SÜPER KUPA HEYECANI STA\'DA' },
 ];
 
 function SideBannerContent() {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-5 rounded-2xl border-4 border-double border-amber-300 bg-gradient-to-b from-red-900 via-neutral-900 to-red-900 px-3 py-8 text-center shadow-[0_0_35px_rgba(251,191,36,0.55)]">
-      <span className="animate-bounce text-4xl">🎰</span>
+      <span className="jackpot-pulse inline-block text-4xl">🎰</span>
       <span className="text-sm font-black leading-tight tracking-wide text-amber-300">FERRARI</span>
       <span className="text-sm font-black leading-tight tracking-wide text-amber-300">BET</span>
       <span className="text-[10px] font-bold text-neutral-400">✕</span>
@@ -32,7 +33,7 @@ function MobileBannerStrip() {
   return (
     <div className="mx-auto max-w-lg px-4 pt-3">
       <div className="flex items-center gap-3 overflow-x-auto rounded-xl border-2 border-double border-amber-300 bg-gradient-to-r from-red-900 via-neutral-900 to-red-900 px-3 py-2 shadow-[0_0_20px_rgba(251,191,36,0.45)]">
-        <span className="shrink-0 animate-bounce text-xl">🎰</span>
+        <span className="jackpot-pulse inline-block shrink-0 text-xl">🎰</span>
         <span className="shrink-0 text-xs font-black tracking-wide text-amber-300">
           FERRARI BET <span className="text-neutral-400">✕</span> <span className="text-white">STASAHA</span>
         </span>
