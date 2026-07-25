@@ -60,16 +60,32 @@ function compute1X2(): OddsRow[] {
   ];
 }
 
+// The raw Poisson probabilities for an 11x11 grid span several orders of
+// magnitude (the single most-likely cell is already only ~3% likely), so a
+// flat odds cap left almost every cell pinned at MAX_SCORE_ODDS. Instead,
+// rank every cell by probability and spread the ranks smoothly across
+// [MIN_SCORE_ODDS, MAX_SCORE_ODDS] - the ordering still comes straight from
+// the Poisson model (more likely score = lower odds), it just no longer
+// relies on the raw probability's magnitude, which is what let a handful of
+// cells crowd out the rest of the range.
+const MIN_SCORE_ODDS = 2.5;
+
 function computeScores(): OddsRow[] {
-  const rows: OddsRow[] = [];
+  const cells: { h: number; a: number; p: number }[] = [];
   for (let h = 0; h <= MAX_GOALS_PER_SIDE; h++) {
     for (let a = 0; a <= MAX_GOALS_PER_SIDE; a++) {
-      const p = poissonPmf(GOALS_HOME_LAMBDA, h) * poissonPmf(GOALS_AWAY_LAMBDA, a);
-      const oddsValue = Math.min(oddsFromProbability(p), MAX_SCORE_ODDS);
-      rows.push({ market: 'SCORE', selectionKey: `${h}-${a}`, oddsValue });
+      cells.push({ h, a, p: poissonPmf(GOALS_HOME_LAMBDA, h) * poissonPmf(GOALS_AWAY_LAMBDA, a) });
     }
   }
-  return rows;
+  cells.sort((x, y) => y.p - x.p); // most likely first
+
+  const n = cells.length;
+  return cells.map((c, rank) => {
+    const t = n > 1 ? rank / (n - 1) : 0; // 0 = most likely, 1 = least likely
+    const curved = Math.pow(t, 0.7); // keeps the likely cluster tighter near the low end
+    const oddsValue = Math.round((MIN_SCORE_ODDS + curved * (MAX_SCORE_ODDS - MIN_SCORE_ODDS)) * 100) / 100;
+    return { market: 'SCORE' as const, selectionKey: `${c.h}-${c.a}`, oddsValue };
+  });
 }
 
 function computeOverUnder(ouLine: number): OddsRow[] {
