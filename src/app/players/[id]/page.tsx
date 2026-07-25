@@ -44,6 +44,7 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
   const totalGoals = player.playerGoals.reduce((sum, g) => sum + g.goalCount, 0);
   const playedAppearances = player.appearances.filter((a) => a.match.status === 'finished');
   const teamsPlayedFor = [...new Set(player.appearances.map((a) => a.team.name))];
+  const gkStarts = playedAppearances.filter((a) => a.position === 'GK').length;
   const values = [player.pace, player.shooting, player.passing, player.dribbling, player.defending, player.physical].filter(
     (v): v is number => v !== null
   );
@@ -103,6 +104,9 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
         <h2 className="mb-2 text-sm font-semibold text-neutral-400">Hali Saha Karnesi</h2>
         <p className="text-sm">Maç sayısı: <span className="font-semibold">{playedAppearances.length}</span></p>
         <p className="text-sm">Toplam gol: <span className="font-semibold">{totalGoals}</span></p>
+        {gkStarts > 0 && player.position !== 'GK' && (
+          <p className="text-sm">🧤 Kaleci olarak başladığı maç: <span className="font-semibold">{gkStarts}</span></p>
+        )}
         {teamsPlayedFor.length > 0 && (
           <p className="mt-1 text-sm">
             Oynadığı takımlar: <span className="font-semibold">{teamsPlayedFor.join(', ')}</span>

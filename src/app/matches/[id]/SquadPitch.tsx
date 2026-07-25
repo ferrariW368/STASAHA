@@ -19,16 +19,24 @@ export type PitchPlayer = {
   marketValue: number | null;
   playerGoals: { matchId: string; goalCount: number }[];
   playerEvents: { matchId: string; happened: boolean }[];
+  appearances: { matchId: string; position: string | null }[];
 };
 
 type Row = 'GK' | 'DEF' | 'MID' | 'FWD' | 'OTHER';
 const ROW_LABEL: Record<Row, string> = { GK: 'Kaleci', DEF: 'Defans', MID: 'Orta Saha', FWD: 'Forvet', OTHER: 'Diğer' };
 const ORDER_FROM_EDGE: Row[] = ['OTHER', 'GK', 'DEF', 'MID', 'FWD'];
 
-function groupByPosition(players: PitchPlayer[]): Record<Row, PitchPlayer[]> {
+// This match's actual starting position, when known (an outfield player can
+// cover GK for one match without that becoming their permanent position).
+function matchPosition(p: PitchPlayer, matchId: string): string | null {
+  return p.appearances.find((a) => a.matchId === matchId)?.position ?? p.position;
+}
+
+function groupByPosition(players: PitchPlayer[], matchId: string): Record<Row, PitchPlayer[]> {
   const groups: Record<Row, PitchPlayer[]> = { GK: [], DEF: [], MID: [], FWD: [], OTHER: [] };
   for (const p of players) {
-    const row: Row = p.position === 'GK' || p.position === 'DEF' || p.position === 'MID' || p.position === 'FWD' ? p.position : 'OTHER';
+    const pos = matchPosition(p, matchId);
+    const row: Row = pos === 'GK' || pos === 'DEF' || pos === 'MID' || pos === 'FWD' ? pos : 'OTHER';
     groups[row].push(p);
   }
   return groups;
@@ -98,7 +106,7 @@ function TeamHalf({
   showMatchEvents: boolean;
   onSelectPlayer: (p: PitchPlayer) => void;
 }) {
-  const groups = groupByPosition(players);
+  const groups = groupByPosition(players, matchId);
   const rating = teamStarRating(players);
   return (
     <div className="flex flex-1 flex-col justify-center gap-2 p-2">
@@ -206,11 +214,15 @@ export default function SquadPitch({
               <button onClick={() => setSelected(null)} className="text-xs text-neutral-600">Kapat</button>
             </div>
             <div className="flex flex-col gap-1 text-sm text-neutral-300">
-              <p>Mevki: <span className="font-semibold">
-                {selected.position === 'GK' || selected.position === 'DEF' || selected.position === 'MID' || selected.position === 'FWD'
-                  ? ROW_LABEL[selected.position]
-                  : 'Belirtilmemiş'}
+              <p>Bu Maçtaki Mevki: <span className="font-semibold">
+                {(() => {
+                  const pos = matchPosition(selected, matchId);
+                  return pos === 'GK' || pos === 'DEF' || pos === 'MID' || pos === 'FWD' ? ROW_LABEL[pos] : 'Belirtilmemiş';
+                })()}
               </span></p>
+              {selected.position !== 'GK' && matchPosition(selected, matchId) === 'GK' && (
+                <p className="text-xs italic text-amber-400">🧤 Bu maç için kaleciyi üstlendi</p>
+              )}
               <p>GÜÇ: <span className="font-semibold">{playerOverall(selected) ?? '-'}</span></p>
               <p>Toplam Gol: <span className="font-semibold">{selected.playerGoals.reduce((s, g) => s + g.goalCount, 0)}</span></p>
               {selected.marketValue !== null && (

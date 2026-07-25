@@ -4,6 +4,19 @@ import { prisma } from '@/lib/prisma';
 import { computeMatchOdds } from '@/lib/odds';
 import { requireAdmin } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
+import type { Player } from '@prisma/client';
+
+// A player's starting position for this match is usually their own default
+// position, but if they've ever been slotted as GK in an approved lineup
+// (someone playing out of position, since real keepers can be scarce),
+// they're shown as this match's goalkeeper too.
+async function resolveAppearancePosition(player: Player): Promise<string | null> {
+  if (player.position === 'GK') return 'GK';
+  const gkSlot = await prisma.lineupSlot.findFirst({
+    where: { playerId: player.id, position: 'GK', lineup: { status: 'approved' } },
+  });
+  return gkSlot ? 'GK' : player.position;
+}
 
 export async function createMatch(
   homeTeamId: string,
@@ -44,10 +57,15 @@ export async function createMatch(
     data: oddsRows.map((o) => ({ matchId: match.id, market: o.market, selectionKey: o.selectionKey, oddsValue: o.oddsValue })),
   });
 
+  const [homePositions, awayPositions] = await Promise.all([
+    Promise.all(homePlayers.map(resolveAppearancePosition)),
+    Promise.all(awayPlayers.map(resolveAppearancePosition)),
+  ]);
+
   await prisma.matchAppearance.createMany({
     data: [
-      ...homePlayers.map((p) => ({ matchId: match.id, playerId: p.id, teamId: homeTeamId })),
-      ...awayPlayers.map((p) => ({ matchId: match.id, playerId: p.id, teamId: awayTeamId })),
+      ...homePlayers.map((p, i) => ({ matchId: match.id, playerId: p.id, teamId: homeTeamId, position: homePositions[i] })),
+      ...awayPlayers.map((p, i) => ({ matchId: match.id, playerId: p.id, teamId: awayTeamId, position: awayPositions[i] })),
     ],
   });
 

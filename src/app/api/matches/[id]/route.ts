@@ -6,8 +6,16 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const match = await prisma.match.findUnique({
     where: { id },
     include: {
-      homeTeam: { include: { players: { include: { playerGoals: true, playerEvents: { where: { eventType: 'YELLOW' } } } } } },
-      awayTeam: { include: { players: { include: { playerGoals: true, playerEvents: { where: { eventType: 'YELLOW' } } } } } },
+      homeTeam: { include: { players: { include: {
+        playerGoals: true,
+        playerEvents: { where: { eventType: 'YELLOW' } },
+        appearances: { where: { matchId: id } },
+      } } } },
+      awayTeam: { include: { players: { include: {
+        playerGoals: true,
+        playerEvents: { where: { eventType: 'YELLOW' } },
+        appearances: { where: { matchId: id } },
+      } } } },
       odds: true,
     },
   });

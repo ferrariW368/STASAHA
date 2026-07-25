@@ -83,13 +83,14 @@ model Match {
 // created, so a player's profile can show a real "matches played" count and
 // team history even after they later transfer elsewhere.
 model MatchAppearance {
-  id       String @id @default(cuid())
+  id       String  @id @default(cuid())
   matchId  String
-  match    Match  @relation(fields: [matchId], references: [id])
+  match    Match   @relation(fields: [matchId], references: [id])
   playerId String
-  player   Player @relation(fields: [playerId], references: [id])
+  player   Player  @relation(fields: [playerId], references: [id])
   teamId   String
-  team     Team   @relation(fields: [teamId], references: [id])
+  team     Team    @relation(fields: [teamId], references: [id])
+  position String? // this match's starting position - usually the player's own Player.position, but can differ (e.g. an outfield player covering GK)
 
   @@unique([matchId, playerId])
 }
