@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { createTransferNews, updateTransferStage } from '@/actions/transfers';
+import { createTransferNews, updateTransferStage, deleteTransferNews } from '@/actions/transfers';
 
 const stageOptions = [
   { value: 'RUMOR', label: 'Söylenti' },
@@ -81,6 +81,17 @@ export default async function AdminTransfersPage() {
               </select>
               <input name="note" placeholder="Güncel not" defaultValue={n.note ?? ''} className="flex-1 rounded border px-2 py-1 text-xs" />
               <button className="rounded bg-neutral-700 px-3 py-1 text-xs font-semibold text-white">Güncelle</button>
+            </form>
+            <form
+              action={async () => {
+                'use server';
+                await deleteTransferNews(n.id);
+              }}
+              className="mt-2"
+            >
+              <button className="rounded border border-red-800 px-3 py-1 text-xs font-semibold text-red-400">
+                Sil (hiç gözükmesin)
+              </button>
             </form>
           </div>
         ))}

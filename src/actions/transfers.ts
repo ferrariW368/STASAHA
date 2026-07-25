@@ -29,8 +29,15 @@ export async function createTransferNews(
     },
   });
 
+  // A signed transfer actually moves the player to their new team.
+  if (stage === 'SIGNED') {
+    await prisma.player.update({ where: { id: playerId }, data: { teamId: toTeamId } });
+  }
+
   revalidatePath('/');
   revalidatePath('/admin/transfers');
+  revalidatePath('/admin/players');
+  revalidatePath('/players');
   return {};
 }
 
@@ -55,6 +62,18 @@ export async function updateTransferStage(newsId: string, stage: string, note: s
   revalidatePath('/');
   revalidatePath('/admin/transfers');
   revalidatePath('/admin/players');
+  revalidatePath('/players');
+  return {};
+}
+
+export async function deleteTransferNews(newsId: string) {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
+  await prisma.transferNews.delete({ where: { id: newsId } });
+
+  revalidatePath('/');
+  revalidatePath('/admin/transfers');
   revalidatePath('/players');
   return {};
 }
