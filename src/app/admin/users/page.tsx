@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { adjustBalance } from '@/actions/users';
+import { adjustBalance, adminResetPassword } from '@/actions/users';
 import { changePassword } from '@/actions/auth';
 import { redirect } from 'next/navigation';
 
@@ -67,6 +67,23 @@ export default async function AdminUsersPage({
             >
               <input name="delta" type="number" placeholder="+/- STA" className="flex-1 rounded border px-2 py-1 text-sm" />
               <button className="rounded bg-neutral-700 px-3 py-1 text-sm text-white">Uygula</button>
+            </form>
+            <form
+              action={async (formData) => {
+                'use server';
+                const newPassword = formData.get('newPassword') as string;
+                await adminResetPassword(u.id, newPassword);
+              }}
+              className="mt-2 flex gap-2"
+            >
+              <input
+                name="newPassword"
+                type="text"
+                placeholder="Yeni şifre belirle"
+                className="flex-1 rounded border px-2 py-1 text-sm"
+                required
+              />
+              <button className="rounded bg-red-600 px-3 py-1 text-sm text-white">Şifreyi Sıfırla</button>
             </form>
           </li>
         ))}
