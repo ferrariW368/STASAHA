@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import AdBanner from '@/components/AdBanner';
 import F1Car from '@/components/F1Car';
+import FootballIcon from '@/components/FootballIcon';
 import { isMatchLocked } from '@/lib/matchLock';
 import { computeUserScore } from '@/lib/score';
 
@@ -46,11 +47,12 @@ export default async function HomePage() {
     <main className="mx-auto max-w-lg px-4 py-6">
       <div className="relative mb-6 overflow-hidden rounded-2xl border border-red-900/60 bg-gradient-to-br from-red-950 via-neutral-900 to-neutral-950 px-4 py-6 shadow-lg">
         <F1Car className="absolute -right-6 -top-2 h-20 w-auto text-red-600/25 sm:h-28" />
+        <FootballIcon className="absolute -right-2 bottom-2 h-10 w-auto text-amber-700/30" />
         <h1 className="relative text-3xl font-black tracking-tight">
           🎰 FERRARI<span className="text-red-500">BET</span>
         </h1>
         <p className="relative mt-1 text-xs font-semibold uppercase tracking-widest text-amber-400">
-          Şansını dene, tam gaz kazan
+          Şansını dene, tam gaz kazan 🏈
         </p>
         <F1Car className="relative mt-4 h-6 w-auto text-red-600" />
       </div>

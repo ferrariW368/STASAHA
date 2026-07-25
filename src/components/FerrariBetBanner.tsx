@@ -1,10 +1,12 @@
+// Roughly 60% Ferrari/casino flavor, 40% American-football flavor by design.
 const items = [
   { emoji: '🎰', text: 'FERRARI BET × STASAHA' },
   { emoji: '🎲', text: 'ŞANSINI DENE, KAZAN!' },
   { emoji: '💰', text: 'JACKPOT: STA YAĞMURU' },
-  { emoji: '🏆', text: 'RESMİ SPONSOR: EFSANE HALI SAHA' },
-  { emoji: '🔥', text: 'ORANLAR ATEŞ GİBİ' },
+  { emoji: '🏎️', text: 'ORANLAR ATEŞ GİBİ, TAM GAZ!' },
   { emoji: '🏈', text: 'SÜPER KUPA HEYECANI STA\'DA' },
+  { emoji: '🏈', text: 'HAIL MARY\'Yİ KAÇIRMA' },
+  { emoji: '🏈', text: 'TOUCHDOWN ORANLARI BURADA' },
 ];
 
 function SideBannerContent() {

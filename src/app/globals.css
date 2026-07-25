@@ -50,8 +50,8 @@ body {
 /* Scale-only pulse (no vertical travel) so the slot emoji never pokes
    outside its narrow banner - animate-bounce was doing exactly that. */
 @keyframes jackpot-pulse {
-  0%, 100% { transform: scale(1) rotate(0deg); }
-  50% { transform: scale(1.18) rotate(-4deg); }
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.18); }
 }
 .jackpot-pulse {
   animation: jackpot-pulse 1.6s ease-in-out infinite;
