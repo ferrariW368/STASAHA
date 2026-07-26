@@ -4,7 +4,7 @@ import AdBanner from '@/components/AdBanner';
 import Reveal from '@/components/Reveal';
 import SectionLabel from '@/components/SectionLabel';
 import Marquee from '@/components/Marquee';
-import { isMatchLocked } from '@/lib/matchLock';
+import MatchGallery from './MatchGallery';
 import { computeUserScore } from '@/lib/score';
 
 const MARKET_TAGS = [
@@ -22,18 +22,20 @@ const transferStageLabel: Record<string, { text: string; className: string }> = 
 };
 
 export default async function HomePage() {
-  const matches = await prisma.match.findMany({
-    where: { status: { in: ['upcoming', 'locked'] } },
-    include: { homeTeam: true, awayTeam: true },
-    orderBy: { kickoffTime: 'asc' },
-  });
-
-  const finishedMatches = await prisma.match.findMany({
-    where: { status: 'finished' },
+  const allMatches = await prisma.match.findMany({
+    where: { status: { not: 'cancelled' } },
     include: { homeTeam: true, awayTeam: true },
     orderBy: { kickoffTime: 'desc' },
-    take: 5,
   });
+  const galleryMatches = allMatches.map((m) => ({
+    id: m.id,
+    homeTeamName: m.homeTeam.name,
+    awayTeamName: m.awayTeam.name,
+    kickoffTime: m.kickoffTime.toISOString(),
+    status: m.status,
+    finalHomeScore: m.finalHomeScore,
+    finalAwayScore: m.finalAwayScore,
+  }));
 
   const usersForScore = await prisma.user.findMany({
     where: { role: 'user' },
@@ -145,80 +147,18 @@ export default async function HomePage() {
         />
       )}
 
-      <section id="maclar" className="mb-8">
+      <section id="maclar" className="mb-10">
         <SectionLabel number="02" label="MAÇLAR" />
-        <h2 className="mb-2 font-display text-2xl tracking-wide text-text-primary">Yaklaşan Maçlar</h2>
-        <ul className="flex flex-col gap-2">
-          {matches.map((m) => {
-            const locked = isMatchLocked(m.kickoffTime);
-            return (
-              <li key={m.id}>
-                <Link
-                  href={`/matches/${m.id}`}
-                  className="match-card-glow pop-interactive flex items-center justify-between rounded-xl border border-line bg-pitch-night-raised p-3 shadow-sm"
-                >
-                  <div>
-                    <div className="font-medium">{m.homeTeam.name} vs {m.awayTeam.name}</div>
-                    <div className="text-sm text-neutral-500">
-                      {m.kickoffTime.toLocaleString('tr-TR', { dateStyle: 'medium', timeStyle: 'short' })}
-                    </div>
-                  </div>
-                  {locked ? (
-                    <span className="live-pulse rounded-full bg-ferrari-red/10 px-2 py-1 text-xs font-medium text-ferrari-red">
-                      🔴 CANLI
-                    </span>
-                  ) : (
-                    <span className="rounded-full bg-gold/10 px-2 py-1 text-xs font-medium text-gold">
-                      Kupon Yap
-                    </span>
-                  )}
-                </Link>
-              </li>
-            );
-          })}
-          {matches.length === 0 && (
-            <li className="rounded-xl border border-line bg-pitch-night-raised p-4 text-center text-sm text-neutral-600 shadow-sm">
-              Şu an yaklaşan maç yok.
-            </li>
-          )}
-        </ul>
+        <h2 className="mb-4 font-display text-2xl tracking-wide text-text-primary">Maçlar</h2>
+        <MatchGallery matches={galleryMatches} />
       </section>
 
       <AdBanner />
 
-      {finishedMatches.length > 0 && (
-        <Reveal delayMs={80}>
-          <section className="mb-10">
-            <SectionLabel number="03" label="GEÇMİŞ" />
-            <h2 className="mb-2 font-display text-2xl tracking-wide text-text-primary">Geçmiş Maçlar</h2>
-            <ul className="flex flex-col gap-2">
-              {finishedMatches.map((m) => (
-                <li key={m.id}>
-                  <Link
-                    href={`/matches/${m.id}`}
-                    className="match-card-glow pop-interactive block rounded-xl border border-line bg-pitch-night-raised p-3 shadow-sm"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">{m.homeTeam.name} vs {m.awayTeam.name}</span>
-                      <span className="rounded-full bg-neutral-800 px-2 py-1 text-xs font-semibold text-neutral-300">
-                        {m.finalHomeScore} - {m.finalAwayScore}
-                      </span>
-                    </div>
-                    <div className="text-sm text-neutral-500">
-                      {m.kickoffTime.toLocaleString('tr-TR', { dateStyle: 'medium', timeStyle: 'short' })}
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-        </Reveal>
-      )}
-
       {transferNews.length > 0 && (
         <Reveal delayMs={80}>
           <section className="mb-10">
-            <SectionLabel number="04" label="TRANSFERLER" />
+            <SectionLabel number="03" label="TRANSFERLER" />
             <h2 className="mb-2 font-display text-2xl tracking-wide text-text-primary">📰 Transfer Haberleri</h2>
             <ul className="flex flex-col gap-2">
               {transferNews.map((n) => {
@@ -247,7 +187,7 @@ export default async function HomePage() {
 
       <Reveal delayMs={80}>
         <section>
-          <SectionLabel number="05" label="LİDERLİK" />
+          <SectionLabel number="04" label="LİDERLİK" />
           <div className="mb-2 flex items-center justify-between">
             <h2 className="font-display text-2xl tracking-wide text-text-primary">Liderlik Tablosu</h2>
             <Link href="/leaderboard" className="text-sm font-medium text-gold">Tümünü gör</Link>
