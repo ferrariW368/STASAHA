@@ -7,7 +7,7 @@ import { computeUserScore } from '@/lib/score';
 
 const transferStageLabel: Record<string, { text: string; className: string }> = {
   RUMOR: { text: 'Söylenti', className: 'bg-pitch-night-raised text-text-muted' },
-  ADVANCED: { text: 'Büyük Oranda Bitti', className: 'bg-scoreboard-amber/10 text-scoreboard-amber' },
+  ADVANCED: { text: 'Büyük Oranda Bitti', className: 'bg-gold/10 text-gold' },
   FAILED: { text: 'Gerçekleşmedi', className: 'bg-red-500/10 text-red-400' },
   SIGNED: { text: 'İmza Atıldı', className: 'bg-grass/10 text-grass' },
   CANCELLED: { text: 'İptal Edildi', className: 'bg-red-500/10 text-red-400' },
@@ -45,15 +45,15 @@ export default async function HomePage() {
   return (
     <main className="mx-auto max-w-lg px-4 py-6">
       <div className="relative mb-6 overflow-hidden rounded-2xl border border-line bg-gradient-to-b from-pitch-night-raised to-pitch-night px-4 py-7 shadow-lg">
-        <div className="pointer-events-none absolute -left-10 -top-16 h-40 w-40 rounded-full bg-scoreboard-amber/20 blur-3xl" />
-        <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-grass/20 blur-3xl" />
+        <div className="pointer-events-none absolute -left-10 -top-16 h-40 w-40 rounded-full bg-gold/20 blur-3xl" />
+        <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-ferrari-red/20 blur-3xl" />
         <h1 className="relative font-display text-4xl tracking-wide text-text-primary">
-          🎰 FERRARI<span className="text-scoreboard-amber">BET</span>
+          🎰 FERRARI<span className="text-gold">BET</span>
         </h1>
-        <p className="relative mt-1 text-xs font-semibold uppercase tracking-widest text-grass">
+        <p className="relative mt-1 text-xs font-semibold uppercase tracking-widest text-ferrari-red">
           Şansını dene, sahaya çık
         </p>
-        <div className="relative mt-4 h-1 w-16 rounded-full bg-gradient-to-r from-grass to-scoreboard-amber" />
+        <div className="relative mt-4 h-1 w-16 rounded-full bg-gradient-to-r from-ferrari-red to-gold" />
       </div>
 
       <section className="mb-8">

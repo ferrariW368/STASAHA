@@ -26,7 +26,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     ? await prisma.user.findUnique({ where: { username: session.user.name }, select: { staBalance: true } })
     : null;
 
-  const navLinkClass = 'shrink-0 rounded-full px-3 py-2 font-medium text-text-muted transition-colors active:bg-pitch-night-raised active:text-grass';
+  const navLinkClass = 'shrink-0 rounded-full px-3 py-2 font-medium text-text-muted transition-colors active:bg-pitch-night-raised active:text-gold';
 
   return (
     <html lang="tr" className={`${bebasNeue.variable} ${inter.variable}`}>
@@ -40,7 +40,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               {session?.user ? (
                 <>
                   {currentUser && (
-                    <span className="shrink-0 rounded-full bg-scoreboard-amber/10 px-3 py-2 font-display tracking-wide text-scoreboard-amber">
+                    <span className="shrink-0 rounded-full bg-gold/10 px-3 py-2 font-display tracking-wide text-gold">
                       {currentUser.staBalance} STA
                     </span>
                   )}
@@ -59,7 +59,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <>
                   <Link href="/players" className={navLinkClass}>Oyuncular</Link>
                   <Link href="/login" className={navLinkClass}>Giriş</Link>
-                  <Link href="/register" className="shrink-0 rounded-full bg-grass px-3 py-2 font-semibold text-pitch-night active:bg-grass-glow">
+                  <Link href="/register" className="shrink-0 rounded-full bg-gold px-3 py-2 font-semibold text-pitch-night active:bg-gold-dim">
                     Kayıt Ol
                   </Link>
                 </>
