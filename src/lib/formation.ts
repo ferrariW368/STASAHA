@@ -34,6 +34,33 @@ const FORMATIONS: Record<number, Formation> = {
       { position: 'FWD', count: 2 },
     ],
   },
+  9: {
+    format: 9,
+    rows: [
+      { position: 'GK', count: 1 },
+      { position: 'DEF', count: 3 },
+      { position: 'MID', count: 3 },
+      { position: 'FWD', count: 2 },
+    ],
+  },
+  10: {
+    format: 10,
+    rows: [
+      { position: 'GK', count: 1 },
+      { position: 'DEF', count: 4 },
+      { position: 'MID', count: 3 },
+      { position: 'FWD', count: 2 },
+    ],
+  },
+  11: {
+    format: 11,
+    rows: [
+      { position: 'GK', count: 1 },
+      { position: 'DEF', count: 4 },
+      { position: 'MID', count: 4 },
+      { position: 'FWD', count: 2 },
+    ],
+  },
 };
 
 export const VALID_FORMATS = Object.keys(FORMATIONS).map(Number);
