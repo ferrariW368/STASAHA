@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import AdBanner from '@/components/AdBanner';
 import Reveal from '@/components/Reveal';
+import SectionLabel from '@/components/SectionLabel';
 import { isMatchLocked } from '@/lib/matchLock';
 import { computeUserScore } from '@/lib/score';
 
@@ -44,20 +45,64 @@ export default async function HomePage() {
 
   return (
     <main className="mx-auto max-w-lg px-4 py-6">
-      <div className="relative mb-6 overflow-hidden rounded-2xl border border-line bg-gradient-to-b from-pitch-night-raised to-pitch-night px-4 py-7 shadow-lg">
+      <div className="relative mb-10 overflow-hidden rounded-2xl border border-line bg-gradient-to-b from-pitch-night-raised to-pitch-night px-4 py-8 shadow-lg">
         <div className="pointer-events-none absolute -left-10 -top-16 h-40 w-40 rounded-full bg-gold/20 blur-3xl" />
         <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-ferrari-red/20 blur-3xl" />
-        <h1 className="relative font-display text-4xl tracking-wide text-text-primary">
-          🎰 FERRARI<span className="text-gold">BET</span>
+
+        <span className="relative inline-block rounded-full border border-gold/40 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-gold">
+          🎰 STA · Hali Saha Tahmin Ligi
+        </span>
+
+        <h1 className="relative mt-4 font-display text-4xl leading-[1.05] tracking-wide text-text-primary sm:text-5xl">
+          SAHAYA ÇIK.<br />
+          KUPONU YAP.<br />
+          <span className="text-ferrari-red">ZİRVEYE</span> <span className="text-gold">TIRMAN.</span>
         </h1>
-        <p className="relative mt-1 text-xs font-semibold uppercase tracking-widest text-ferrari-red">
-          Şansını dene, sahaya çık
+
+        <p className="relative mt-4 max-w-sm text-sm text-text-muted">
+          Arkadaş grubunun kendi hali saha maçları üzerine, gerçek para içermeyen
+          STA para birimiyle kupon yap, oyuncu kadroları kur, liderlik tablosunda
+          zirveye oyna.
         </p>
-        <div className="relative mt-4 h-1 w-16 rounded-full bg-gradient-to-r from-ferrari-red to-gold" />
+
+        <div className="relative mt-6 flex flex-wrap gap-2">
+          <Link href="#maclar" className="pop-interactive rounded-full bg-gold px-5 py-2.5 text-sm font-semibold text-pitch-night">
+            Keşfet →
+          </Link>
+          <Link href="/kadro-plani" className="pop-interactive rounded-full border border-line px-5 py-2.5 text-sm font-semibold text-text-primary">
+            Kadro Kur
+          </Link>
+          <Link href="#nasil-oynanir" className="pop-interactive rounded-full px-5 py-2.5 text-sm font-semibold text-ferrari-red">
+            ▸ Nasıl Oynanır
+          </Link>
+        </div>
       </div>
 
-      <section className="mb-8">
-        <h2 className="mb-2 text-lg font-semibold">Yaklaşan Maçlar</h2>
+      <Reveal>
+        <section id="nasil-oynanir" className="mb-10">
+          <SectionLabel number="01" label="NASIL ÇALIŞIR" />
+          <h2 className="mb-4 font-display text-2xl tracking-wide text-text-primary">Nasıl Oynanır</h2>
+          <div className="flex flex-col gap-3">
+            {[
+              { n: '01', title: 'Kayıt Ol', text: '1000 STA ile hesabını aç, hiçbir gerçek para gerekmez.' },
+              { n: '02', title: 'Kupon Yap', text: 'Maç sonucu, skor, gol atacak oyuncu gibi pazarlardan seç.' },
+              { n: '03', title: 'Zirveye Tırman', text: 'Kuponun tutarsa STA kazan, liderlik tablosunda yüksel.' },
+            ].map((step) => (
+              <div key={step.n} className="flex gap-4 rounded-xl border border-line bg-pitch-night-raised p-4">
+                <span className="font-display text-3xl text-ferrari-red">{step.n}</span>
+                <div>
+                  <h3 className="font-display text-lg tracking-wide text-text-primary">{step.title}</h3>
+                  <p className="mt-0.5 text-sm text-text-muted">{step.text}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </Reveal>
+
+      <section id="maclar" className="mb-8">
+        <SectionLabel number="02" label="MAÇLAR" />
+        <h2 className="mb-2 font-display text-2xl tracking-wide text-text-primary">Yaklaşan Maçlar</h2>
         <ul className="flex flex-col gap-2">
           {matches.map((m) => {
             const locked = isMatchLocked(m.kickoffTime);
@@ -65,7 +110,7 @@ export default async function HomePage() {
               <li key={m.id}>
                 <Link
                   href={`/matches/${m.id}`}
-                  className="pop-interactive flex items-center justify-between rounded-xl bg-neutral-900 p-3 shadow-sm"
+                  className="match-card-glow pop-interactive flex items-center justify-between rounded-xl border border-line bg-pitch-night-raised p-3 shadow-sm"
                 >
                   <div>
                     <div className="font-medium">{m.homeTeam.name} vs {m.awayTeam.name}</div>
@@ -74,11 +119,11 @@ export default async function HomePage() {
                     </div>
                   </div>
                   {locked ? (
-                    <span className="rounded-full bg-neutral-800 px-2 py-1 text-xs font-medium text-neutral-500">
-                      Kilitli
+                    <span className="live-pulse rounded-full bg-ferrari-red/10 px-2 py-1 text-xs font-medium text-ferrari-red">
+                      🔴 CANLI
                     </span>
                   ) : (
-                    <span className="rounded-full bg-green-500/10 px-2 py-1 text-xs font-medium text-green-400">
+                    <span className="rounded-full bg-gold/10 px-2 py-1 text-xs font-medium text-gold">
                       Kupon Yap
                     </span>
                   )}
@@ -87,7 +132,7 @@ export default async function HomePage() {
             );
           })}
           {matches.length === 0 && (
-            <li className="rounded-xl bg-neutral-900 p-4 text-center text-sm text-neutral-600 shadow-sm">
+            <li className="rounded-xl border border-line bg-pitch-night-raised p-4 text-center text-sm text-neutral-600 shadow-sm">
               Şu an yaklaşan maç yok.
             </li>
           )}
@@ -97,80 +142,89 @@ export default async function HomePage() {
       <AdBanner />
 
       {finishedMatches.length > 0 && (
-        <section className="mb-8">
-          <h2 className="mb-2 text-lg font-semibold">Geçmiş Maçlar</h2>
-          <ul className="flex flex-col gap-2">
-            {finishedMatches.map((m) => (
-              <li key={m.id}>
-                <Link
-                  href={`/matches/${m.id}`}
-                  className="pop-interactive block rounded-xl bg-neutral-900 p-3 shadow-sm"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">{m.homeTeam.name} vs {m.awayTeam.name}</span>
-                    <span className="rounded-full bg-neutral-800 px-2 py-1 text-xs font-semibold text-neutral-300">
-                      {m.finalHomeScore} - {m.finalAwayScore}
-                    </span>
-                  </div>
-                  <div className="text-sm text-neutral-500">
-                    {m.kickoffTime.toLocaleString('tr-TR', { dateStyle: 'medium', timeStyle: 'short' })}
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
+        <Reveal delayMs={80}>
+          <section className="mb-10">
+            <SectionLabel number="03" label="GEÇMİŞ" />
+            <h2 className="mb-2 font-display text-2xl tracking-wide text-text-primary">Geçmiş Maçlar</h2>
+            <ul className="flex flex-col gap-2">
+              {finishedMatches.map((m) => (
+                <li key={m.id}>
+                  <Link
+                    href={`/matches/${m.id}`}
+                    className="match-card-glow pop-interactive block rounded-xl border border-line bg-pitch-night-raised p-3 shadow-sm"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">{m.homeTeam.name} vs {m.awayTeam.name}</span>
+                      <span className="rounded-full bg-neutral-800 px-2 py-1 text-xs font-semibold text-neutral-300">
+                        {m.finalHomeScore} - {m.finalAwayScore}
+                      </span>
+                    </div>
+                    <div className="text-sm text-neutral-500">
+                      {m.kickoffTime.toLocaleString('tr-TR', { dateStyle: 'medium', timeStyle: 'short' })}
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </Reveal>
       )}
 
       {transferNews.length > 0 && (
-        <section className="mb-8">
-          <h2 className="mb-2 text-lg font-semibold">📰 Transfer Haberleri</h2>
-          <ul className="flex flex-col gap-2">
-            {transferNews.map((n) => {
-              const stage = transferStageLabel[n.stage] ?? transferStageLabel.RUMOR;
-              return (
-                <li key={n.id} className="rounded-xl bg-neutral-900 p-3 shadow-sm">
-                  <div className="mb-1 flex items-center justify-between">
-                    <Link href={`/players/${n.playerId}`} className="font-medium text-neutral-100">
-                      {n.player.name}
-                    </Link>
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${stage.className}`}>
-                      {stage.text}
-                    </span>
-                  </div>
-                  <p className="text-xs text-neutral-500">
-                    {n.fromTeam?.name ?? 'Serbest'} → {n.toTeam?.name ?? 'Serbest'}
-                  </p>
-                  {n.note && <p className="mt-1 text-xs text-neutral-500">{n.note}</p>}
-                </li>
-              );
-            })}
-          </ul>
-        </section>
+        <Reveal delayMs={80}>
+          <section className="mb-10">
+            <SectionLabel number="04" label="TRANSFERLER" />
+            <h2 className="mb-2 font-display text-2xl tracking-wide text-text-primary">📰 Transfer Haberleri</h2>
+            <ul className="flex flex-col gap-2">
+              {transferNews.map((n) => {
+                const stage = transferStageLabel[n.stage] ?? transferStageLabel.RUMOR;
+                return (
+                  <li key={n.id} className="rounded-xl border border-line bg-pitch-night-raised p-3 shadow-sm">
+                    <div className="mb-1 flex items-center justify-between">
+                      <Link href={`/players/${n.playerId}`} className="font-medium text-neutral-100">
+                        {n.player.name}
+                      </Link>
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${stage.className}`}>
+                        {stage.text}
+                      </span>
+                    </div>
+                    <p className="text-xs text-neutral-500">
+                      {n.fromTeam?.name ?? 'Serbest'} → {n.toTeam?.name ?? 'Serbest'}
+                    </p>
+                    {n.note && <p className="mt-1 text-xs text-neutral-500">{n.note}</p>}
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        </Reveal>
       )}
 
-      <section>
-        <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Liderlik Tablosu</h2>
-          <Link href="/leaderboard" className="text-sm font-medium text-green-400">Tümünü gör</Link>
-        </div>
-        <ol className="flex flex-col gap-1 rounded-xl bg-neutral-900 p-2 shadow-sm">
-          {topUsers.map((u, i) => (
-            <li key={u.username} className="flex justify-between rounded-lg px-3 py-2 text-sm">
-              <span>
-                <span className="mr-1 text-neutral-600">{i + 1}.</span>
-                {u.username}
-              </span>
-              <span className={`font-semibold ${u.score.net > 0 ? 'text-green-400' : u.score.net < 0 ? 'text-red-400' : 'text-neutral-500'}`}>
-                {u.score.net > 0 ? '+' : ''}{u.score.net} puan
-              </span>
-            </li>
-          ))}
-          {topUsers.length === 0 && (
-            <li className="px-3 py-2 text-sm text-neutral-600">Henüz kullanıcı yok.</li>
-          )}
-        </ol>
-      </section>
+      <Reveal delayMs={80}>
+        <section>
+          <SectionLabel number="05" label="LİDERLİK" />
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="font-display text-2xl tracking-wide text-text-primary">Liderlik Tablosu</h2>
+            <Link href="/leaderboard" className="text-sm font-medium text-gold">Tümünü gör</Link>
+          </div>
+          <ol className="flex flex-col gap-1 rounded-xl border border-line bg-pitch-night-raised p-2 shadow-sm">
+            {topUsers.map((u, i) => (
+              <li key={u.username} className="flex justify-between rounded-lg px-3 py-2 text-sm">
+                <span>
+                  <span className="mr-1 text-neutral-600">{i + 1}.</span>
+                  {u.username}
+                </span>
+                <span className={`font-semibold ${u.score.net > 0 ? 'text-green-400' : u.score.net < 0 ? 'text-red-400' : 'text-neutral-500'}`}>
+                  {u.score.net > 0 ? '+' : ''}{u.score.net} puan
+                </span>
+              </li>
+            ))}
+            {topUsers.length === 0 && (
+              <li className="px-3 py-2 text-sm text-neutral-600">Henüz kullanıcı yok.</li>
+            )}
+          </ol>
+        </section>
+      </Reveal>
     </main>
   );
 }
