@@ -7,6 +7,8 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import LogoutButton from '@/components/LogoutButton';
 import FerrariBetBanner from '@/components/FerrariBetBanner';
+import IntroSplash from '@/components/IntroSplash';
+import Footer from '@/components/Footer';
 
 const bebasNeue = Bebas_Neue({ subsets: ['latin'], weight: '400', variable: '--font-bebas-neue' });
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -31,6 +33,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="tr" className={`${bebasNeue.variable} ${inter.variable}`}>
       <body className="bg-pitch-night text-text-primary">
+        <IntroSplash />
         <header className="sticky top-0 z-20 border-b border-line bg-pitch-night-raised px-4 py-3">
           <div className="mx-auto flex max-w-lg items-center justify-between gap-2">
             <Link href="/" className="shrink-0 font-display text-2xl tracking-wide text-ferrari-red">
@@ -69,6 +72,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </header>
         <FerrariBetBanner />
         {children}
+        <Footer />
       </body>
     </html>
   );
