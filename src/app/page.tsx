@@ -3,8 +3,15 @@ import Link from 'next/link';
 import AdBanner from '@/components/AdBanner';
 import Reveal from '@/components/Reveal';
 import SectionLabel from '@/components/SectionLabel';
+import Marquee from '@/components/Marquee';
 import { isMatchLocked } from '@/lib/matchLock';
 import { computeUserScore } from '@/lib/score';
+
+const MARKET_TAGS = [
+  'MAÇ SONUCU', 'SKOR TAHMİNİ', 'TOPLAM GOL ALT/ÜST', 'İLK YARI ALT/ÜST',
+  'OYUNCU GOLÜ', 'KG VAR/YOK', 'KIRMIZI KART', 'SAHAYA DALAN OLUR MU',
+  'KAVGA ÇIKAR MI', 'HAKEM TARTIŞMASI',
+];
 
 const transferStageLabel: Record<string, { text: string; className: string }> = {
   RUMOR: { text: 'Söylenti', className: 'bg-pitch-night-raised text-text-muted' },
@@ -43,6 +50,23 @@ export default async function HomePage() {
     take: 5,
   });
 
+  const teams = await prisma.team.findMany({ select: { name: true } });
+  const topScorerGoal = await prisma.playerGoal.groupBy({
+    by: ['playerId'],
+    _sum: { goalCount: true },
+    orderBy: { _sum: { goalCount: 'desc' } },
+    take: 1,
+  });
+  const topScorer = topScorerGoal.length > 0
+    ? await prisma.player.findUnique({ where: { id: topScorerGoal[0].playerId }, select: { name: true } })
+    : null;
+  const tickerItems: string[] = [
+    ...teams.map((t) => `⚽ ${t.name}`),
+    ...(topScorer && topScorerGoal[0]._sum.goalCount
+      ? [`🏆 GOL KRALI: ${topScorer.name} (${topScorerGoal[0]._sum.goalCount})`]
+      : []),
+  ];
+
   return (
     <main className="mx-auto max-w-lg px-4 py-6">
       <div className="relative mb-10 overflow-hidden rounded-2xl border border-line bg-gradient-to-b from-pitch-night-raised to-pitch-night px-4 py-8 shadow-lg">
@@ -78,6 +102,15 @@ export default async function HomePage() {
         </div>
       </div>
 
+      <Marquee
+        className="mb-10 border-y border-line py-3"
+        items={MARKET_TAGS.map((tag) => (
+          <span key={tag} className="font-display text-lg tracking-wide text-text-muted">
+            {tag} <span className="text-ferrari-red">·</span>
+          </span>
+        ))}
+      />
+
       <Reveal>
         <section id="nasil-oynanir" className="mb-10">
           <SectionLabel number="01" label="NASIL ÇALIŞIR" />
@@ -99,6 +132,18 @@ export default async function HomePage() {
           </div>
         </section>
       </Reveal>
+
+      {tickerItems.length > 0 && (
+        <Marquee
+          durationSec={18}
+          className="mb-10 border-y border-line bg-pitch-night-raised py-3"
+          items={tickerItems.map((item, i) => (
+            <span key={i} className="font-display text-lg tracking-wide text-gold">
+              {item}
+            </span>
+          ))}
+        />
+      )}
 
       <section id="maclar" className="mb-8">
         <SectionLabel number="02" label="MAÇLAR" />

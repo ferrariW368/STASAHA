@@ -108,11 +108,25 @@ body {
   animation: live-pulse 1.8s ease-in-out infinite;
 }
 
+/* Infinite horizontal scroll band - content is duplicated by the component,
+   this just slides the whole track left by exactly half its width. */
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee-track {
+  animation-name: marquee-scroll;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  width: max-content;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .race-car-loader,
   .jackpot-pulse,
   .fade-slide-in,
-  .live-pulse {
+  .live-pulse,
+  .marquee-track {
     animation: none !important;
   }
   .pop-interactive,
