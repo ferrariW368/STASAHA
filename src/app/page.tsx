@@ -5,6 +5,7 @@ import Reveal from '@/components/Reveal';
 import SectionLabel from '@/components/SectionLabel';
 import Marquee from '@/components/Marquee';
 import MatchGallery from './MatchGallery';
+import FrameworkAcronym from './FrameworkAcronym';
 import { computeUserScore } from '@/lib/score';
 
 const MARKET_TAGS = [
@@ -67,6 +68,19 @@ export default async function HomePage() {
     ...(topScorer && topScorerGoal[0]._sum.goalCount
       ? [`🏆 GOL KRALI: ${topScorer.name} (${topScorerGoal[0]._sum.goalCount})`]
       : []),
+  ];
+
+  const [totalMatches, totalBets, totalPlayerCount, balanceSum] = await Promise.all([
+    prisma.match.count({ where: { status: { not: 'cancelled' } } }),
+    prisma.bet.count(),
+    prisma.user.count({ where: { role: 'user' } }),
+    prisma.user.aggregate({ _sum: { staBalance: true } }),
+  ]);
+  const stats = [
+    { value: `${totalMatches}`, label: 'Oynanan Maç', detail: 'İptal edilenler hariç, kurulmuş tüm maçlar.' },
+    { value: `${totalBets}`, label: 'Kupon', detail: 'Şimdiye kadar oluşturulan toplam kupon sayısı.' },
+    { value: `${totalPlayerCount}`, label: 'Kayıtlı Oyuncu', detail: 'STA hesabı olan gerçek kullanıcı sayısı.' },
+    { value: `${(balanceSum._sum.staBalance ?? 0).toLocaleString('tr-TR')}`, label: 'STA Dolaşımda', detail: 'Tüm kullanıcıların toplam bakiyesi.' },
   ];
 
   return (
@@ -147,18 +161,43 @@ export default async function HomePage() {
         />
       )}
 
+      <Reveal>
+        <section className="mb-10">
+          <SectionLabel number="02" label="SİSTEMİMİZ" />
+          <h2 className="mb-4 font-display text-2xl tracking-wide text-text-primary">F·E·R·R·A·R·I</h2>
+          <FrameworkAcronym />
+        </section>
+      </Reveal>
+
       <section id="maclar" className="mb-10">
-        <SectionLabel number="02" label="MAÇLAR" />
+        <SectionLabel number="03" label="MAÇLAR" />
         <h2 className="mb-4 font-display text-2xl tracking-wide text-text-primary">Maçlar</h2>
         <MatchGallery matches={galleryMatches} />
       </section>
 
       <AdBanner />
 
+      <Reveal delayMs={80}>
+        <section className="mb-10">
+          <SectionLabel number="04" label="RAKAMLARLA" />
+          <div className="grid grid-cols-2 gap-3">
+            {stats.map((s) => (
+              <div key={s.label} className="group rounded-xl border border-line bg-pitch-night-raised p-4">
+                <div className="font-display text-3xl text-gold">{s.value}</div>
+                <div className="text-xs text-text-muted">{s.label}</div>
+                <p className="mt-2 text-[11px] text-text-muted opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                  {s.detail}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </Reveal>
+
       {transferNews.length > 0 && (
         <Reveal delayMs={80}>
           <section className="mb-10">
-            <SectionLabel number="03" label="TRANSFERLER" />
+            <SectionLabel number="05" label="TRANSFERLER" />
             <h2 className="mb-2 font-display text-2xl tracking-wide text-text-primary">📰 Transfer Haberleri</h2>
             <ul className="flex flex-col gap-2">
               {transferNews.map((n) => {
@@ -187,7 +226,7 @@ export default async function HomePage() {
 
       <Reveal delayMs={80}>
         <section>
-          <SectionLabel number="04" label="LİDERLİK" />
+          <SectionLabel number="06" label="LİDERLİK" />
           <div className="mb-2 flex items-center justify-between">
             <h2 className="font-display text-2xl tracking-wide text-text-primary">Liderlik Tablosu</h2>
             <Link href="/leaderboard" className="text-sm font-medium text-gold">Tümünü gör</Link>
@@ -209,6 +248,22 @@ export default async function HomePage() {
             )}
           </ol>
         </section>
+      </Reveal>
+
+      <Reveal delayMs={80}>
+        <div className="relative mt-10 overflow-hidden rounded-2xl border border-line bg-pitch-night px-4 py-16 text-center">
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ferrari-red/10 to-transparent" />
+          <h2 className="relative font-display text-6xl tracking-wide text-text-primary sm:text-7xl">
+            FERRARİ<span className="text-gold">BET</span>
+          </h2>
+          <p className="relative mt-3 text-sm text-text-muted">Kuponunu hazırla, sahaya çık.</p>
+          <Link
+            href="/register"
+            className="pop-interactive relative mt-6 inline-block rounded-full bg-gold px-8 py-3 text-sm font-semibold text-pitch-night"
+          >
+            Hemen Kayıt Ol
+          </Link>
+        </div>
       </Reveal>
     </main>
   );
