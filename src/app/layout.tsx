@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { Bebas_Neue, Inter } from 'next/font/google';
 import './globals.css';
 import Link from 'next/link';
 import { getServerSession } from 'next-auth';
@@ -6,6 +7,9 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import LogoutButton from '@/components/LogoutButton';
 import FerrariBetBanner from '@/components/FerrariBetBanner';
+
+const bebasNeue = Bebas_Neue({ subsets: ['latin'], weight: '400', variable: '--font-bebas-neue' });
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
   title: 'FERRARI BET',
@@ -22,50 +26,40 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     ? await prisma.user.findUnique({ where: { username: session.user.name }, select: { staBalance: true } })
     : null;
 
+  const navLinkClass = 'shrink-0 rounded-full px-3 py-2 font-medium text-text-muted transition-colors active:bg-pitch-night-raised active:text-grass';
+
   return (
-    <html lang="tr">
-      <body className="bg-neutral-950 text-neutral-100">
-        <header className="sticky top-0 z-20 bg-neutral-900 px-4 py-3">
+    <html lang="tr" className={`${bebasNeue.variable} ${inter.variable}`}>
+      <body className="bg-pitch-night text-text-primary">
+        <header className="sticky top-0 z-20 border-b border-line bg-pitch-night-raised px-4 py-3">
           <div className="mx-auto flex max-w-lg items-center justify-between gap-2">
-            <Link href="/" className="shrink-0 font-bold text-amber-400">🎰 FERRARI BET</Link>
+            <Link href="/" className="shrink-0 font-display text-2xl tracking-wide text-ferrari-red">
+              🎰 FERRARI BET
+            </Link>
             <nav className="flex flex-nowrap items-center gap-1.5 overflow-x-auto text-sm">
               {session?.user ? (
                 <>
                   {currentUser && (
-                    <span className="shrink-0 rounded-full bg-amber-400/10 px-3 py-1.5 font-semibold text-amber-400">
+                    <span className="shrink-0 rounded-full bg-scoreboard-amber/10 px-3 py-2 font-display tracking-wide text-scoreboard-amber">
                       {currentUser.staBalance} STA
                     </span>
                   )}
                   {session.user.role === 'admin' && (
-                    <Link href="/admin" className="shrink-0 rounded-full px-3 py-1.5 font-medium text-neutral-200 active:bg-neutral-800">
-                      Admin
-                    </Link>
+                    <Link href="/admin" className={navLinkClass}>Admin</Link>
                   )}
-                  <Link href="/players" className="shrink-0 rounded-full px-3 py-1.5 font-medium text-neutral-200 active:bg-neutral-800">
-                    Oyuncular
-                  </Link>
-                  <Link href="/kadro-plani" className="shrink-0 rounded-full px-3 py-1.5 font-medium text-neutral-200 active:bg-neutral-800">
-                    Kadro Planla
-                  </Link>
-                  <Link href="/bets" className="shrink-0 rounded-full px-3 py-1.5 font-medium text-neutral-200 active:bg-neutral-800">
-                    Kuponlarım
-                  </Link>
-                  <Link href="/leaderboard" className="shrink-0 rounded-full px-3 py-1.5 font-medium text-neutral-200 active:bg-neutral-800">
-                    Liderlik
-                  </Link>
+                  <Link href="/players" className={navLinkClass}>Oyuncular</Link>
+                  <Link href="/kadro-plani" className={navLinkClass}>Kadro Planla</Link>
+                  <Link href="/bets" className={navLinkClass}>Kuponlarım</Link>
+                  <Link href="/leaderboard" className={navLinkClass}>Liderlik</Link>
                   <span className="shrink-0">
                     <LogoutButton />
                   </span>
                 </>
               ) : (
                 <>
-                  <Link href="/players" className="shrink-0 rounded-full px-3 py-1.5 font-medium text-neutral-200 active:bg-neutral-800">
-                    Oyuncular
-                  </Link>
-                  <Link href="/login" className="shrink-0 rounded-full px-3 py-1.5 font-medium text-neutral-200 active:bg-neutral-800">
-                    Giriş
-                  </Link>
-                  <Link href="/register" className="shrink-0 rounded-full bg-amber-400 px-3 py-1.5 font-semibold text-neutral-900 active:bg-amber-500">
+                  <Link href="/players" className={navLinkClass}>Oyuncular</Link>
+                  <Link href="/login" className={navLinkClass}>Giriş</Link>
+                  <Link href="/register" className="shrink-0 rounded-full bg-grass px-3 py-2 font-semibold text-pitch-night active:bg-grass-glow">
                     Kayıt Ol
                   </Link>
                 </>
