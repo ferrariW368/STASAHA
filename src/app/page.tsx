@@ -1,16 +1,15 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import AdBanner from '@/components/AdBanner';
-import F1Car from '@/components/F1Car';
-import FootballIcon from '@/components/FootballIcon';
+import Reveal from '@/components/Reveal';
 import { isMatchLocked } from '@/lib/matchLock';
 import { computeUserScore } from '@/lib/score';
 
 const transferStageLabel: Record<string, { text: string; className: string }> = {
-  RUMOR: { text: 'Söylenti', className: 'bg-neutral-800 text-neutral-400' },
-  ADVANCED: { text: 'Büyük Oranda Bitti', className: 'bg-amber-400/10 text-amber-400' },
+  RUMOR: { text: 'Söylenti', className: 'bg-pitch-night-raised text-text-muted' },
+  ADVANCED: { text: 'Büyük Oranda Bitti', className: 'bg-scoreboard-amber/10 text-scoreboard-amber' },
   FAILED: { text: 'Gerçekleşmedi', className: 'bg-red-500/10 text-red-400' },
-  SIGNED: { text: 'İmza Atıldı', className: 'bg-green-500/10 text-green-400' },
+  SIGNED: { text: 'İmza Atıldı', className: 'bg-grass/10 text-grass' },
   CANCELLED: { text: 'İptal Edildi', className: 'bg-red-500/10 text-red-400' },
 };
 
@@ -45,16 +44,16 @@ export default async function HomePage() {
 
   return (
     <main className="mx-auto max-w-lg px-4 py-6">
-      <div className="relative mb-6 overflow-hidden rounded-2xl border border-red-900/60 bg-gradient-to-br from-red-950 via-neutral-900 to-neutral-950 px-4 py-6 shadow-lg">
-        <F1Car className="absolute -right-6 -top-2 h-20 w-auto text-red-600/25 sm:h-28" />
-        <FootballIcon className="absolute -right-2 bottom-2 h-10 w-auto text-amber-700/30" />
-        <h1 className="relative text-3xl font-black tracking-tight">
-          🎰 FERRARI<span className="text-red-500">BET</span>
+      <div className="relative mb-6 overflow-hidden rounded-2xl border border-line bg-gradient-to-b from-pitch-night-raised to-pitch-night px-4 py-7 shadow-lg">
+        <div className="pointer-events-none absolute -left-10 -top-16 h-40 w-40 rounded-full bg-scoreboard-amber/20 blur-3xl" />
+        <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-grass/20 blur-3xl" />
+        <h1 className="relative font-display text-4xl tracking-wide text-text-primary">
+          🎰 FERRARI<span className="text-scoreboard-amber">BET</span>
         </h1>
-        <p className="relative mt-1 text-xs font-semibold uppercase tracking-widest text-amber-400">
-          Şansını dene, tam gaz kazan 🏈
+        <p className="relative mt-1 text-xs font-semibold uppercase tracking-widest text-grass">
+          Şansını dene, sahaya çık
         </p>
-        <F1Car className="relative mt-4 h-6 w-auto text-red-600" />
+        <div className="relative mt-4 h-1 w-16 rounded-full bg-gradient-to-r from-grass to-scoreboard-amber" />
       </div>
 
       <section className="mb-8">
