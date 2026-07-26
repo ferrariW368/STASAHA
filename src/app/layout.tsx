@@ -5,10 +5,10 @@ import Link from 'next/link';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import LogoutButton from '@/components/LogoutButton';
 import FerrariBetBanner from '@/components/FerrariBetBanner';
 import IntroSplash from '@/components/IntroSplash';
 import Footer from '@/components/Footer';
+import FullscreenNav from '@/components/FullscreenNav';
 
 const bebasNeue = Bebas_Neue({ subsets: ['latin'], weight: '400', variable: '--font-bebas-neue' });
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -28,8 +28,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     ? await prisma.user.findUnique({ where: { username: session.user.name }, select: { staBalance: true } })
     : null;
 
-  const navLinkClass = 'shrink-0 rounded-full px-3 py-2 font-medium text-text-muted transition-colors active:bg-pitch-night-raised active:text-gold';
-
   return (
     <html lang="tr" className={`${bebasNeue.variable} ${inter.variable}`}>
       <body className="bg-pitch-night text-text-primary">
@@ -39,35 +37,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <Link href="/" className="shrink-0 font-display text-2xl tracking-wide text-ferrari-red">
               🎰 FERRARI BET
             </Link>
-            <nav className="flex flex-nowrap items-center gap-1.5 overflow-x-auto text-sm">
-              {session?.user ? (
-                <>
-                  {currentUser && (
-                    <span className="shrink-0 rounded-full bg-gold/10 px-3 py-2 font-display tracking-wide text-gold">
-                      {currentUser.staBalance} STA
-                    </span>
-                  )}
-                  {session.user.role === 'admin' && (
-                    <Link href="/admin" className={navLinkClass}>Admin</Link>
-                  )}
-                  <Link href="/players" className={navLinkClass}>Oyuncular</Link>
-                  <Link href="/kadro-plani" className={navLinkClass}>Kadro Planla</Link>
-                  <Link href="/bets" className={navLinkClass}>Kuponlarım</Link>
-                  <Link href="/leaderboard" className={navLinkClass}>Liderlik</Link>
-                  <span className="shrink-0">
-                    <LogoutButton />
-                  </span>
-                </>
-              ) : (
-                <>
-                  <Link href="/players" className={navLinkClass}>Oyuncular</Link>
-                  <Link href="/login" className={navLinkClass}>Giriş</Link>
-                  <Link href="/register" className="shrink-0 rounded-full bg-gold px-3 py-2 font-semibold text-pitch-night active:bg-gold-dim">
-                    Kayıt Ol
-                  </Link>
-                </>
+            <div className="flex shrink-0 items-center gap-2">
+              {currentUser && (
+                <span className="shrink-0 rounded-full bg-gold/10 px-3 py-2 text-sm font-display tracking-wide text-gold">
+                  {currentUser.staBalance} STA
+                </span>
               )}
-            </nav>
+              <FullscreenNav user={session?.user ? { isAdmin: session.user.role === 'admin' } : null} />
+            </div>
           </div>
         </header>
         <FerrariBetBanner />
