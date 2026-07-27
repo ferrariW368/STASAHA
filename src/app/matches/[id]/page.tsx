@@ -8,6 +8,7 @@ import SquadPitch, { type PitchPlayer } from './SquadPitch';
 import MatchStats from './MatchStats';
 import { MAX_GOALS_PER_SIDE } from '@/lib/odds';
 import F1Car from '@/components/F1Car';
+import AnimatedNumber from '@/components/AnimatedNumber';
 
 type Odds = { market: string; selectionKey: string; oddsValue: number };
 type PlayerData = PitchPlayer;
@@ -48,7 +49,7 @@ function OddsButton({
       }`}
     >
       <span className="text-xs">{label}</span>
-      <span className="font-bold">{odds?.oddsValue.toFixed(2)}</span>
+      <AnimatedNumber value={odds.oddsValue} decimals={2} className="font-bold" />
     </button>
   );
 }
@@ -235,7 +236,7 @@ export default function MatchDetailPage() {
                             isSelected(o) ? 'bg-green-600 text-white' : 'bg-neutral-800 text-neutral-300 active:bg-neutral-800'
                           }`}
                         >
-                          {o.oddsValue.toFixed(1)}
+                          <AnimatedNumber value={o.oddsValue} decimals={1} />
                         </button>
                       </td>
                     ) : (
@@ -383,7 +384,9 @@ export default function MatchDetailPage() {
           )}
           <div className="mb-2 flex items-center justify-between text-sm">
             <span className="text-neutral-500">Toplam Oran</span>
-            <span className="font-bold">{selected.length ? totalOdds.toFixed(2) : '-'}</span>
+            <span className="font-bold">
+              {selected.length ? <AnimatedNumber value={totalOdds} decimals={2} /> : '-'}
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <input
@@ -399,7 +402,14 @@ export default function MatchDetailPage() {
               disabled={submitting || selected.length === 0 || stake <= 0}
               className="pop-interactive flex-1 rounded-lg bg-green-600 py-2 text-sm font-semibold text-white disabled:opacity-40"
             >
-              {submitting ? 'Gönderiliyor...' : `Kuponu Onayla${potentialWin ? ` · Kazanç ${potentialWin} STA` : ''}`}
+              {submitting ? 'Gönderiliyor...' : (
+                <>
+                  Kuponu Onayla
+                  {potentialWin > 0 && (
+                    <> · Kazanç <AnimatedNumber value={potentialWin} /> STA</>
+                  )}
+                </>
+              )}
             </button>
           </div>
           {message && (

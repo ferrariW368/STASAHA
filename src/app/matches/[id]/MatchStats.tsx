@@ -1,4 +1,5 @@
 import { generateFakeStats } from '@/lib/fakeStats';
+import AnimatedNumber from '@/components/AnimatedNumber';
 
 function StatRow({ label, home, away, suffix = '' }: { label: string; home: number; away: number; suffix?: string }) {
   const total = home + away || 1;
@@ -6,9 +7,9 @@ function StatRow({ label, home, away, suffix = '' }: { label: string; home: numb
   return (
     <div className="mb-3">
       <div className="mb-1 flex items-center justify-between text-xs">
-        <span className="font-bold text-blue-400">{home}{suffix}</span>
+        <span className="font-bold text-blue-400"><AnimatedNumber value={home} />{suffix}</span>
         <span className="text-neutral-500">{label}</span>
-        <span className="font-bold text-green-400">{away}{suffix}</span>
+        <span className="font-bold text-green-400"><AnimatedNumber value={away} />{suffix}</span>
       </div>
       <div className="flex h-1.5 overflow-hidden rounded-full bg-neutral-800">
         <div className="bg-blue-500" style={{ width: `${homePct}%` }} />
