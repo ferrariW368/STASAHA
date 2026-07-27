@@ -2,13 +2,13 @@ import { describe, it, expect } from 'vitest';
 import { getFormation, totalSlots, VALID_FORMATS } from '../src/lib/formation';
 
 describe('getFormation', () => {
-  it('supports formats 5 through 8', () => {
-    expect(VALID_FORMATS.sort()).toEqual([5, 6, 7, 8]);
+  it('supports formats 5 through 11', () => {
+    expect(VALID_FORMATS.sort((a, b) => a - b)).toEqual([5, 6, 7, 8, 9, 10, 11]);
   });
 
   it('returns null for an unsupported format', () => {
     expect(getFormation(4)).toBeNull();
-    expect(getFormation(9)).toBeNull();
+    expect(getFormation(12)).toBeNull();
   });
 
   it('every formation has exactly one GK and totals match the format', () => {
