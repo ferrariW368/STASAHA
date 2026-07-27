@@ -9,6 +9,7 @@ import MatchStats from './MatchStats';
 import { MAX_GOALS_PER_SIDE } from '@/lib/odds';
 import F1Car from '@/components/F1Car';
 import AnimatedNumber from '@/components/AnimatedNumber';
+import confetti from 'canvas-confetti';
 
 type Odds = { market: string; selectionKey: string; oddsValue: number };
 type PlayerData = PitchPlayer;
@@ -127,7 +128,17 @@ export default function MatchDetailPage() {
     );
     setSubmitting(false);
     setMessage(result.error ?? 'Kupon başarıyla oluşturuldu!');
-    if (!result.error) setSelected([]);
+    if (!result.error) {
+      setSelected([]);
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        confetti({
+          particleCount: 120,
+          spread: 80,
+          origin: { y: 0.7 },
+          colors: ['#dc0000', '#e8b923', '#ffffff'],
+        });
+      }
+    }
   }
 
   const oneXTwo = match.odds.filter((o) => o.market === '1X2');
