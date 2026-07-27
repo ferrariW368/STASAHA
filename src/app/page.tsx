@@ -169,13 +169,17 @@ export default async function HomePage() {
         </section>
       </Reveal>
 
-      <section id="maclar" className="mb-10">
-        <SectionLabel number="03" label="MAÇLAR" />
-        <h2 className="mb-4 font-display text-2xl tracking-wide text-text-primary">Maçlar</h2>
-        <MatchGallery matches={galleryMatches} />
-      </section>
+      <Reveal delayMs={80}>
+        <section id="maclar" className="mb-10">
+          <SectionLabel number="03" label="MAÇLAR" />
+          <h2 className="mb-4 font-display text-2xl tracking-wide text-text-primary">Maçlar</h2>
+          <MatchGallery matches={galleryMatches} />
+        </section>
+      </Reveal>
 
-      <AdBanner />
+      <Reveal delayMs={80}>
+        <AdBanner />
+      </Reveal>
 
       <Reveal delayMs={80}>
         <section className="mb-10">
