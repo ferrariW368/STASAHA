@@ -16,10 +16,17 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 export const metadata: Metadata = {
   title: 'FERRARI BET',
   description: 'Arkadaş grubu için eğlence amaçlı STA para birimiyle tahmin oyunu',
+  openGraph: {
+    title: 'FERRARI BET',
+    description: 'Arkadaş grubu için eğlence amaçlı STA para birimiyle tahmin oyunu',
+    type: 'website',
+    locale: 'tr_TR',
+  },
 };
 
 export const viewport: Viewport = {
   colorScheme: 'dark',
+  themeColor: '#050505',
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
