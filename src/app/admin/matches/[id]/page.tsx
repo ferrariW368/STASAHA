@@ -49,7 +49,7 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
   return (
     <div>
       <h1 className="mb-4 text-xl font-bold">{match.homeTeam.name} vs {match.awayTeam.name}</h1>
-      <p className="mb-4 text-sm text-neutral-500">Durum: {match.status}</p>
+      <p className="mb-4 text-sm text-text-muted">Durum: {match.status}</p>
 
       {match.status === 'finished' && (
         <div className="text-sm">
@@ -63,7 +63,7 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
       )}
 
       {match.status === 'cancelled' && (
-        <p className="text-sm text-neutral-500">Bu maç iptal edildi, bekleyen kuponlar iade edildi.</p>
+        <p className="text-sm text-text-muted">Bu maç iptal edildi, bekleyen kuponlar iade edildi.</p>
       )}
 
       {match.status !== 'finished' && match.status !== 'cancelled' && (
@@ -144,19 +144,19 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
               <label className="mb-2 flex items-center gap-2 text-sm">
                 <input type="checkbox" name="matchAbandoned" /> Maç yarıda mı kaldı?
               </label>
-              <p className="mb-1 mt-3 text-xs font-semibold text-neutral-500">Kavgaya karışanlar</p>
+              <p className="mb-1 mt-3 text-xs font-semibold text-text-muted">Kavgaya karışanlar</p>
               {allPlayers.map((p) => (
                 <label key={p.id} className="flex items-center gap-2 text-sm">
                   <input type="checkbox" name={`fight_${p.id}`} /> {p.name}
                 </label>
               ))}
-              <p className="mb-1 mt-3 text-xs font-semibold text-neutral-500">Sahaya geç kalanlar</p>
+              <p className="mb-1 mt-3 text-xs font-semibold text-text-muted">Sahaya geç kalanlar</p>
               {allPlayers.map((p) => (
                 <label key={p.id} className="flex items-center gap-2 text-sm">
                   <input type="checkbox" name={`late_${p.id}`} /> {p.name}
                 </label>
               ))}
-              <p className="mb-1 mt-3 text-xs font-semibold text-neutral-500">🟨 Sarı kart görenler</p>
+              <p className="mb-1 mt-3 text-xs font-semibold text-text-muted">🟨 Sarı kart görenler</p>
               {allPlayers.map((p) => (
                 <label key={p.id} className="flex items-center gap-2 text-sm">
                   <input type="checkbox" name={`yellow_${p.id}`} /> {p.name}
@@ -170,7 +170,7 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
           </form>
 
           {locked ? (
-            <p className="mb-6 rounded border border-neutral-800 bg-neutral-800 p-3 text-sm text-neutral-500">
+            <p className="mb-6 rounded border border-line bg-line p-3 text-sm text-text-muted">
               Maç saati geçti, oranlar kilitlendi — sadece sonuçlandırma yapılabilir.
             </p>
           ) : (
@@ -192,11 +192,11 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
               >
                 {[...oddsByMarket.entries()].map(([market, rows]) => (
                   <div key={market}>
-                    <p className="mb-1 text-xs font-semibold text-neutral-500">{marketLabel[market] ?? market}</p>
+                    <p className="mb-1 text-xs font-semibold text-text-muted">{marketLabel[market] ?? market}</p>
                     <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
                       {rows.map((o) => (
                         <div key={o.id} className="flex items-center justify-between gap-2">
-                          <span className="truncate text-xs text-neutral-400">
+                          <span className="truncate text-xs text-text-muted">
                             {describeOddsSelection(o.market, o.selectionKey)}
                           </span>
                           <input
@@ -212,7 +212,7 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
                     </div>
                   </div>
                 ))}
-                <button className="rounded bg-neutral-700 px-4 py-2 text-sm font-semibold text-white">
+                <button className="rounded bg-line px-4 py-2 text-sm font-semibold text-white">
                   Oranları Kaydet
                 </button>
               </form>

@@ -43,7 +43,7 @@ export default async function AdminUsersPage({
             className="rounded border px-3 py-2 text-sm"
             required
           />
-          <button className="rounded bg-neutral-700 px-4 py-2 text-sm text-white">Şifreyi Güncelle</button>
+          <button className="rounded bg-line px-4 py-2 text-sm text-white">Şifreyi Güncelle</button>
         </form>
         {pwd === 'ok' && <p className="mt-2 text-sm text-green-400">Şifre güncellendi.</p>}
         {pwd === 'error' && <p className="mt-2 text-sm text-red-400">{msg ?? 'Bir hata oluştu.'}</p>}
@@ -66,7 +66,7 @@ export default async function AdminUsersPage({
               className="flex gap-2"
             >
               <input name="delta" type="number" placeholder="+/- STA" className="flex-1 rounded border px-2 py-1 text-sm" />
-              <button className="rounded bg-neutral-700 px-3 py-1 text-sm text-white">Uygula</button>
+              <button className="rounded bg-line px-3 py-1 text-sm text-white">Uygula</button>
             </form>
             <form
               action={async (formData) => {

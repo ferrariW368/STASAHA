@@ -72,7 +72,7 @@ function PlayerChip({
   return (
     <button
       onClick={onClick}
-      className={`pop-interactive flex w-16 flex-col items-center gap-0.5 rounded-lg border-2 px-1 py-1.5 text-center active:bg-neutral-900 ${
+      className={`pop-interactive flex w-16 flex-col items-center gap-0.5 rounded-lg border-2 px-1 py-1.5 text-center active:bg-pitch-night-raised ${
         isGoalkeeper ? 'border-amber-400 bg-amber-50' : 'border-white/50 bg-white/90'
       }`}
     >
@@ -158,10 +158,10 @@ export default function SquadPitch({
   return (
     <section className="mb-5">
       <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-neutral-400">Kadrolar</h2>
+        <h2 className="text-sm font-semibold text-text-muted">Kadrolar</h2>
         <button
           onClick={() => setShowInspiration((v) => !v)}
-          className={`rounded-lg border-2 px-2 py-1 text-[10px] font-bold ${showInspiration ? 'border-amber-500 bg-amber-400/10 text-amber-400' : 'border-neutral-800 text-neutral-500'}`}
+          className={`rounded-lg border-2 px-2 py-1 text-[10px] font-bold ${showInspiration ? 'border-amber-500 bg-amber-400/10 text-amber-400' : 'border-line text-text-muted'}`}
         >
           {showInspiration ? '⭐ İlham Alınan Futbolcular' : 'İlham Alınan İsimleri Göster'}
         </button>
@@ -199,21 +199,21 @@ export default function SquadPitch({
           onClick={() => setSelected(null)}
         >
           <div
-            className="fade-slide-in w-full max-w-sm rounded-xl bg-neutral-900 p-4 shadow-lg"
+            className="fade-slide-in w-full max-w-sm rounded-xl bg-pitch-night-raised p-4 shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-2 flex items-start justify-between">
               <div>
                 <h3 className="text-lg font-bold">
-                  {selected.name} {selected.number ? <span className="text-neutral-600">#{selected.number}</span> : null}
+                  {selected.name} {selected.number ? <span className="text-text-muted">#{selected.number}</span> : null}
                 </h3>
                 {selected.styleInspiration && (
-                  <p className="text-xs italic text-neutral-600">Oyun stili esini: {selected.styleInspiration}</p>
+                  <p className="text-xs italic text-text-muted">Oyun stili esini: {selected.styleInspiration}</p>
                 )}
               </div>
-              <button onClick={() => setSelected(null)} className="text-xs text-neutral-600">Kapat</button>
+              <button onClick={() => setSelected(null)} className="text-xs text-text-muted">Kapat</button>
             </div>
-            <div className="flex flex-col gap-1 text-sm text-neutral-300">
+            <div className="flex flex-col gap-1 text-sm text-text-primary">
               <p>Bu Maçtaki Mevki: <span className="font-semibold">
                 {(() => {
                   const pos = matchPosition(selected, matchId);

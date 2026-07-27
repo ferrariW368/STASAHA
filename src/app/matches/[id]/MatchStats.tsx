@@ -8,10 +8,10 @@ function StatRow({ label, home, away, suffix = '' }: { label: string; home: numb
     <div className="mb-3">
       <div className="mb-1 flex items-center justify-between text-xs">
         <span className="font-bold text-blue-400"><AnimatedNumber value={home} />{suffix}</span>
-        <span className="text-neutral-500">{label}</span>
+        <span className="text-text-muted">{label}</span>
         <span className="font-bold text-green-400"><AnimatedNumber value={away} />{suffix}</span>
       </div>
-      <div className="flex h-1.5 overflow-hidden rounded-full bg-neutral-800">
+      <div className="flex h-1.5 overflow-hidden rounded-full bg-line">
         <div className="bg-blue-500" style={{ width: `${homePct}%` }} />
         <div className="bg-green-500" style={{ width: `${100 - homePct}%` }} />
       </div>
@@ -36,9 +36,9 @@ export default function MatchStats({
 
   return (
     <section className="mb-5">
-      <h2 className="mb-2 text-sm font-semibold text-neutral-400">📊 Maç İstatistikleri</h2>
-      <div className="rounded-lg border border-neutral-800 bg-neutral-900 p-3">
-        <div className="mb-3 flex items-center justify-between text-[11px] font-semibold text-neutral-500">
+      <h2 className="mb-2 text-sm font-semibold text-text-muted">📊 Maç İstatistikleri</h2>
+      <div className="rounded-lg border border-line bg-pitch-night-raised p-3">
+        <div className="mb-3 flex items-center justify-between text-[11px] font-semibold text-text-muted">
           <span className="truncate text-blue-400">{homeTeamName}</span>
           <span className="truncate text-green-400">{awayTeamName}</span>
         </div>
@@ -49,7 +49,7 @@ export default function MatchStats({
         <StatRow label="İkili Mücadele" home={stats.duelsWon[0]} away={stats.duelsWon[1]} />
         <StatRow label="Hava Topu" home={stats.aerialDuelsWon[0]} away={stats.aerialDuelsWon[1]} />
         <StatRow label="Ofsayt" home={stats.offsides[0]} away={stats.offsides[1]} />
-        <p className="mt-2 text-center text-[9px] italic text-neutral-700">
+        <p className="mt-2 text-center text-[9px] italic text-text-muted">
           İstatistikler eğlence amaçlıdır, gerçek maç kaydı değildir.
         </p>
       </div>

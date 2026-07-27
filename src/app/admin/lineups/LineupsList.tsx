@@ -29,7 +29,7 @@ export default function LineupsList({ lineups }: { lineups: LineupData[] }) {
     <div>
       <button
         onClick={() => setShowInspiration((v) => !v)}
-        className={`mb-4 rounded-lg border-2 px-3 py-1.5 text-xs font-bold ${showInspiration ? 'border-amber-500 bg-amber-400/10 text-amber-400' : 'border-neutral-800 text-neutral-500'}`}
+        className={`mb-4 rounded-lg border-2 px-3 py-1.5 text-xs font-bold ${showInspiration ? 'border-amber-500 bg-amber-400/10 text-amber-400' : 'border-line text-text-muted'}`}
       >
         {showInspiration ? '⭐ İlham Alınan Futbolcular Gösteriliyor' : 'İlham Alınan Futbolcuları Göster'}
       </button>
@@ -42,7 +42,7 @@ export default function LineupsList({ lineups }: { lineups: LineupData[] }) {
               <div className="mb-2 flex items-center justify-between">
                 <div>
                   <span className="font-semibold">{lineup.squadName}</span>
-                  <span className="ml-2 text-xs text-neutral-500">
+                  <span className="ml-2 text-xs text-text-muted">
                     {lineup.format}v{lineup.format} · {lineup.submittedByUsername}
                   </span>
                 </div>
@@ -54,8 +54,8 @@ export default function LineupsList({ lineups }: { lineups: LineupData[] }) {
               <div className="mb-3 flex flex-col gap-1">
                 {lineup.rows.map((row) => (
                   <div key={row.position} className="flex items-center gap-2 text-xs">
-                    <span className="w-16 shrink-0 font-semibold text-neutral-500">{positionLabel[row.position]}</span>
-                    <span className="text-neutral-300">
+                    <span className="w-16 shrink-0 font-semibold text-text-muted">{positionLabel[row.position]}</span>
+                    <span className="text-text-primary">
                       {row.slots
                         .map((s) => (showInspiration && s.styleInspiration ? s.styleInspiration : s.playerName))
                         .join(', ')}
@@ -81,7 +81,7 @@ export default function LineupsList({ lineups }: { lineups: LineupData[] }) {
             </div>
           );
         })}
-        {lineups.length === 0 && <p className="text-sm text-neutral-600">Henüz kadro önerisi yok.</p>}
+        {lineups.length === 0 && <p className="text-sm text-text-muted">Henüz kadro önerisi yok.</p>}
       </div>
     </div>
   );

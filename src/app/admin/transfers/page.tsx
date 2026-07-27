@@ -64,7 +64,7 @@ export default async function AdminTransfersPage() {
             <div className="mb-1 font-semibold">
               {n.player.name}: {n.fromTeam?.name ?? 'Serbest'} → {n.toTeam?.name ?? 'Serbest'}
             </div>
-            {n.note && <p className="mb-2 text-xs text-neutral-500">{n.note}</p>}
+            {n.note && <p className="mb-2 text-xs text-text-muted">{n.note}</p>}
             <form
               action={async (formData) => {
                 'use server';
@@ -80,7 +80,7 @@ export default async function AdminTransfersPage() {
                 ))}
               </select>
               <input name="note" placeholder="Güncel not" defaultValue={n.note ?? ''} className="flex-1 rounded border px-2 py-1 text-xs" />
-              <button className="rounded bg-neutral-700 px-3 py-1 text-xs font-semibold text-white">Güncelle</button>
+              <button className="rounded bg-line px-3 py-1 text-xs font-semibold text-white">Güncelle</button>
             </form>
             <form
               action={async () => {
@@ -95,7 +95,7 @@ export default async function AdminTransfersPage() {
             </form>
           </div>
         ))}
-        {news.length === 0 && <p className="text-sm text-neutral-600">Henüz transfer haberi yok.</p>}
+        {news.length === 0 && <p className="text-sm text-text-muted">Henüz transfer haberi yok.</p>}
       </div>
     </div>
   );

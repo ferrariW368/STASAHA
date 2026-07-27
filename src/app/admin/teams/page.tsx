@@ -42,7 +42,7 @@ export default async function AdminTeamsPage({
                   defaultValue={team.name}
                   className="flex-1 rounded border px-2 py-1 font-semibold"
                 />
-                <button className="rounded bg-neutral-700 px-3 py-1 text-sm text-white">Kaydet</button>
+                <button className="rounded bg-line px-3 py-1 text-sm text-white">Kaydet</button>
               </form>
               <form
                 action={async () => {
@@ -85,7 +85,7 @@ export default async function AdminTeamsPage({
             >
               <input name="playerName" placeholder="Oyuncu adı" className="flex-1 rounded border px-2 py-1 text-sm" />
               <input name="number" placeholder="No" className="w-16 rounded border px-2 py-1 text-sm" />
-              <button className="rounded bg-neutral-700 px-3 py-1 text-sm text-white">Ekle</button>
+              <button className="rounded bg-line px-3 py-1 text-sm text-white">Ekle</button>
             </form>
           </div>
         ))}

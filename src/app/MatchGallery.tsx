@@ -69,7 +69,7 @@ export default function MatchGallery({ matches }: { matches: GalleryMatch[] }) {
               <div className="flex items-center justify-between gap-2">
                 <span className="font-medium">{m.homeTeamName} vs {m.awayTeamName}</span>
                 {isFinished ? (
-                  <span className="shrink-0 rounded-full bg-neutral-800 px-2 py-1 text-xs font-semibold text-neutral-300">
+                  <span className="shrink-0 rounded-full bg-line px-2 py-1 text-xs font-semibold text-text-primary">
                     {m.finalHomeScore} - {m.finalAwayScore}
                   </span>
                 ) : isLocked ? (
@@ -89,7 +89,7 @@ export default function MatchGallery({ matches }: { matches: GalleryMatch[] }) {
           );
         })}
         {filtered.length === 0 && (
-          <p className="col-span-full rounded-xl border border-line bg-pitch-night-raised p-4 text-center text-sm text-neutral-600">
+          <p className="col-span-full rounded-xl border border-line bg-pitch-night-raised p-4 text-center text-sm text-text-muted">
             Bu filtreye uyan maç yok.
           </p>
         )}

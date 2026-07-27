@@ -81,13 +81,13 @@ export default function LineupBuilderPage() {
   return (
     <main className="mx-auto max-w-lg px-4 py-6">
       <h1 className="mb-1 text-2xl font-bold">⚽ Kadro Planla</h1>
-      <p className="mb-4 text-xs text-neutral-500">
+      <p className="mb-4 text-xs text-text-muted">
         Hayalindeki kadroyu kur, admin onaylarsa yeni maç kurulurken hazır bekler.
       </p>
 
       {!format ? (
-        <div className="rounded-xl bg-neutral-900 p-4 shadow-sm">
-          <h2 className="mb-3 text-sm font-semibold text-neutral-400">Kaça kaça oynanacak?</h2>
+        <div className="rounded-xl bg-pitch-night-raised p-4 shadow-sm">
+          <h2 className="mb-3 text-sm font-semibold text-text-muted">Kaça kaça oynanacak?</h2>
           <div className="grid grid-cols-4 gap-2">
             {VALID_FORMATS.map((f) => (
               <button
@@ -106,12 +106,12 @@ export default function LineupBuilderPage() {
             value={squadName}
             onChange={(e) => setSquadName(e.target.value)}
             placeholder="Takımına bir isim ver"
-            className="mb-3 w-full rounded-xl border-2 border-neutral-800 px-3 py-2 text-sm font-semibold"
+            className="mb-3 w-full rounded-xl border-2 border-line px-3 py-2 text-sm font-semibold"
           />
 
           <button
             onClick={() => setShowInspiration((v) => !v)}
-            className={`mb-3 w-full rounded-xl border-2 py-2 text-xs font-bold ${showInspiration ? 'border-amber-500 bg-amber-400/10 text-amber-400' : 'border-neutral-800 text-neutral-500'}`}
+            className={`mb-3 w-full rounded-xl border-2 py-2 text-xs font-bold ${showInspiration ? 'border-amber-500 bg-amber-400/10 text-amber-400' : 'border-line text-text-muted'}`}
           >
             {showInspiration ? '⭐ İlham Alınan Futbolcular Gösteriliyor' : 'İlham Alınan Futbolcuları Göster'}
           </button>
@@ -151,12 +151,12 @@ export default function LineupBuilderPage() {
           </div>
 
           {pickerSlot && (
-            <div className="mb-4 rounded-xl bg-neutral-900 p-3 shadow-sm">
+            <div className="mb-4 rounded-xl bg-pitch-night-raised p-3 shadow-sm">
               <div className="mb-2 flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-neutral-400">
+                <h2 className="text-sm font-semibold text-text-muted">
                   {positionLabel[pickerSlot.position]} seç
                 </h2>
-                <button onClick={() => setPickerSlot(null)} className="text-xs text-neutral-600">Kapat</button>
+                <button onClick={() => setPickerSlot(null)} className="text-xs text-text-muted">Kapat</button>
               </div>
               <div className="flex max-h-64 flex-col gap-1 overflow-y-auto">
                 {players
@@ -170,7 +170,7 @@ export default function LineupBuilderPage() {
                     <button
                       key={p.id}
                       onClick={() => assignPlayer(pickerSlot.position, pickerSlot.slotOrder, p.id)}
-                      className="flex items-center justify-between rounded-lg bg-neutral-800 px-3 py-2 text-left text-sm active:bg-neutral-950"
+                      className="flex items-center justify-between rounded-lg bg-line px-3 py-2 text-left text-sm active:bg-pitch-night"
                     >
                       <span>
                         {displayName(p)} {p.number ? `#${p.number}` : ''}
@@ -178,11 +178,11 @@ export default function LineupBuilderPage() {
                           <span className="ml-1 text-[10px] text-amber-400">({positionLabel[p.position as Position]})</span>
                         )}
                       </span>
-                      <span className="text-xs text-neutral-600">{p.teamName ?? 'Serbest'}</span>
+                      <span className="text-xs text-text-muted">{p.teamName ?? 'Serbest'}</span>
                     </button>
                   ))}
                 {players.filter((p) => !usedPlayerIds.has(p.id)).length === 0 && (
-                  <p className="px-3 py-2 text-xs text-neutral-600">Uygun oyuncu kalmadı.</p>
+                  <p className="px-3 py-2 text-xs text-text-muted">Uygun oyuncu kalmadı.</p>
                 )}
               </div>
             </div>
@@ -194,7 +194,7 @@ export default function LineupBuilderPage() {
                 setFormat(null);
                 setSlots([]);
               }}
-              className="rounded-xl border border-neutral-700 px-4 py-2 text-sm font-semibold text-neutral-400"
+              className="rounded-xl border border-line px-4 py-2 text-sm font-semibold text-text-muted"
             >
               Vazgeç
             </button>
@@ -210,7 +210,7 @@ export default function LineupBuilderPage() {
       )}
 
       {message && (
-        <p className="mt-4 rounded-xl bg-neutral-900 p-3 text-center text-sm shadow-sm">{message}</p>
+        <p className="mt-4 rounded-xl bg-pitch-night-raised p-3 text-center text-sm shadow-sm">{message}</p>
       )}
     </main>
   );

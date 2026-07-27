@@ -209,17 +209,17 @@ export default async function HomePage() {
                 return (
                   <li key={n.id} className="rounded-xl border border-line bg-pitch-night-raised p-3 shadow-sm">
                     <div className="mb-1 flex items-center justify-between">
-                      <Link href={`/players/${n.playerId}`} className="font-medium text-neutral-100">
+                      <Link href={`/players/${n.playerId}`} className="font-medium text-text-primary">
                         {n.player.name}
                       </Link>
                       <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${stage.className}`}>
                         {stage.text}
                       </span>
                     </div>
-                    <p className="text-xs text-neutral-500">
+                    <p className="text-xs text-text-muted">
                       {n.fromTeam?.name ?? 'Serbest'} → {n.toTeam?.name ?? 'Serbest'}
                     </p>
-                    {n.note && <p className="mt-1 text-xs text-neutral-500">{n.note}</p>}
+                    {n.note && <p className="mt-1 text-xs text-text-muted">{n.note}</p>}
                   </li>
                 );
               })}
@@ -239,16 +239,16 @@ export default async function HomePage() {
             {topUsers.map((u, i) => (
               <li key={u.username} className="flex justify-between rounded-lg px-3 py-2 text-sm">
                 <span>
-                  <span className="mr-1 text-neutral-600">{i + 1}.</span>
+                  <span className="mr-1 text-text-muted">{i + 1}.</span>
                   {u.username}
                 </span>
-                <span className={`font-semibold ${u.score.net > 0 ? 'text-green-400' : u.score.net < 0 ? 'text-red-400' : 'text-neutral-500'}`}>
+                <span className={`font-semibold ${u.score.net > 0 ? 'text-green-400' : u.score.net < 0 ? 'text-red-400' : 'text-text-muted'}`}>
                   {u.score.net > 0 ? '+' : ''}{u.score.net} puan
                 </span>
               </li>
             ))}
             {topUsers.length === 0 && (
-              <li className="px-3 py-2 text-sm text-neutral-600">Henüz kullanıcı yok.</li>
+              <li className="px-3 py-2 text-sm text-text-muted">Henüz kullanıcı yok.</li>
             )}
           </ol>
         </section>

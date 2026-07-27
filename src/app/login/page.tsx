@@ -27,13 +27,13 @@ export default function LoginPage() {
       <h1 className="mb-6 text-2xl font-bold">Giriş Yap</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input
-          className="rounded border border-neutral-700 bg-neutral-900 px-3 py-2 placeholder-neutral-500"
+          className="rounded border border-line bg-pitch-night-raised px-3 py-2 placeholder-neutral-500"
           placeholder="Kullanıcı adı"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
         <input
-          className="rounded border border-neutral-700 bg-neutral-900 px-3 py-2 placeholder-neutral-500"
+          className="rounded border border-line bg-pitch-night-raised px-3 py-2 placeholder-neutral-500"
           type="password"
           placeholder="Şifre"
           value={password}

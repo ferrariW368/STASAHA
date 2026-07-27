@@ -15,7 +15,7 @@ function SideBannerContent() {
       <span className="jackpot-pulse inline-block text-4xl">🎰</span>
       <span className="text-sm font-black leading-tight tracking-wide text-amber-300">FERRARI</span>
       <span className="text-sm font-black leading-tight tracking-wide text-amber-300">BET</span>
-      <span className="text-[10px] font-bold text-neutral-400">✕</span>
+      <span className="text-[10px] font-bold text-text-muted">✕</span>
       <span className="text-sm font-black leading-tight tracking-wide text-white">STASAHA</span>
       <div className="my-1 h-px w-16 bg-amber-400/40" />
       {items.slice(1).map((item, i) => (
@@ -37,7 +37,7 @@ function MobileBannerStrip() {
       <div className="flex items-center gap-3 overflow-x-auto rounded-xl border-2 border-double border-amber-300 bg-gradient-to-r from-red-900 via-neutral-900 to-red-900 px-3 py-2 shadow-[0_0_20px_rgba(251,191,36,0.45)]">
         <span className="jackpot-pulse inline-block shrink-0 text-xl">🎰</span>
         <span className="shrink-0 text-xs font-black tracking-wide text-amber-300">
-          FERRARI BET <span className="text-neutral-400">✕</span> <span className="text-white">STASAHA</span>
+          FERRARI BET <span className="text-text-muted">✕</span> <span className="text-white">STASAHA</span>
         </span>
         {items.slice(1).map((item, i) => (
           <span key={i} className="flex shrink-0 items-center gap-1 text-[11px] font-black tracking-wide text-amber-400">

@@ -46,7 +46,7 @@ function OddsButton({
       className={`pop-interactive flex flex-1 flex-col items-center rounded-lg border py-2 text-sm transition-colors ${
         active
           ? 'border-green-600 bg-green-600 text-white'
-          : 'border-neutral-700 bg-neutral-900 text-neutral-200 active:bg-neutral-950'
+          : 'border-line bg-pitch-night-raised text-text-primary active:bg-pitch-night'
       }`}
     >
       <span className="text-xs">{label}</span>
@@ -85,7 +85,7 @@ export default function MatchDetailPage() {
 
   if (!match) {
     return (
-      <main className="mx-auto max-w-lg overflow-hidden px-4 py-10 text-center text-sm text-neutral-500">
+      <main className="mx-auto max-w-lg overflow-hidden px-4 py-10 text-center text-sm text-text-muted">
         <F1Car className="race-car-loader mx-auto mb-3 h-8 w-auto text-red-600" />
         Maç yükleniyor...
       </main>
@@ -148,11 +148,11 @@ export default function MatchDetailPage() {
 
   return (
     <main className="mx-auto max-w-lg px-4 pb-40 pt-6">
-      <div className="mb-5 rounded-xl bg-neutral-900 p-4 text-center shadow-sm">
+      <div className="mb-5 rounded-xl bg-pitch-night-raised p-4 text-center shadow-sm">
         <h1 className="text-lg font-bold">
-          {match.homeTeam.name} <span className="text-neutral-600">vs</span> {match.awayTeam.name}
+          {match.homeTeam.name} <span className="text-text-muted">vs</span> {match.awayTeam.name}
         </h1>
-        <p className="mt-1 text-xs text-neutral-500">
+        <p className="mt-1 text-xs text-text-muted">
           {new Date(match.kickoffTime).toLocaleString('tr-TR', { dateStyle: 'medium', timeStyle: 'short' })}
         </p>
       </div>
@@ -177,7 +177,7 @@ export default function MatchDetailPage() {
       )}
 
       <section className="mb-5">
-        <h2 className="mb-2 text-sm font-semibold text-neutral-400">Maç Sonucu</h2>
+        <h2 className="mb-2 text-sm font-semibold text-text-muted">Maç Sonucu</h2>
         <div className="flex gap-2">
           {oneXTwo.map((o) => (
             <OddsButton
@@ -191,7 +191,7 @@ export default function MatchDetailPage() {
       </section>
 
       <section className="mb-5">
-        <h2 className="mb-2 text-sm font-semibold text-neutral-400">Toplam Gol</h2>
+        <h2 className="mb-2 text-sm font-semibold text-text-muted">Toplam Gol</h2>
         <div className="flex gap-2">
           {ouGoals.map((o) => (
             <OddsButton
@@ -206,7 +206,7 @@ export default function MatchDetailPage() {
 
       {htOuGoals.length > 0 && (
       <section className="mb-5">
-        <h2 className="mb-2 text-sm font-semibold text-neutral-400">İlk Yarı Toplam Gol</h2>
+        <h2 className="mb-2 text-sm font-semibold text-text-muted">İlk Yarı Toplam Gol</h2>
         <div className="flex gap-2">
           {htOuGoals.map((o) => (
             <OddsButton
@@ -223,28 +223,28 @@ export default function MatchDetailPage() {
       <AdBanner />
 
       <section className="mb-5">
-        <h2 className="mb-2 text-sm font-semibold text-neutral-400">Skor Tahmini</h2>
-        <div className="overflow-x-auto rounded-lg border border-neutral-800 bg-neutral-900">
+        <h2 className="mb-2 text-sm font-semibold text-text-muted">Skor Tahmini</h2>
+        <div className="overflow-x-auto rounded-lg border border-line bg-pitch-night-raised">
           <table className="w-full border-collapse text-xs">
             <thead>
               <tr>
-                <th className="border-b border-r border-neutral-800 bg-neutral-800 p-1 text-[10px] text-neutral-600">Ev \ Dep</th>
+                <th className="border-b border-r border-line bg-line p-1 text-[10px] text-text-muted">Ev \ Dep</th>
                 {Array.from({ length: MAX_GOALS_PER_SIDE + 1 }, (_, a) => a).map((a) => (
-                  <th key={a} className="border-b border-neutral-800 bg-neutral-800 p-1 text-neutral-500">{a}</th>
+                  <th key={a} className="border-b border-line bg-line p-1 text-text-muted">{a}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {scoreGrid.map((row) => (
                 <tr key={row.home}>
-                  <th className="border-r border-neutral-800 bg-neutral-800 p-1 text-neutral-500">{row.home}</th>
+                  <th className="border-r border-line bg-line p-1 text-text-muted">{row.home}</th>
                   {row.cells.map((o, i) =>
                     o ? (
-                      <td key={i} className="border border-neutral-900 p-0.5">
+                      <td key={i} className="border border-line p-0.5">
                         <button
                           onClick={() => toggleSelection(o)}
                           className={`w-full rounded py-1 text-[11px] font-semibold ${
-                            isSelected(o) ? 'bg-green-600 text-white' : 'bg-neutral-800 text-neutral-300 active:bg-neutral-800'
+                            isSelected(o) ? 'bg-green-600 text-white' : 'bg-line text-text-primary active:bg-line'
                           }`}
                         >
                           <AnimatedNumber value={o.oddsValue} decimals={1} />
@@ -262,14 +262,14 @@ export default function MatchDetailPage() {
       </section>
 
       <section className="mb-5">
-        <h2 className="mb-2 text-sm font-semibold text-neutral-400">Oyuncu Golleri</h2>
+        <h2 className="mb-2 text-sm font-semibold text-text-muted">Oyuncu Golleri</h2>
         <div className="flex flex-col gap-3">
           {[
             { team: match.homeTeam, teamLabel: match.homeTeam.name },
             { team: match.awayTeam, teamLabel: match.awayTeam.name },
           ].map(({ team, teamLabel }) => (
-            <div key={teamLabel} className="rounded-lg border border-neutral-800 bg-neutral-900 p-3">
-              <p className="mb-2 text-xs font-semibold text-neutral-500">{teamLabel}</p>
+            <div key={teamLabel} className="rounded-lg border border-line bg-pitch-night-raised p-3">
+              <p className="mb-2 text-xs font-semibold text-text-muted">{teamLabel}</p>
               <div className="flex flex-col gap-2">
                 {team.players.map((p) => {
                   const onePlus = findOdds(match.odds, 'PLAYER_GOALS', `${p.id}:1+`);
@@ -277,7 +277,7 @@ export default function MatchDetailPage() {
                   if (!onePlus && !twoPlus) return null;
                   return (
                     <div key={p.id} className="flex items-center gap-2">
-                      <span className="w-20 shrink-0 truncate text-xs text-neutral-300">
+                      <span className="w-20 shrink-0 truncate text-xs text-text-primary">
                         {p.name}
                         {p.number ? ` (#${p.number})` : ''}
                       </span>
@@ -288,7 +288,7 @@ export default function MatchDetailPage() {
                     </div>
                   );
                 })}
-                {team.players.length === 0 && <p className="text-xs text-neutral-600">Kadro girilmemiş.</p>}
+                {team.players.length === 0 && <p className="text-xs text-text-muted">Kadro girilmemiş.</p>}
               </div>
             </div>
           ))}
@@ -296,7 +296,7 @@ export default function MatchDetailPage() {
       </section>
 
       <section className="mb-5">
-        <h2 className="mb-2 text-sm font-semibold text-neutral-400">🎉 Eğlenceli Bahisler</h2>
+        <h2 className="mb-2 text-sm font-semibold text-text-muted">🎉 Eğlenceli Bahisler</h2>
         <div className="mb-2 flex gap-2">
           <OddsButton odds={findOdds(match.odds, 'BTS', 'YES')} label="KG Var" {...oddsButtonProps(findOdds(match.odds, 'BTS', 'YES'))} />
           <OddsButton odds={findOdds(match.odds, 'BTS', 'NO')} label="KG Yok" {...oddsButtonProps(findOdds(match.odds, 'BTS', 'NO'))} />
@@ -352,14 +352,14 @@ export default function MatchDetailPage() {
       </section>
 
       <section className="mb-5">
-        <h2 className="mb-2 text-sm font-semibold text-neutral-400">🥊 Kavga & Geç Kalma</h2>
+        <h2 className="mb-2 text-sm font-semibold text-text-muted">🥊 Kavga & Geç Kalma</h2>
         <div className="flex flex-col gap-3">
           {[
             { team: match.homeTeam, teamLabel: match.homeTeam.name },
             { team: match.awayTeam, teamLabel: match.awayTeam.name },
           ].map(({ team, teamLabel }) => (
-            <div key={teamLabel} className="rounded-lg border border-neutral-800 bg-neutral-900 p-3">
-              <p className="mb-2 text-xs font-semibold text-neutral-500">{teamLabel}</p>
+            <div key={teamLabel} className="rounded-lg border border-line bg-pitch-night-raised p-3">
+              <p className="mb-2 text-xs font-semibold text-text-muted">{teamLabel}</p>
               <div className="flex flex-col gap-2">
                 {team.players.map((p) => {
                   const fightYes = findOdds(match.odds, 'FIGHT', `${p.id}:YES`);
@@ -367,7 +367,7 @@ export default function MatchDetailPage() {
                   if (!fightYes && !lateYes) return null;
                   return (
                     <div key={p.id} className="flex items-center gap-2">
-                      <span className="w-20 shrink-0 truncate text-xs text-neutral-300">{p.name}</span>
+                      <span className="w-20 shrink-0 truncate text-xs text-text-primary">{p.name}</span>
                       <div className="flex flex-1 gap-1">
                         <OddsButton odds={fightYes} label="Kavga Eder" {...oddsButtonProps(fightYes)} />
                         <OddsButton odds={lateYes} label="Geç Kalır" {...oddsButtonProps(lateYes)} />
@@ -375,14 +375,14 @@ export default function MatchDetailPage() {
                     </div>
                   );
                 })}
-                {team.players.length === 0 && <p className="text-xs text-neutral-600">Kadro girilmemiş.</p>}
+                {team.players.length === 0 && <p className="text-xs text-text-muted">Kadro girilmemiş.</p>}
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      <div className="fixed inset-x-0 bottom-0 z-10 border-t border-neutral-800 bg-neutral-900/95 px-4 py-3 backdrop-blur">
+      <div className="fixed inset-x-0 bottom-0 z-10 border-t border-line bg-pitch-night-raised/95 px-4 py-3 backdrop-blur">
         <div className="mx-auto max-w-lg">
           {selected.length > 0 && (
             <div className="mb-2 flex flex-wrap gap-1">
@@ -394,7 +394,7 @@ export default function MatchDetailPage() {
             </div>
           )}
           <div className="mb-2 flex items-center justify-between text-sm">
-            <span className="text-neutral-500">Toplam Oran</span>
+            <span className="text-text-muted">Toplam Oran</span>
             <span className="font-bold">
               {selected.length ? <AnimatedNumber value={totalOdds} decimals={2} /> : '-'}
             </span>
@@ -405,7 +405,7 @@ export default function MatchDetailPage() {
               min={1}
               value={stake}
               onChange={(e) => setStake(parseInt(e.target.value, 10) || 0)}
-              className="w-24 rounded-lg border border-neutral-700 px-3 py-2 text-sm"
+              className="w-24 rounded-lg border border-line px-3 py-2 text-sm"
               placeholder="STA"
             />
             <button

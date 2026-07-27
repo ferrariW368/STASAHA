@@ -18,7 +18,7 @@ export default async function PlayersPage() {
   return (
     <main className="mx-auto max-w-lg px-4 py-6">
       <h1 className="mb-1 text-2xl font-bold">Oyuncular</h1>
-      <p className="mb-4 text-xs text-neutral-500">Kadro, güç değerleri ve piyasa değerleri</p>
+      <p className="mb-4 text-xs text-text-muted">Kadro, güç değerleri ve piyasa değerleri</p>
       <div className="flex flex-col gap-2">
         {players.map((p) => {
           const rating = overallRating(p);
@@ -26,14 +26,14 @@ export default async function PlayersPage() {
             <Link
               key={p.id}
               href={`/players/${p.id}`}
-              className="pop-interactive flex items-center justify-between rounded-xl bg-neutral-900 p-3 shadow-sm"
+              className="pop-interactive flex items-center justify-between rounded-xl bg-pitch-night-raised p-3 shadow-sm"
             >
               <div>
                 <div className="font-medium">
                   {p.name}
-                  {p.number ? <span className="ml-1 text-xs text-neutral-600">#{p.number}</span> : null}
+                  {p.number ? <span className="ml-1 text-xs text-text-muted">#{p.number}</span> : null}
                 </div>
-                <div className="text-xs text-neutral-500">{p.team ? p.team.name : 'Serbest Oyuncu'}</div>
+                <div className="text-xs text-text-muted">{p.team ? p.team.name : 'Serbest Oyuncu'}</div>
               </div>
               <div className="flex items-center gap-3">
                 {rating !== null && (
@@ -49,7 +49,7 @@ export default async function PlayersPage() {
           );
         })}
         {players.length === 0 && (
-          <p className="rounded-xl bg-neutral-900 p-4 text-center text-sm text-neutral-600 shadow-sm">
+          <p className="rounded-xl bg-pitch-night-raised p-4 text-center text-sm text-text-muted shadow-sm">
             Henüz oyuncu yok.
           </p>
         )}

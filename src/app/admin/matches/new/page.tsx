@@ -35,7 +35,7 @@ export default async function NewMatchPage() {
         </select>
         <input type="datetime-local" name="kickoffTime" className="rounded border px-3 py-2" required />
         <div>
-          <label className="mb-1 block text-sm text-neutral-400">Toplam Gol Alt/Üst Çizgisi</label>
+          <label className="mb-1 block text-sm text-text-muted">Toplam Gol Alt/Üst Çizgisi</label>
           <input
             type="number"
             name="ouLine"
@@ -45,12 +45,12 @@ export default async function NewMatchPage() {
             className="w-full rounded border px-3 py-2"
             required
           />
-          <p className="mt-1 text-xs text-neutral-600">
+          <p className="mt-1 text-xs text-text-muted">
             Buçuklu bir sayı kullan (örn. 9.5) — tam sayıda beraberlik ihtimali oluşur.
           </p>
         </div>
         <div>
-          <label className="mb-1 block text-sm text-neutral-400">İlk Yarı Toplam Gol Alt/Üst Çizgisi</label>
+          <label className="mb-1 block text-sm text-text-muted">İlk Yarı Toplam Gol Alt/Üst Çizgisi</label>
           <input
             type="number"
             name="htOuLine"

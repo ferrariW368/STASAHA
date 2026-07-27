@@ -11,7 +11,7 @@ const attributeLabels: { key: 'pace' | 'shooting' | 'passing' | 'dribbling' | 'd
 ];
 
 const stageLabel: Record<string, { text: string; className: string }> = {
-  RUMOR: { text: 'Söylenti', className: 'bg-neutral-800 text-neutral-400' },
+  RUMOR: { text: 'Söylenti', className: 'bg-line text-text-muted' },
   ADVANCED: { text: 'Büyük Oranda Bitti', className: 'bg-amber-400/10 text-amber-400' },
   FAILED: { text: 'Gerçekleşmedi', className: 'bg-red-500/10 text-red-400' },
   SIGNED: { text: 'İmza Atıldı', className: 'bg-green-500/10 text-green-400' },
@@ -35,7 +35,7 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
 
   if (!player) {
     return (
-      <main className="mx-auto max-w-lg px-4 py-10 text-center text-sm text-neutral-500">
+      <main className="mx-auto max-w-lg px-4 py-10 text-center text-sm text-text-muted">
         Oyuncu bulunamadı.
       </main>
     );
@@ -52,17 +52,17 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
 
   return (
     <main className="mx-auto max-w-lg px-4 py-6">
-      <Link href="/players" className="mb-4 inline-block text-sm text-neutral-500">‹ Oyuncular</Link>
+      <Link href="/players" className="mb-4 inline-block text-sm text-text-muted">‹ Oyuncular</Link>
 
-      <div className="mb-4 rounded-xl bg-neutral-900 p-4 shadow-sm">
+      <div className="mb-4 rounded-xl bg-pitch-night-raised p-4 shadow-sm">
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-xl font-bold">
-              {player.name} {player.number ? <span className="text-neutral-600">#{player.number}</span> : null}
+              {player.name} {player.number ? <span className="text-text-muted">#{player.number}</span> : null}
             </h1>
-            <p className="text-sm text-neutral-500">{player.team ? player.team.name : 'Serbest Oyuncu'}</p>
+            <p className="text-sm text-text-muted">{player.team ? player.team.name : 'Serbest Oyuncu'}</p>
             {player.styleInspiration && (
-              <p className="mt-1 text-xs italic text-neutral-600">Oyun stili esini: {player.styleInspiration}</p>
+              <p className="mt-1 text-xs italic text-text-muted">Oyun stili esini: {player.styleInspiration}</p>
             )}
           </div>
           {overall !== null && (
@@ -80,19 +80,19 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
       </div>
 
       {values.length > 0 && (
-        <div className="mb-4 rounded-xl bg-neutral-900 p-4 shadow-sm">
-          <h2 className="mb-3 text-sm font-semibold text-neutral-400">Özellikler</h2>
+        <div className="mb-4 rounded-xl bg-pitch-night-raised p-4 shadow-sm">
+          <h2 className="mb-3 text-sm font-semibold text-text-muted">Özellikler</h2>
           <div className="flex flex-col gap-2">
             {attributeLabels.map(({ key, label }) => {
               const value = player[key];
               if (value === null) return null;
               return (
                 <div key={key} className="flex items-center gap-2">
-                  <span className="w-16 shrink-0 text-xs text-neutral-400">{label}</span>
-                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-neutral-950">
+                  <span className="w-16 shrink-0 text-xs text-text-muted">{label}</span>
+                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-pitch-night">
                     <div className="h-full rounded-full bg-amber-400" style={{ width: `${value}%` }} />
                   </div>
-                  <span className="w-6 shrink-0 text-right text-xs font-semibold text-neutral-300">{value}</span>
+                  <span className="w-6 shrink-0 text-right text-xs font-semibold text-text-primary">{value}</span>
                 </div>
               );
             })}
@@ -100,8 +100,8 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
         </div>
       )}
 
-      <div className="mb-4 rounded-xl bg-neutral-900 p-4 shadow-sm">
-        <h2 className="mb-2 text-sm font-semibold text-neutral-400">Hali Saha Karnesi</h2>
+      <div className="mb-4 rounded-xl bg-pitch-night-raised p-4 shadow-sm">
+        <h2 className="mb-2 text-sm font-semibold text-text-muted">Hali Saha Karnesi</h2>
         <p className="text-sm">Maç sayısı: <span className="font-semibold">{playedAppearances.length}</span></p>
         <p className="text-sm">Toplam gol: <span className="font-semibold">{totalGoals}</span></p>
         {gkStarts > 0 && player.position !== 'GK' && (
@@ -115,20 +115,20 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
       </div>
 
       {player.transferNews.length > 0 && (
-        <div className="rounded-xl bg-neutral-900 p-4 shadow-sm">
-          <h2 className="mb-2 text-sm font-semibold text-neutral-400">Transfer Geçmişi</h2>
+        <div className="rounded-xl bg-pitch-night-raised p-4 shadow-sm">
+          <h2 className="mb-2 text-sm font-semibold text-text-muted">Transfer Geçmişi</h2>
           <ul className="flex flex-col gap-2">
             {player.transferNews.map((n) => {
               const stage = stageLabel[n.stage] ?? stageLabel.RUMOR;
               return (
-                <li key={n.id} className="rounded-lg bg-neutral-800 p-2 text-xs">
+                <li key={n.id} className="rounded-lg bg-line p-2 text-xs">
                   <div className="mb-1 flex items-center justify-between">
                     <span>
                       {n.fromTeam?.name ?? 'Serbest'} → {n.toTeam?.name ?? 'Serbest'}
                     </span>
                     <span className={`rounded-full px-2 py-0.5 font-semibold ${stage.className}`}>{stage.text}</span>
                   </div>
-                  {n.note && <p className="text-neutral-500">{n.note}</p>}
+                  {n.note && <p className="text-text-muted">{n.note}</p>}
                 </li>
               );
             })}

@@ -16,7 +16,7 @@ export default async function AdminDashboard() {
             <Link href={`/admin/matches/${m.id}`} className="font-medium text-green-400">
               {m.homeTeam.name} vs {m.awayTeam.name}
             </Link>
-            <div className="text-neutral-500">
+            <div className="text-text-muted">
               {m.kickoffTime.toLocaleString('tr-TR')} — durum: {m.status}
               {m.status === 'finished' ? ` (${m.finalHomeScore}-${m.finalAwayScore})` : ''}
             </div>
