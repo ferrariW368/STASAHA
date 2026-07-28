@@ -16,6 +16,8 @@ model User {
   createdAt    DateTime @default(now())
   bets         Bet[]
   lineups      Lineup[]
+  horseOwnerships HorseOwnership[]
+  horseBets       HorseBet[]
 }
 
 model Team {
@@ -192,4 +194,71 @@ model LineupSlot {
   slotOrder Int    // left-to-right order within that position row, for layout
 
   @@unique([lineupId, playerId])
+}
+
+model Horse {
+  id           String  @id @default(cuid())
+  name         String
+  number       Int?
+  color        String  // hex color, e.g. "#e8b923" — visual identity on the track/shop
+  speedRating  Int     // 1-10, admin-entered
+  formRating   Int     // 1-10, admin-entered
+  luckRating   Int     // 1-10, admin-entered — adds upset variance
+  price        Int     // STA, full (100%) ownership value, admin-entered
+  active       Boolean @default(true) // false = retired from the race pool, kept for history
+  ownerships   HorseOwnership[]
+  raceEntries  HorseRaceEntry[]
+  bets         HorseBet[]
+}
+
+model HorseOwnership {
+  id          String   @id @default(cuid())
+  horseId     String
+  horse       Horse    @relation(fields: [horseId], references: [id])
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  staInvested Int      // this user's cumulative STA investment in this horse
+  createdAt   DateTime @default(now())
+
+  @@unique([horseId, userId])
+}
+
+model HorseRace {
+  id            String   @id @default(cuid())
+  phase         String   @default("BETTING") // "BETTING" | "RACING" | "FINISHED"
+  bettingEndsAt DateTime
+  raceEndsAt    DateTime
+  seed          Int      // deterministic finish-order seed, shared by server settlement and client animation
+  createdAt     DateTime @default(now())
+  entries       HorseRaceEntry[]
+  bets          HorseBet[]
+}
+
+model HorseRaceEntry {
+  id             String    @id @default(cuid())
+  raceId         String
+  race           HorseRace @relation(fields: [raceId], references: [id])
+  horseId        String
+  horse          Horse     @relation(fields: [horseId], references: [id])
+  oddsValue      Float     // frozen at race creation, same pattern as the football Odds model
+  finishPosition Int?      // 1 = winner, filled in at settlement
+
+  @@unique([raceId, horseId])
+}
+
+model HorseBet {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id])
+  raceId         String
+  race           HorseRace @relation(fields: [raceId], references: [id])
+  horseId        String
+  horse          Horse     @relation(fields: [horseId], references: [id])
+  stake          Int
+  oddsValueAtBet Float
+  potentialWin   Int       // Math.round(stake * oddsValueAtBet), stored at bet time — same shape as Bet.potentialWin so both feed computeUserScore identically
+  status         String    @default("pending") // "pending" | "won" | "lost"
+  createdAt      DateTime  @default(now())
+
+  @@unique([userId, raceId])
 }
