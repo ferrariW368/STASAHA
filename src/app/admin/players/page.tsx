@@ -10,7 +10,7 @@ export default async function AdminPlayersPage() {
 
   return (
     <div>
-      <h1 className="mb-1 text-xl font-bold">Oyuncu Havuzu</h1>
+      <h2 className="mb-1 font-display text-lg tracking-wide text-text-primary">Oyuncu Havuzu</h2>
       <p className="mb-4 text-xs text-text-muted">
         Profil bilgileri (özellikler, piyasa değeri, oyun stili esini) tamamen senin girdiğin, gerçek bir
         futbolcunun verisi kopyalanmadan sadece esin olarak kullanılan değerlerdir.
@@ -25,20 +25,20 @@ export default async function AdminPlayersPage() {
         }}
         className="mb-6 flex flex-wrap gap-2"
       >
-        <input name="name" placeholder="Yeni oyuncu adı" className="flex-1 rounded border px-3 py-2 text-sm" required />
-        <input name="number" placeholder="No" className="w-16 rounded border px-3 py-2 text-sm" />
-        <select name="teamId" className="rounded border px-3 py-2 text-sm">
+        <input name="name" placeholder="Yeni oyuncu adı" className="flex-1 rounded-lg border border-line bg-pitch-night px-3 py-2 text-sm text-text-primary" required />
+        <input name="number" placeholder="No" className="w-16 rounded-lg border border-line bg-pitch-night px-3 py-2 text-sm text-text-primary" />
+        <select name="teamId" className="rounded-lg border border-line bg-pitch-night px-3 py-2 text-sm text-text-primary">
           <option value="">Serbest Oyuncu</option>
           {teams.map((t) => (
             <option key={t.id} value={t.id}>{t.name}</option>
           ))}
         </select>
-        <button className="rounded bg-green-600 px-4 py-2 text-sm font-semibold text-white">Ekle</button>
+        <button className="pop-interactive rounded-full bg-gold px-4 py-2 text-sm font-semibold text-pitch-night">Ekle</button>
       </form>
 
       <div className="flex flex-col gap-4">
         {players.map((p) => (
-          <div key={p.id} className="rounded border p-3">
+          <div key={p.id} className="rounded-xl border border-line bg-pitch-night-raised p-4">
             <form
               action={async (formData) => {
                 'use server';
@@ -65,10 +65,10 @@ export default async function AdminPlayersPage() {
               className="flex flex-col gap-2"
             >
               <div className="mb-1 flex items-center justify-between">
-                <span className="font-semibold">
+                <span className="font-semibold text-text-primary">
                   {p.name} {p.number ? `#${p.number}` : ''}
                 </span>
-                <select name="teamId" defaultValue={p.teamId ?? ''} className="rounded border px-2 py-1 text-xs">
+                <select name="teamId" defaultValue={p.teamId ?? ''} className="rounded-lg border border-line bg-pitch-night px-2 py-1 text-xs text-text-primary">
                   <option value="">Serbest Oyuncu</option>
                   {teams.map((t) => (
                     <option key={t.id} value={t.id}>{t.name}</option>
@@ -81,9 +81,9 @@ export default async function AdminPlayersPage() {
                   name="styleInspiration"
                   placeholder="Oyun stili esini (örn. Lionel Messi)"
                   defaultValue={p.styleInspiration ?? ''}
-                  className="flex-1 rounded border px-2 py-1 text-sm"
+                  className="flex-1 rounded-lg border border-line bg-pitch-night px-2 py-1 text-sm text-text-primary"
                 />
-                <select name="position" defaultValue={p.position ?? ''} className="rounded border px-2 py-1 text-sm">
+                <select name="position" defaultValue={p.position ?? ''} className="rounded-lg border border-line bg-pitch-night px-2 py-1 text-sm text-text-primary">
                   <option value="">Mevki seç</option>
                   <option value="GK">Kaleci</option>
                   <option value="DEF">Defans</option>
@@ -94,7 +94,7 @@ export default async function AdminPlayersPage() {
 
               <div className="grid grid-cols-3 gap-2 text-xs">
                 {(['pace', 'shooting', 'passing', 'dribbling', 'defending', 'physical'] as const).map((key) => (
-                  <label key={key} className="flex flex-col gap-0.5">
+                  <label key={key} className="flex flex-col gap-0.5 text-text-muted">
                     {key === 'pace' && 'Hız'}
                     {key === 'shooting' && 'Şut'}
                     {key === 'passing' && 'Pas'}
@@ -107,24 +107,24 @@ export default async function AdminPlayersPage() {
                       min={1}
                       max={99}
                       defaultValue={p[key] ?? ''}
-                      className="rounded border px-2 py-1"
+                      className="rounded-lg border border-line bg-pitch-night px-2 py-1 text-text-primary"
                     />
                   </label>
                 ))}
               </div>
 
-              <label className="flex flex-col gap-0.5 text-xs">
+              <label className="flex flex-col gap-0.5 text-xs text-text-muted">
                 Piyasa Değeri (STA)
                 <input
                   name="marketValue"
                   type="number"
                   min={0}
                   defaultValue={p.marketValue ?? ''}
-                  className="w-32 rounded border px-2 py-1"
+                  className="w-32 rounded-lg border border-line bg-pitch-night px-2 py-1 text-text-primary"
                 />
               </label>
 
-              <button className="mt-1 self-start rounded bg-line px-3 py-1.5 text-xs font-semibold text-white">
+              <button className="pop-interactive mt-1 self-start rounded-full border border-line px-3 py-1.5 text-xs font-semibold text-text-primary">
                 Kaydet
               </button>
             </form>
