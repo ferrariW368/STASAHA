@@ -27,7 +27,7 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
       odds: true,
     },
   });
-  if (!match) return <p>Maç bulunamadı.</p>;
+  if (!match) return <p className="text-text-muted">Maç bulunamadı.</p>;
 
   const allPlayers = [...match.homeTeam.players, ...match.awayTeam.players];
   const playerNameById = new Map(allPlayers.map((p) => [p.id, p.name]));
@@ -48,11 +48,11 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
 
   return (
     <div>
-      <h1 className="mb-4 text-xl font-bold">{match.homeTeam.name} vs {match.awayTeam.name}</h1>
+      <h2 className="mb-4 font-display text-lg tracking-wide text-text-primary">{match.homeTeam.name} vs {match.awayTeam.name}</h2>
       <p className="mb-4 text-sm text-text-muted">Durum: {match.status}</p>
 
       {match.status === 'finished' && (
-        <div className="text-sm">
+        <div className="mb-6 rounded-xl border border-line bg-pitch-night-raised p-4 text-sm text-text-primary">
           <p>Sonuç: {match.finalHomeScore} - {match.finalAwayScore}</p>
           <p>İlk yarı: {match.htHomeScore} - {match.htAwayScore}</p>
           <p>Kırmızı kart: {match.redCard ? 'Evet' : 'Hayır'}</p>
@@ -112,70 +112,70 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
             className="mb-6 flex flex-col gap-4"
           >
             <div className="flex gap-2">
-              <input name="homeScore" type="number" min={0} placeholder="Ev sahibi skor" className="w-1/2 rounded border px-3 py-2" required />
-              <input name="awayScore" type="number" min={0} placeholder="Deplasman skor" className="w-1/2 rounded border px-3 py-2" required />
+              <input name="homeScore" type="number" min={0} placeholder="Ev sahibi skor" className="w-1/2 rounded-lg border border-line bg-pitch-night px-3 py-2 text-sm text-text-primary" required />
+              <input name="awayScore" type="number" min={0} placeholder="Deplasman skor" className="w-1/2 rounded-lg border border-line bg-pitch-night px-3 py-2 text-sm text-text-primary" required />
             </div>
             <div className="flex gap-2">
-              <input name="htHomeScore" type="number" min={0} placeholder="İlk yarı ev sahibi skor" className="w-1/2 rounded border px-3 py-2" required />
-              <input name="htAwayScore" type="number" min={0} placeholder="İlk yarı deplasman skor" className="w-1/2 rounded border px-3 py-2" required />
+              <input name="htHomeScore" type="number" min={0} placeholder="İlk yarı ev sahibi skor" className="w-1/2 rounded-lg border border-line bg-pitch-night px-3 py-2 text-sm text-text-primary" required />
+              <input name="htAwayScore" type="number" min={0} placeholder="İlk yarı deplasman skor" className="w-1/2 rounded-lg border border-line bg-pitch-night px-3 py-2 text-sm text-text-primary" required />
             </div>
 
-            <div>
-              <h2 className="mb-2 font-semibold">Oyuncu Golleri</h2>
+            <div className="rounded-xl border border-line bg-pitch-night-raised p-4">
+              <h3 className="mb-2 font-semibold text-text-primary">Oyuncu Golleri</h3>
               {allPlayers.map((p) => (
-                <div key={p.id} className="mb-1 flex items-center justify-between text-sm">
+                <div key={p.id} className="mb-1 flex items-center justify-between text-sm text-text-primary">
                   <span>{p.name}</span>
-                  <input name={`goals_${p.id}`} type="number" min={0} defaultValue={0} className="w-16 rounded border px-2 py-1" />
+                  <input name={`goals_${p.id}`} type="number" min={0} defaultValue={0} className="w-16 rounded-lg border border-line bg-pitch-night px-2 py-1 text-xs text-text-primary" />
                 </div>
               ))}
             </div>
 
-            <div className="rounded border p-3">
-              <h2 className="mb-2 font-semibold">Eğlenceli Olaylar</h2>
-              <label className="mb-2 flex items-center gap-2 text-sm">
+            <div className="rounded-xl border border-line bg-pitch-night-raised p-4">
+              <h3 className="mb-2 font-semibold text-text-primary">Eğlenceli Olaylar</h3>
+              <label className="mb-2 flex items-center gap-2 text-sm text-text-primary">
                 <input type="checkbox" name="redCard" /> Kırmızı kart çıktı mı?
               </label>
-              <label className="mb-2 flex items-center gap-2 text-sm">
+              <label className="mb-2 flex items-center gap-2 text-sm text-text-primary">
                 <input type="checkbox" name="pitchInvasion" /> Sahaya izinsiz biri girdi mi?
               </label>
-              <label className="mb-2 flex items-center gap-2 text-sm">
+              <label className="mb-2 flex items-center gap-2 text-sm text-text-primary">
                 <input type="checkbox" name="refereeArgument" /> Hakem tartışması çıktı mı?
               </label>
-              <label className="mb-2 flex items-center gap-2 text-sm">
+              <label className="mb-2 flex items-center gap-2 text-sm text-text-primary">
                 <input type="checkbox" name="matchAbandoned" /> Maç yarıda mı kaldı?
               </label>
               <p className="mb-1 mt-3 text-xs font-semibold text-text-muted">Kavgaya karışanlar</p>
               {allPlayers.map((p) => (
-                <label key={p.id} className="flex items-center gap-2 text-sm">
+                <label key={p.id} className="flex items-center gap-2 text-sm text-text-primary">
                   <input type="checkbox" name={`fight_${p.id}`} /> {p.name}
                 </label>
               ))}
               <p className="mb-1 mt-3 text-xs font-semibold text-text-muted">Sahaya geç kalanlar</p>
               {allPlayers.map((p) => (
-                <label key={p.id} className="flex items-center gap-2 text-sm">
+                <label key={p.id} className="flex items-center gap-2 text-sm text-text-primary">
                   <input type="checkbox" name={`late_${p.id}`} /> {p.name}
                 </label>
               ))}
               <p className="mb-1 mt-3 text-xs font-semibold text-text-muted">🟨 Sarı kart görenler</p>
               {allPlayers.map((p) => (
-                <label key={p.id} className="flex items-center gap-2 text-sm">
+                <label key={p.id} className="flex items-center gap-2 text-sm text-text-primary">
                   <input type="checkbox" name={`yellow_${p.id}`} /> {p.name}
                 </label>
               ))}
             </div>
 
-            <button className="rounded bg-red-600 px-4 py-2 font-semibold text-white">
+            <button className="pop-interactive rounded-full bg-ferrari-red px-4 py-2 text-sm font-semibold text-text-primary">
               Sonuçlandır (geri alınamaz)
             </button>
           </form>
 
           {locked ? (
-            <p className="mb-6 rounded border border-line bg-line p-3 text-sm text-text-muted">
+            <p className="mb-6 rounded-xl border border-line bg-pitch-night-raised p-4 text-sm text-text-muted">
               Maç saati geçti, oranlar kilitlendi — sadece sonuçlandırma yapılabilir.
             </p>
           ) : (
-            <div className="mb-6 rounded border p-3">
-              <h2 className="mb-2 font-semibold">Oranları Düzenle</h2>
+            <div className="mb-6 rounded-xl border border-line bg-pitch-night-raised p-4">
+              <h3 className="mb-2 font-semibold text-text-primary">Oranları Düzenle</h3>
               <form
                 action={async (formData) => {
                   'use server';
@@ -205,14 +205,14 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
                             step="0.01"
                             min="1.01"
                             defaultValue={o.oddsValue}
-                            className="w-20 rounded border px-2 py-1 text-xs"
+                            className="w-20 rounded-lg border border-line bg-pitch-night px-2 py-1 text-xs text-text-primary"
                           />
                         </div>
                       ))}
                     </div>
                   </div>
                 ))}
-                <button className="rounded bg-line px-4 py-2 text-sm font-semibold text-white">
+                <button className="pop-interactive rounded-full border border-line px-4 py-2 text-sm font-semibold text-text-primary">
                   Oranları Kaydet
                 </button>
               </form>
@@ -226,7 +226,7 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
               if (!('error' in result)) redirect('/admin');
             }}
           >
-            <button className="w-full rounded border border-red-300 px-4 py-2 text-sm font-semibold text-red-400">
+            <button className="pop-interactive w-full rounded-full border border-ferrari-red px-4 py-2 text-sm font-semibold text-ferrari-red">
               Maçı İptal Et (oynanmadı, bekleyen kuponları iade eder)
             </button>
           </form>
