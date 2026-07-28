@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { href: '/admin/lineups', label: 'Kadro Onayları' },
   { href: '/admin/matches/new', label: 'Yeni Maç' },
   { href: '/admin/users', label: 'Kullanıcılar' },
+  { href: '/admin/horses', label: 'Atlar' },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

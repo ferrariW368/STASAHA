@@ -32,7 +32,7 @@ export type CurrentRaceView =
     }
   | { error: 'NOT_ENOUGH_HORSES' };
 
-const raceInclude = { entries: { include: { horse: true } } } as const;
+const raceInclude = { entries: { include: { horse: true }, orderBy: { horseId: 'asc' } } } as const;
 
 // The standard Prisma pattern for typing a query result shaped by a reused
 // `include` object — `Prisma.HorseRaceGetPayload` derives the exact type
