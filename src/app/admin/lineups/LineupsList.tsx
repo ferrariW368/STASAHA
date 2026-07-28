@@ -7,9 +7,9 @@ import type { Position } from '@/lib/formation';
 const positionLabel: Record<Position, string> = { GK: 'Kaleci', DEF: 'Defans', MID: 'Orta Saha', FWD: 'Forvet' };
 
 const statusLabel: Record<string, { text: string; className: string }> = {
-  pending: { text: 'Onay Bekliyor', className: 'bg-amber-400/10 text-amber-400' },
+  pending: { text: 'Onay Bekliyor', className: 'bg-gold/10 text-gold' },
   approved: { text: 'Onaylandı', className: 'bg-green-500/10 text-green-400' },
-  rejected: { text: 'Reddedildi', className: 'bg-red-500/10 text-red-400' },
+  rejected: { text: 'Reddedildi', className: 'bg-ferrari-red/10 text-ferrari-red' },
 };
 
 type SlotData = { position: Position; slotOrder: number; playerName: string; styleInspiration: string | null };
@@ -29,7 +29,7 @@ export default function LineupsList({ lineups }: { lineups: LineupData[] }) {
     <div>
       <button
         onClick={() => setShowInspiration((v) => !v)}
-        className={`mb-4 rounded-lg border-2 px-3 py-1.5 text-xs font-bold ${showInspiration ? 'border-amber-500 bg-amber-400/10 text-amber-400' : 'border-line text-text-muted'}`}
+        className={`pop-interactive mb-4 rounded-full border px-3 py-1.5 text-xs font-bold ${showInspiration ? 'border-gold bg-gold/10 text-gold' : 'border-line text-text-muted'}`}
       >
         {showInspiration ? '⭐ İlham Alınan Futbolcular Gösteriliyor' : 'İlham Alınan Futbolcuları Göster'}
       </button>
@@ -38,10 +38,10 @@ export default function LineupsList({ lineups }: { lineups: LineupData[] }) {
         {lineups.map((lineup) => {
           const status = statusLabel[lineup.status] ?? statusLabel.pending;
           return (
-            <div key={lineup.id} className="rounded border p-3">
+            <div key={lineup.id} className="rounded-xl border border-line bg-pitch-night-raised p-4">
               <div className="mb-2 flex items-center justify-between">
                 <div>
-                  <span className="font-semibold">{lineup.squadName}</span>
+                  <span className="font-semibold text-text-primary">{lineup.squadName}</span>
                   <span className="ml-2 text-xs text-text-muted">
                     {lineup.format}v{lineup.format} · {lineup.submittedByUsername}
                   </span>
@@ -67,12 +67,12 @@ export default function LineupsList({ lineups }: { lineups: LineupData[] }) {
               {lineup.status === 'pending' && (
                 <div className="flex gap-2">
                   <form action={async () => { await approveLineup(lineup.id); }}>
-                    <button className="rounded bg-green-600 px-3 py-1.5 text-xs font-semibold text-white">
+                    <button className="pop-interactive rounded-full bg-gold px-3 py-1.5 text-xs font-semibold text-pitch-night">
                       Onayla (takımı oluştur)
                     </button>
                   </form>
                   <form action={async () => { await rejectLineup(lineup.id); }}>
-                    <button className="rounded border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-400">
+                    <button className="pop-interactive rounded-full border border-ferrari-red px-3 py-1.5 text-xs font-semibold text-ferrari-red">
                       Reddet
                     </button>
                   </form>

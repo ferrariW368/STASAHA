@@ -34,7 +34,7 @@ export default async function AdminLineupsPage() {
 
   return (
     <div>
-      <h1 className="mb-4 text-xl font-bold">Kadro Onayları</h1>
+      <h2 className="mb-4 font-display text-lg tracking-wide text-text-primary">Kadro Onayları</h2>
       <LineupsList lineups={data} />
     </div>
   );
