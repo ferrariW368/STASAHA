@@ -1,16 +1,29 @@
 import Link from 'next/link';
 
+const NAV_ITEMS = [
+  { href: '/admin', label: 'Panel' },
+  { href: '/admin/teams', label: 'Takımlar' },
+  { href: '/admin/players', label: 'Oyuncular' },
+  { href: '/admin/transfers', label: 'Transferler' },
+  { href: '/admin/lineups', label: 'Kadro Onayları' },
+  { href: '/admin/matches/new', label: 'Yeni Maç' },
+  { href: '/admin/users', label: 'Kullanıcılar' },
+];
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="mx-auto max-w-2xl px-4 py-6">
-      <nav className="mb-6 flex flex-wrap gap-3 text-sm font-medium">
-        <Link href="/admin" className="text-green-400">Panel</Link>
-        <Link href="/admin/teams" className="text-green-400">Takımlar</Link>
-        <Link href="/admin/players" className="text-green-400">Oyuncular</Link>
-        <Link href="/admin/transfers" className="text-green-400">Transferler</Link>
-        <Link href="/admin/lineups" className="text-green-400">Kadro Onayları</Link>
-        <Link href="/admin/matches/new" className="text-green-400">Yeni Maç</Link>
-        <Link href="/admin/users" className="text-green-400">Kullanıcılar</Link>
+      <h1 className="mb-4 font-display text-3xl tracking-wide text-text-primary">Admin Panel</h1>
+      <nav className="mb-6 flex flex-wrap gap-2">
+        {NAV_ITEMS.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="pop-interactive rounded-full border border-line px-3 py-1.5 text-sm font-semibold text-text-muted"
+          >
+            {item.label}
+          </Link>
+        ))}
       </nav>
       {children}
     </div>
