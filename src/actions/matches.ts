@@ -6,16 +6,19 @@ import { requireAdmin } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import type { Player } from '@prisma/client';
 
-// A player's starting position for this match is usually their own default
-// position, but if they've ever been slotted as GK in an approved lineup
-// (someone playing out of position, since real keepers can be scarce),
-// they're shown as this match's goalkeeper too.
+// A player's starting position for this match should reflect the formation
+// they were actually placed in when their squad was built via Kadro Planla
+// (Kadro Planla lets any player fill any slot, so a player's own default
+// Player.position can differ from the row they were drafted into) — not
+// just their own default position. Falls back to Player.position only if
+// they were never part of an approved lineup (e.g. added directly via the
+// admin panel rather than through a submitted squad).
 async function resolveAppearancePosition(player: Player): Promise<string | null> {
-  if (player.position === 'GK') return 'GK';
-  const gkSlot = await prisma.lineupSlot.findFirst({
-    where: { playerId: player.id, position: 'GK', lineup: { status: 'approved' } },
+  const slot = await prisma.lineupSlot.findFirst({
+    where: { playerId: player.id, lineup: { status: 'approved' } },
+    orderBy: { lineup: { createdAt: 'desc' } },
   });
-  return gkSlot ? 'GK' : player.position;
+  return slot?.position ?? player.position;
 }
 
 export async function createMatch(
