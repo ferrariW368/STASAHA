@@ -28,7 +28,7 @@ export default function BuyShareForm({ horseId }: { horseId: string }) {
       <button
         onClick={submit}
         disabled={submitting || amount <= 0}
-        className="pop-interactive flex-1 rounded-full bg-gold px-3 py-1.5 text-xs font-semibold text-pitch-night disabled:opacity-40"
+        className="pop-interactive flex-1 rounded-full bg-gold px-3 py-1.5 text-sm font-semibold text-pitch-night disabled:opacity-40"
       >
         {submitting ? 'Gönderiliyor...' : 'Pay Al'}
       </button>
