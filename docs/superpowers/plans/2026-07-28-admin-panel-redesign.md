@@ -721,19 +721,19 @@ export default async function NewMatchPage() {
         }}
         className="flex flex-col gap-4"
       >
-        <select name="homeTeamId" className="rounded-lg border border-line bg-pitch-night px-3 py-2 text-text-primary" required>
+        <select name="homeTeamId" className="rounded-lg border border-line bg-pitch-night px-3 py-2 text-sm text-text-primary" required>
           <option value="">Ev sahibi takım seç</option>
           {teams.map((t) => (
             <option key={t.id} value={t.id}>{t.name}</option>
           ))}
         </select>
-        <select name="awayTeamId" className="rounded-lg border border-line bg-pitch-night px-3 py-2 text-text-primary" required>
+        <select name="awayTeamId" className="rounded-lg border border-line bg-pitch-night px-3 py-2 text-sm text-text-primary" required>
           <option value="">Deplasman takım seç</option>
           {teams.map((t) => (
             <option key={t.id} value={t.id}>{t.name}</option>
           ))}
         </select>
-        <input type="datetime-local" name="kickoffTime" className="rounded-lg border border-line bg-pitch-night px-3 py-2 text-text-primary" required />
+        <input type="datetime-local" name="kickoffTime" className="rounded-lg border border-line bg-pitch-night px-3 py-2 text-sm text-text-primary" required />
         <div>
           <label className="mb-1 block text-sm text-text-muted">Toplam Gol Alt/Üst Çizgisi</label>
           <input
@@ -742,7 +742,7 @@ export default async function NewMatchPage() {
             step="0.5"
             min="0.5"
             defaultValue={9.5}
-            className="w-full rounded-lg border border-line bg-pitch-night px-3 py-2 text-text-primary"
+            className="w-full rounded-lg border border-line bg-pitch-night px-3 py-2 text-sm text-text-primary"
             required
           />
           <p className="mt-1 text-xs text-text-muted">
@@ -757,11 +757,11 @@ export default async function NewMatchPage() {
             step="0.5"
             min="0.5"
             defaultValue={4.5}
-            className="w-full rounded-lg border border-line bg-pitch-night px-3 py-2 text-text-primary"
+            className="w-full rounded-lg border border-line bg-pitch-night px-3 py-2 text-sm text-text-primary"
             required
           />
         </div>
-        <button className="pop-interactive rounded-full bg-gold px-4 py-2 font-semibold text-pitch-night">Maçı Oluştur</button>
+        <button className="pop-interactive rounded-full bg-gold px-4 py-2 text-sm font-semibold text-pitch-night">Maçı Oluştur</button>
       </form>
     </div>
   );
@@ -908,12 +908,12 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
             className="mb-6 flex flex-col gap-4"
           >
             <div className="flex gap-2">
-              <input name="homeScore" type="number" min={0} placeholder="Ev sahibi skor" className="w-1/2 rounded-lg border border-line bg-pitch-night px-3 py-2 text-text-primary" required />
-              <input name="awayScore" type="number" min={0} placeholder="Deplasman skor" className="w-1/2 rounded-lg border border-line bg-pitch-night px-3 py-2 text-text-primary" required />
+              <input name="homeScore" type="number" min={0} placeholder="Ev sahibi skor" className="w-1/2 rounded-lg border border-line bg-pitch-night px-3 py-2 text-sm text-text-primary" required />
+              <input name="awayScore" type="number" min={0} placeholder="Deplasman skor" className="w-1/2 rounded-lg border border-line bg-pitch-night px-3 py-2 text-sm text-text-primary" required />
             </div>
             <div className="flex gap-2">
-              <input name="htHomeScore" type="number" min={0} placeholder="İlk yarı ev sahibi skor" className="w-1/2 rounded-lg border border-line bg-pitch-night px-3 py-2 text-text-primary" required />
-              <input name="htAwayScore" type="number" min={0} placeholder="İlk yarı deplasman skor" className="w-1/2 rounded-lg border border-line bg-pitch-night px-3 py-2 text-text-primary" required />
+              <input name="htHomeScore" type="number" min={0} placeholder="İlk yarı ev sahibi skor" className="w-1/2 rounded-lg border border-line bg-pitch-night px-3 py-2 text-sm text-text-primary" required />
+              <input name="htAwayScore" type="number" min={0} placeholder="İlk yarı deplasman skor" className="w-1/2 rounded-lg border border-line bg-pitch-night px-3 py-2 text-sm text-text-primary" required />
             </div>
 
             <div className="rounded-xl border border-line bg-pitch-night-raised p-4">
@@ -960,7 +960,7 @@ export default async function AdminMatchPage({ params }: { params: Promise<{ id:
               ))}
             </div>
 
-            <button className="pop-interactive rounded-full bg-ferrari-red px-4 py-2 font-semibold text-text-primary">
+            <button className="pop-interactive rounded-full bg-ferrari-red px-4 py-2 text-sm font-semibold text-text-primary">
               Sonuçlandır (geri alınamaz)
             </button>
           </form>
