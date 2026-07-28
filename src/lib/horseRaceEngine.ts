@@ -106,54 +106,63 @@ async function startNewRace(): Promise<CurrentRaceView> {
 }
 
 async function settleRace(raceId: string): Promise<void> {
-  // Conditional update: only the request that actually flips BETTING/RACING's
-  // phase to FINISHED performs settlement. Concurrent callers get count=0 and
-  // return immediately, avoiding double-payout.
-  const { count } = await prisma.horseRace.updateMany({
-    where: { id: raceId, phase: 'RACING' },
-    data: { phase: 'FINISHED' },
-  });
-  if (count === 0) return;
+  // Interactive transaction: the conditional phase-flip, the reads that
+  // determine the outcome, and the payout writes all happen inside the same
+  // transaction, so either the whole settlement commits or none of it does.
+  // If any step throws (transient DB error, connection drop, etc.), Postgres
+  // rolls back the phase flip too, leaving the race in RACING so a future
+  // call can retry settlement cleanly instead of getting stuck at FINISHED
+  // with unpaid bets.
+  await prisma.$transaction(async (tx) => {
+    // Conditional update: only the request that actually flips BETTING/RACING's
+    // phase to FINISHED performs settlement. Concurrent callers get count=0 and
+    // return immediately, avoiding double-payout.
+    const { count } = await tx.horseRace.updateMany({
+      where: { id: raceId, phase: 'RACING' },
+      data: { phase: 'FINISHED' },
+    });
+    if (count === 0) return;
 
-  const race = await prisma.horseRace.findUniqueOrThrow({ where: { id: raceId }, include: raceInclude });
-  const horseIds = race.entries.map((e) => e.horseId);
-  const probs = winProbabilities(race.entries.map((e) => e.horse));
-  const rng = mulberry32(race.seed);
-  const finishOrder = drawFinishOrder(horseIds, probs, rng);
-  const winnerId = finishOrder[0];
+    const race = await tx.horseRace.findUniqueOrThrow({ where: { id: raceId }, include: raceInclude });
+    const horseIds = race.entries.map((e) => e.horseId);
+    const probs = winProbabilities(race.entries.map((e) => e.horse));
+    const rng = mulberry32(race.seed);
+    const finishOrder = drawFinishOrder(horseIds, probs, rng);
+    const winnerId = finishOrder[0];
 
-  const bets = await prisma.horseBet.findMany({ where: { raceId } });
-  const winnerOwnerships = await prisma.horseOwnership.findMany({ where: { horseId: winnerId } });
-  const winnerHorse = race.entries.find((e) => e.horseId === winnerId)!.horse;
-  const totalInvested = winnerOwnerships.reduce((s, o) => s + o.staInvested, 0);
-  const bonusPool = Math.round(winnerHorse.price * OWNER_BONUS_RATE);
+    const bets = await tx.horseBet.findMany({ where: { raceId } });
+    const winnerOwnerships = await tx.horseOwnership.findMany({ where: { horseId: winnerId } });
+    const winnerHorse = race.entries.find((e) => e.horseId === winnerId)!.horse;
+    const totalInvested = winnerOwnerships.reduce((s, o) => s + o.staInvested, 0);
+    const bonusPool = Math.round(winnerHorse.price * OWNER_BONUS_RATE);
 
-  const ops = [
-    ...finishOrder.map((horseId, i) =>
-      prisma.horseRaceEntry.update({
+    for (const [i, horseId] of finishOrder.entries()) {
+      await tx.horseRaceEntry.update({
         where: { raceId_horseId: { raceId, horseId } },
         data: { finishPosition: i + 1 },
-      })
-    ),
-    ...bets.map((bet) =>
-      prisma.horseBet.update({
+      });
+    }
+
+    for (const bet of bets) {
+      await tx.horseBet.update({
         where: { id: bet.id },
         data: { status: bet.horseId === winnerId ? 'won' : 'lost' },
-      })
-    ),
-    ...bets
-      .filter((bet) => bet.horseId === winnerId)
-      .map((bet) =>
-        prisma.user.update({ where: { id: bet.userId }, data: { staBalance: { increment: bet.potentialWin } } })
-      ),
-    ...(totalInvested > 0
-      ? winnerOwnerships
-          .map((o) => ({ userId: o.userId, amount: Math.round(bonusPool * (o.staInvested / totalInvested)) }))
-          .filter((p) => p.amount > 0)
-          .map((p) => prisma.user.update({ where: { id: p.userId }, data: { staBalance: { increment: p.amount } } }))
-      : []),
-  ];
-  if (ops.length > 0) await prisma.$transaction(ops);
+      });
+    }
+
+    for (const bet of bets.filter((bet) => bet.horseId === winnerId)) {
+      await tx.user.update({ where: { id: bet.userId }, data: { staBalance: { increment: bet.potentialWin } } });
+    }
+
+    if (totalInvested > 0) {
+      const payouts = winnerOwnerships
+        .map((o) => ({ userId: o.userId, amount: Math.round(bonusPool * (o.staInvested / totalInvested)) }))
+        .filter((p) => p.amount > 0);
+      for (const p of payouts) {
+        await tx.user.update({ where: { id: p.userId }, data: { staBalance: { increment: p.amount } } });
+      }
+    }
+  });
 }
 
 export async function getCurrentRace(): Promise<CurrentRaceView> {
