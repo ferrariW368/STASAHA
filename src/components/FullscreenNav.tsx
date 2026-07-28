@@ -22,12 +22,15 @@ export default function FullscreenNav({ user }: { user: NavUser }) {
         { href: '/', label: 'Ana Sayfa' },
         { href: '/players', label: 'Oyuncular' },
         { href: '/kadro-plani', label: 'Kadro Planla' },
+        { href: '/at-yarisi', label: 'At Yarışı' },
+        { href: '/at-yarisi/magaza', label: 'At Mağazası' },
         { href: '/bets', label: 'Kuponlarım' },
         { href: '/leaderboard', label: 'Liderlik' },
       ]
     : [
         { href: '/', label: 'Ana Sayfa' },
         { href: '/players', label: 'Oyuncular' },
+        { href: '/at-yarisi', label: 'At Yarışı' },
         { href: '/login', label: 'Giriş' },
         { href: '/register', label: 'Kayıt Ol' },
       ];
