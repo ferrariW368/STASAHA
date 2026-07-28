@@ -5,15 +5,16 @@ import { computeUserScore } from '@/lib/score';
 export async function GET() {
   const users = await prisma.user.findMany({
     where: { role: 'user' },
-    include: { bets: true },
+    include: { bets: true, horseBets: true },
   });
 
   const ranked = users
     .map((u) => {
-      const total = u.bets.length;
-      const won = u.bets.filter((b) => b.status === 'won').length;
+      const allBets = [...u.bets, ...u.horseBets];
+      const total = allBets.length;
+      const won = allBets.filter((b) => b.status === 'won').length;
       const winRate = total > 0 ? Math.round((won / total) * 100) : 0;
-      return { username: u.username, staBalance: u.staBalance, total, winRate, score: computeUserScore(u.bets) };
+      return { username: u.username, staBalance: u.staBalance, total, winRate, score: computeUserScore(allBets) };
     })
     .sort((a, b) => b.score.net - a.score.net);
 
