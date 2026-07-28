@@ -13,7 +13,7 @@ const NAV_ITEMS = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="mx-auto max-w-2xl px-4 py-6">
-      <h1 className="mb-4 font-display text-2xl tracking-wide text-text-primary">Admin Panel</h1>
+      <h1 className="mb-4 font-display text-3xl tracking-wide text-text-primary">Admin Panel</h1>
       <nav className="mb-6 flex flex-wrap gap-2">
         {NAV_ITEMS.map((item) => (
           <Link

@@ -17,7 +17,7 @@
 - Destructive actions (delete, reject, cancel, reset password): `pop-interactive rounded-full border border-ferrari-red px-4 py-2 text-sm font-semibold text-ferrari-red`.
 - All text inputs/selects/textareas: `rounded-lg border border-line bg-pitch-night px-3 py-2 text-sm text-text-primary`.
 - All card containers (replacing bare `rounded border p-3/p-4`): `rounded-xl border border-line bg-pitch-night-raised p-4`.
-- All `<h1>`: `mb-4 font-display text-2xl tracking-wide text-text-primary`. All `<h2>`: `mb-2 font-display text-lg tracking-wide text-text-primary`.
+- All `<h1>`: `mb-4 font-display text-3xl tracking-wide text-text-primary` (there is exactly one true `<h1>` in this whole plan — the shared `admin/layout.tsx` title — every subpage heading below it is an `<h2>`, so it's sized up to stay the visually dominant heading on the page). All `<h2>`: `mb-4 font-display text-lg tracking-wide text-text-primary`.
 - Run `npx tsc --noEmit` after every task — it must stay clean throughout (pure className edits should never break types, so any failure means something else was accidentally touched).
 - Verify: because admin routes are login-gated and Claude cannot enter passwords into any field (including the app's own test admin account), there is no automated Browser-pane click-through for this plan. Each task's "testing" step is a `tsc --noEmit` pass plus a manual code-diff review confirming only classNames changed.
 

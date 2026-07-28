@@ -9,7 +9,7 @@ export default async function AdminDashboard() {
 
   return (
     <div>
-      <h2 className="mb-2 font-display text-lg tracking-wide text-text-primary">Maçlar</h2>
+      <h2 className="mb-4 font-display text-lg tracking-wide text-text-primary">Maçlar</h2>
       <ul className="flex flex-col gap-2">
         {matches.map((m) => (
           <li key={m.id} className="rounded-xl border border-line bg-pitch-night-raised p-4 text-sm">
