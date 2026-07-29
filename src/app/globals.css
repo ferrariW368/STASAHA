@@ -108,6 +108,25 @@ body {
   animation: live-pulse 1.8s ease-in-out infinite;
 }
 
+/* Mechanical split-flap display used by the home-page race board. Its text
+   swaps at the half-turn (handled in HorseRaceBoard) so it feels like a
+   physical airport board rather than a generic fade. */
+@keyframes split-flap-turn {
+  0% { transform: perspective(220px) rotateX(0deg); filter: brightness(1); }
+  49% { transform: perspective(220px) rotateX(-88deg); filter: brightness(0.45); }
+  50% { transform: perspective(220px) rotateX(88deg); filter: brightness(0.45); }
+  100% { transform: perspective(220px) rotateX(0deg); filter: brightness(1); }
+}
+.split-flap-cell {
+  display: inline-block;
+  min-width: 0;
+  transform-origin: center;
+  will-change: transform, filter;
+}
+.flap-animate {
+  animation: split-flap-turn 420ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
 /* Infinite horizontal scroll band - content is duplicated by the component,
    this just slides the whole track left by exactly half its width. */
 @keyframes marquee-scroll {
@@ -126,7 +145,8 @@ body {
   .jackpot-pulse,
   .fade-slide-in,
   .live-pulse,
-  .marquee-track {
+  .marquee-track,
+  .flap-animate {
     animation: none !important;
   }
   .pop-interactive,
