@@ -1,16 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
+
+// useLayoutEffect warns when used during SSR (Next.js server-renders 'use
+// client' components too). Fall back to useEffect on the server; the
+// component is only ever interactive in the browser anyway.
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export default function IntroSplash() {
-  const [visible, setVisible] = useState(false);
+  // Default to visible so the splash is present from the very first paint —
+  // no frame where the home page is shown before the splash pops in.
+  const [visible, setVisible] = useState(true);
   const [fadingOut, setFadingOut] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     setReduceMotion(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-    if (sessionStorage.getItem('ferraribet-intro-seen')) return;
-    setVisible(true);
+    // Runs before the browser paints, so a same-session revisit hides the
+    // splash before it's ever drawn — no flash in either direction.
+    if (sessionStorage.getItem('ferraribet-intro-seen')) {
+      setVisible(false);
+    }
   }, []);
 
   function dismiss() {
