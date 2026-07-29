@@ -40,10 +40,14 @@ export default async function HomePage() {
 
   const usersForScore = await prisma.user.findMany({
     where: { role: 'user' },
-    select: { username: true, bets: { select: { status: true, stake: true, potentialWin: true } } },
+    select: {
+      username: true,
+      bets: { select: { status: true, stake: true, potentialWin: true } },
+      horseBets: { select: { status: true, stake: true, potentialWin: true } },
+    },
   });
   const topUsers = usersForScore
-    .map((u) => ({ username: u.username, score: computeUserScore(u.bets) }))
+    .map((u) => ({ username: u.username, score: computeUserScore([...u.bets, ...u.horseBets]) }))
     .sort((a, b) => b.score.net - a.score.net)
     .slice(0, 3);
 

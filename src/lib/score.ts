@@ -1,3 +1,7 @@
+// Deliberately source-agnostic: both football Bet rows and HorseBet rows
+// share this exact shape, so callers merge both arrays before calling
+// computeUserScore — one net "puan" across both games. Horse ownership
+// bonus payouts are NOT bet rows and must never be passed in here.
 export type ScoredBet = { status: string; stake: number; potentialWin: number };
 
 export type UserScore = { won: number; lost: number; net: number };
