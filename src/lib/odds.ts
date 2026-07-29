@@ -1,3 +1,5 @@
+import { mulberry32 } from './horseRace';
+
 export type OddsRow = {
   market: '1X2' | 'SCORE' | 'OU_GOALS' | 'HT_OU_GOALS' | 'PLAYER_GOALS' | 'BTS' | 'NOVELTY' | 'FIGHT' | 'LATE';
   selectionKey: string;
@@ -26,28 +28,68 @@ function oddsFromProbability(p: number): number {
   return Math.round(raw * HOUSE_MARGIN * 100) / 100;
 }
 
-// RESULT_* is calibrated to feel like a close World Cup final (~2.9 home,
-// ~3.4 draw, ~3.4 away) — used for the match-winner and both-teams-to-score
-// markets, where a realistic draw/no-show chance matters more than raw goal
-// count.
-//
-// GOALS_* drives every other goal-count-based market (score grid, over/under,
-// both-teams-to-score, per-player goal bands) from one shared lambda pair, so
-// they stay statistically consistent with each other — hali saha (5/7-a-side)
-// matches run much higher-scoring than a full-size match, with blowouts
-// (12-0, 14-2) common, so a 0-0 or 1-1 correctly gets very long odds here.
-const RESULT_HOME_LAMBDA = 1.0;
-const RESULT_AWAY_LAMBDA = 0.9;
-const GOALS_HOME_LAMBDA = 5.5;
-const GOALS_AWAY_LAMBDA = 5.0;
+// hashSeed/mulberry32 turn a match's own identity string (id + team ids +
+// kickoff time, built by the caller in src/actions/matches.ts) into a
+// deterministic RNG. Same match -> same seed -> same odds forever. Team and
+// player ratings are never read here - the whole point is a small, per-match
+// variation that doesn't come from "who's stronger."
+function hashSeed(input: string): number {
+  let h = 2166136261; // FNV-1a 32-bit
+  for (let i = 0; i < input.length; i++) {
+    h ^= input.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
 
-function compute1X2(): OddsRow[] {
+// RESULT_* drives the match-winner (1X2) market only. BTS_* drives
+// both-teams-to-score only - it used to wrongly reuse RESULT_*, which gave a
+// low, unrealistic KG Var probability (~37%) for a format where most matches
+// see both sides score. GOALS_* drives every goal-count-based market (score
+// grid, over/under, both half-time and full-match, per-player goal bands)
+// from one shared per-match lambda pair, so they stay statistically
+// consistent with each other - hali saha (5/7-a-side) matches run much
+// higher-scoring than a full-size match, with blowouts (12-0, 14-2) common,
+// so a 0-0 or 1-1 correctly gets very long odds here.
+//
+// All three pairs are derived from the same seeded RNG stream, drawn in a
+// fixed order (RESULT sign, RESULT magnitude, BTS magnitude, GOALS total,
+// GOALS magnitude) so a given matchSeed always reproduces the exact same
+// three lambda pairs.
+const RESULT_LAMBDA_BASE = 2.0;
+const RESULT_TILT_MIN = 0.045; // floor: without it, tilt=0 collapses favored/other odds to the same value
+const RESULT_TILT_MAX = 0.11;
+const BTS_LAMBDA_BASE = 2.5;
+const BTS_TILT_MAX = 0.3;
+const GOALS_TOTAL_MIN = 10.0;
+const GOALS_TOTAL_MAX = 11.6;
+const GOALS_TILT_MAX = 0.3;
+
+type LambdaPair = { home: number; away: number };
+
+function deriveLambdas(matchSeed: string): { result: LambdaPair; bts: LambdaPair; goals: LambdaPair } {
+  const rng = mulberry32(hashSeed(matchSeed));
+
+  const sign = rng() < 0.5 ? 1 : -1; // which side is slightly favored, 50/50
+  const resultMagnitude = RESULT_TILT_MIN + rng() * (RESULT_TILT_MAX - RESULT_TILT_MIN);
+  const btsMagnitude = rng() * BTS_TILT_MAX;
+  const goalsTotal = GOALS_TOTAL_MIN + rng() * (GOALS_TOTAL_MAX - GOALS_TOTAL_MIN);
+  const goalsMagnitude = rng() * GOALS_TILT_MAX;
+
+  return {
+    result: { home: RESULT_LAMBDA_BASE + sign * resultMagnitude, away: RESULT_LAMBDA_BASE - sign * resultMagnitude },
+    bts: { home: BTS_LAMBDA_BASE + sign * btsMagnitude, away: BTS_LAMBDA_BASE - sign * btsMagnitude },
+    goals: { home: goalsTotal / 2 + sign * goalsMagnitude, away: goalsTotal / 2 - sign * goalsMagnitude },
+  };
+}
+
+function compute1X2(result: LambdaPair): OddsRow[] {
   let pHome = 0;
   let pDraw = 0;
   let pAway = 0;
   for (let h = 0; h <= MAX_GOALS_PER_SIDE; h++) {
     for (let a = 0; a <= MAX_GOALS_PER_SIDE; a++) {
-      const p = poissonPmf(RESULT_HOME_LAMBDA, h) * poissonPmf(RESULT_AWAY_LAMBDA, a);
+      const p = poissonPmf(result.home, h) * poissonPmf(result.away, a);
       if (h > a) pHome += p;
       else if (h === a) pDraw += p;
       else pAway += p;
@@ -70,11 +112,11 @@ function compute1X2(): OddsRow[] {
 // cells crowd out the rest of the range.
 const MIN_SCORE_ODDS = 2.5;
 
-function computeScores(): OddsRow[] {
+function computeScores(goals: LambdaPair): OddsRow[] {
   const cells: { h: number; a: number; p: number }[] = [];
   for (let h = 0; h <= MAX_GOALS_PER_SIDE; h++) {
     for (let a = 0; a <= MAX_GOALS_PER_SIDE; a++) {
-      cells.push({ h, a, p: poissonPmf(GOALS_HOME_LAMBDA, h) * poissonPmf(GOALS_AWAY_LAMBDA, a) });
+      cells.push({ h, a, p: poissonPmf(goals.home, h) * poissonPmf(goals.away, a) });
     }
   }
   cells.sort((x, y) => y.p - x.p); // most likely first
@@ -88,11 +130,11 @@ function computeScores(): OddsRow[] {
   });
 }
 
-function computeOverUnder(ouLine: number): OddsRow[] {
+function computeOverUnder(goals: LambdaPair, ouLine: number): OddsRow[] {
   let pUnder = 0;
   for (let h = 0; h <= OU_MAX_GOALS_PER_SIDE; h++) {
     for (let a = 0; a <= OU_MAX_GOALS_PER_SIDE; a++) {
-      if (h + a < ouLine) pUnder += poissonPmf(GOALS_HOME_LAMBDA, h) * poissonPmf(GOALS_AWAY_LAMBDA, a);
+      if (h + a < ouLine) pUnder += poissonPmf(goals.home, h) * poissonPmf(goals.away, a);
     }
   }
   const pOver = 1 - pUnder;
@@ -105,9 +147,9 @@ function computeOverUnder(ouLine: number): OddsRow[] {
 // First-half total goals - modeled as half the full-match lambda, on the
 // simplifying assumption that goals split roughly evenly across the two
 // halves.
-function computeHalfTimeOverUnder(htOuLine: number): OddsRow[] {
-  const htHomeLambda = GOALS_HOME_LAMBDA / 2;
-  const htAwayLambda = GOALS_AWAY_LAMBDA / 2;
+function computeHalfTimeOverUnder(goals: LambdaPair, htOuLine: number): OddsRow[] {
+  const htHomeLambda = goals.home / 2;
+  const htAwayLambda = goals.away / 2;
   let pUnder = 0;
   for (let h = 0; h <= OU_MAX_GOALS_PER_SIDE; h++) {
     for (let a = 0; a <= OU_MAX_GOALS_PER_SIDE; a++) {
@@ -121,11 +163,11 @@ function computeHalfTimeOverUnder(htOuLine: number): OddsRow[] {
   ];
 }
 
-function computeBothTeamsScore(): OddsRow[] {
+function computeBothTeamsScore(bts: LambdaPair): OddsRow[] {
   let pBothScore = 0;
   for (let h = 1; h <= MAX_GOALS_PER_SIDE; h++) {
     for (let a = 1; a <= MAX_GOALS_PER_SIDE; a++) {
-      pBothScore += poissonPmf(RESULT_HOME_LAMBDA, h) * poissonPmf(RESULT_AWAY_LAMBDA, a);
+      pBothScore += poissonPmf(bts.home, h) * poissonPmf(bts.away, a);
     }
   }
   const pNoBothScore = 1 - pBothScore;
@@ -168,11 +210,11 @@ function computePlayerNoveltyMarkets(homePlayerIds: string[], awayPlayerIds: str
 // Bands are "scores at least 1" and "scores 2+" only — a "scores exactly 0"
 // band was dropped because it's the near-certain outcome for any one player
 // on a multi-player team, making its odds comically close to 1.0.
-function computePlayerGoals(homePlayerIds: string[], awayPlayerIds: string[]): OddsRow[] {
+function computePlayerGoals(homePlayerIds: string[], awayPlayerIds: string[], goals: LambdaPair): OddsRow[] {
   const rows: OddsRow[] = [];
   const sides: [string[], number][] = [
-    [homePlayerIds, GOALS_HOME_LAMBDA],
-    [awayPlayerIds, GOALS_AWAY_LAMBDA],
+    [homePlayerIds, goals.home],
+    [awayPlayerIds, goals.away],
   ];
   for (const [playerIds, teamLambda] of sides) {
     if (playerIds.length === 0) continue;
@@ -192,17 +234,19 @@ function computePlayerGoals(homePlayerIds: string[], awayPlayerIds: string[]): O
 export function computeMatchOdds(
   homePlayerIds: string[],
   awayPlayerIds: string[],
+  matchSeed: string,
   ouLine: number = DEFAULT_OU_LINE,
   htOuLine: number = DEFAULT_HT_OU_LINE
 ): OddsRow[] {
+  const { result, bts, goals } = deriveLambdas(matchSeed);
   return [
-    ...compute1X2(),
-    ...computeScores(),
-    ...computeOverUnder(ouLine),
-    ...computeHalfTimeOverUnder(htOuLine),
-    ...computeBothTeamsScore(),
+    ...compute1X2(result),
+    ...computeScores(goals),
+    ...computeOverUnder(goals, ouLine),
+    ...computeHalfTimeOverUnder(goals, htOuLine),
+    ...computeBothTeamsScore(bts),
     ...computeNoveltyMarkets(),
     ...computePlayerNoveltyMarkets(homePlayerIds, awayPlayerIds),
-    ...computePlayerGoals(homePlayerIds, awayPlayerIds),
+    ...computePlayerGoals(homePlayerIds, awayPlayerIds, goals),
   ];
 }
