@@ -115,16 +115,21 @@ describe('computeMatchOdds', () => {
   });
 
   it('produces PLAYER_GOALS 1+/2+ bands (no "0 goals" band) for every player passed in, within the calibrated range', () => {
+    // This fixture uses 2 players per side (['p1','p2'] vs ['p3','p4']), not
+    // the design spec's illustrative 5-player squad, so the per-player
+    // lambda here is teamLambda/2 - numerically verified band for that
+    // squad size (goals total 10.0-11.6, tilt 0-0.3, swept at step 0.001):
+    // 1+ in [1.12, 1.18], 2+ in [1.32, 1.57].
     const playerMarkets = odds.filter((o) => o.market === 'PLAYER_GOALS');
     for (const pid of ['p1', 'p2', 'p3', 'p4']) {
       const onePlus = playerMarkets.find((o) => o.selectionKey === `${pid}:1+`);
       const twoPlus = playerMarkets.find((o) => o.selectionKey === `${pid}:2+`);
       expect(onePlus).toBeTruthy();
       expect(twoPlus).toBeTruthy();
-      expect(onePlus!.oddsValue).toBeGreaterThanOrEqual(1.52);
-      expect(onePlus!.oddsValue).toBeLessThanOrEqual(1.76);
-      expect(twoPlus!.oddsValue).toBeGreaterThanOrEqual(3.11);
-      expect(twoPlus!.oddsValue).toBeLessThanOrEqual(4.42);
+      expect(onePlus!.oddsValue).toBeGreaterThanOrEqual(1.12);
+      expect(onePlus!.oddsValue).toBeLessThanOrEqual(1.18);
+      expect(twoPlus!.oddsValue).toBeGreaterThanOrEqual(1.32);
+      expect(twoPlus!.oddsValue).toBeLessThanOrEqual(1.57);
       expect(playerMarkets.some((o) => o.selectionKey === `${pid}:0`)).toBe(false);
     }
   });
