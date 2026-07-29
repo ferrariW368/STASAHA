@@ -75,7 +75,7 @@ const BTS_TILT_MAX = 0.3;
 | Seçim | Oran bandı |
 |---|---:|
 | KG Var (YES) | 1.27 – 1.28 |
-| KG Yok (NO) | 6.49 – 6.80 |
+| KG Yok (NO) | 6.48 – 6.79 |
 
 Kullanıcının onayladığı bantla (KG Var 1.23–1.34, KG Yok 5.35–8.23) uyumlu.
 
@@ -143,7 +143,7 @@ export function computeMatchOdds(
 2. **Seed'e duyarlılık**: farklı `matchSeed` değerleri, en az 1X2 ve BTS oranlarında farklı (ama sınırlı) sonuçlar üretir — iki farklı seed'in oranları birebir aynı olmamalı.
 3. **Rating bağımsızlığı**: fonksiyon imzasında hiçbir rating/güç parametresi yok (statik güvence) — ayrıca `grep`/kod incelemesiyle `teamRating.ts` fonksiyonlarının `odds.ts` içinde import edilmediği doğrulanır.
 4. **1X2 bandı**: her seed için favori 2.44–2.58, beraberlik 5.17–5.20, diğer taraf 2.82–3.02 aralığında (yukarıdaki tabloyla birebir).
-5. **KG Var/Yok bandı**: YES 1.27–1.28, NO 6.49–6.80 aralığında.
+5. **KG Var/Yok bandı**: YES 1.27–1.28, NO 6.48–6.79 aralığında.
 6. **OU/İY OU/oyuncu gol marketleri** birbirleriyle aynı `homeLambda`/`awayLambda` çiftinden türediği için, aynı seed'de tutarlı kalır (örn. yüksek tempo seed'i hem OU hem oyuncu gol oranlarını aynı yönde etkiler — dolaylı olarak, iki marketin "aynı maçın" ürünü olduğunu doğrulayan bir test eklenir).
 7. Mevcut testlerden korunacak olanlar (fixed novelty/FIGHT/LATE selection key'leri, admin-seçili OU line desteği, "0 gol" bandının olmaması vb.) aynen kalır, sadece çağrı imzasına `matchSeed` eklenir.
 
