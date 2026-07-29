@@ -49,9 +49,11 @@ export async function createMatch(
     data: { homeTeamId, awayTeamId, kickoffTime, status: 'upcoming' },
   });
 
+  const matchSeed = `${match.id}:${homeTeamId}:${awayTeamId}:${kickoffTime.toISOString()}`;
   const oddsRows = computeMatchOdds(
     homePlayers.map((p) => p.id),
     awayPlayers.map((p) => p.id),
+    matchSeed,
     ouLine,
     htOuLine
   );
