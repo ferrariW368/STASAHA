@@ -3,14 +3,16 @@ import { prisma } from './prisma';
 import { winProbabilities, oddsFromProbabilities, mulberry32, drawFinishOrder } from './horseRace';
 
 const RACE_SIZE = 7;
-// Betting window: 10 seconds from the moment the race's betting round
+// Betting window: 7 seconds from the moment the race's betting round
 // ("kupon") is created — short and urgent by design, so viewers commit fast
 // and the live race itself is the main event.
-const BETTING_DURATION_MS = 10_000;
-// Race duration: ~1 minute, with a little variance so it doesn't feel
-// mechanically identical every round.
-const MIN_RACE_DURATION_MS = 55_000;
-const MAX_RACE_DURATION_MS = 65_000;
+const BETTING_DURATION_MS = 7_000;
+// Race duration: 10-20 seconds, with variance so it doesn't feel mechanically
+// identical every round. Short enough to keep the loop fast, long enough that
+// the live tick animation in RaceTrack still reads as an actual race rather
+// than an instant cut to the result.
+const MIN_RACE_DURATION_MS = 10_000;
+const MAX_RACE_DURATION_MS = 20_000;
 const FINISHED_PAUSE_MS = 5_000; // how long the "kazanan: X" screen shows before the next round auto-starts
 const OWNER_BONUS_RATE = 0.1;
 
