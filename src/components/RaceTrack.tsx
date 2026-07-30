@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { winProbabilities, mulberry32, drawFinishOrder } from '@/lib/horseRace';
 import type { RaceEntryView } from '@/lib/horseRaceEngine';
 
@@ -17,8 +17,8 @@ export default function RaceTrack({
   raceEndsAt: string;
   seed: number;
 }) {
-  const [positions, setPositions] = useState<Record<string, number>>({});
   const frameRef = useRef<number | null>(null);
+  const runnerRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   // The finish order is fully determined by (entries' ratings, seed) — the
   // exact same pure functions the server uses at settlement (Task 3). This
@@ -32,13 +32,24 @@ export default function RaceTrack({
   const rankByHorseId = new Map(finishOrder.map((id, i) => [id, i]));
 
   useEffect(() => {
+    // Never move a runner through React state. On mobile, rendering a whole
+    // component tree at rAF cadence while also changing `left` (a layout
+    // property) can defer paints under touch pressure; the deferred paint is
+    // then perceived as "the horses moved when I touched the screen". Direct
+    // transform updates keep the work on the compositor and do not depend on
+    // touch/click events or parent re-renders.
+    function setRunnerPosition(horseId: string, progress: number) {
+      const runner = runnerRefs.current[horseId];
+      if (runner) runner.style.transform = `translate3d(${progress * 100}%, 0, 0)`;
+    }
+
     if (phase !== 'RACING') {
       if (phase === 'FINISHED') {
-        const finished: Record<string, number> = {};
-        for (const e of entries) finished[e.horseId] = rankByHorseId.get(e.horseId) === 0 ? 1 : 0.95;
-        setPositions(finished);
+        for (const entry of entries) {
+          setRunnerPosition(entry.horseId, rankByHorseId.get(entry.horseId) === 0 ? 1 : 0.95);
+        }
       } else {
-        setPositions({});
+        for (const entry of entries) setRunnerPosition(entry.horseId, 0);
       }
       return;
     }
@@ -55,15 +66,13 @@ export default function RaceTrack({
     function tick() {
       const now = Date.now();
       const t = Math.max(0, Math.min(1, (now - start) / totalMs));
-      const next: Record<string, number> = {};
-      entries.forEach((e, i) => {
-        const rank = rankByHorseId.get(e.horseId) ?? entries.length - 1;
+      entries.forEach((entry, i) => {
+        const rank = rankByHorseId.get(entry.horseId) ?? entries.length - 1;
         const rankPenalty = rank * 0.025; // winner (rank 0) has no penalty, each place behind trails a bit more
-        const { freq, phase: ph } = jitterParams[i];
-        const jitter = 0.015 * Math.sin(freq * t * Math.PI * 2 + ph);
-        next[e.horseId] = Math.max(0, Math.min(1, t * (1 - rankPenalty) + jitter));
+        const { freq, phase: jitterPhase } = jitterParams[i];
+        const jitter = 0.015 * Math.sin(freq * t * Math.PI * 2 + jitterPhase);
+        setRunnerPosition(entry.horseId, Math.max(0, Math.min(1, t * (1 - rankPenalty) + jitter)));
       });
-      setPositions(next);
       if (t < 1) frameRef.current = requestAnimationFrame(tick);
     }
     frameRef.current = requestAnimationFrame(tick);
@@ -71,19 +80,29 @@ export default function RaceTrack({
     return () => {
       if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
     };
+    // A new race necessarily has a new timestamp/seed. Depending on `entries`
+    // would restart this effect every time the two-second polling response
+    // creates a fresh array, which would be exactly the visual reset to avoid.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, bettingEndsAt, raceEndsAt, seed]);
 
   return (
     <div className="flex flex-col gap-1 rounded-xl border border-line bg-pitch-night-raised p-3">
-      {entries.map((e) => (
-        <div key={e.horseId} className="relative h-8 rounded-lg bg-pitch-night">
+      {entries.map((entry) => (
+        <div key={entry.horseId} className="relative h-8 overflow-hidden rounded-lg bg-pitch-night">
           <div className="absolute right-1 top-1/2 h-px w-2 -translate-y-1/2 bg-gold" />
           <div
-            className="absolute top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full text-xs font-bold text-pitch-night transition-[left] duration-100 ease-linear"
-            style={{ left: `calc(${(positions[e.horseId] ?? 0) * 92}% )`, backgroundColor: e.color }}
+            ref={(node) => {
+              runnerRefs.current[entry.horseId] = node;
+            }}
+            className="absolute inset-y-0 left-0 w-[calc(100%-1.5rem)] will-change-transform"
           >
-            {e.number ?? ''}
+            <div
+              className="absolute top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full text-xs font-bold text-pitch-night"
+              style={{ backgroundColor: entry.color }}
+            >
+              {entry.number ?? ''}
+            </div>
           </div>
         </div>
       ))}

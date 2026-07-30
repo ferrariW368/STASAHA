@@ -3,9 +3,16 @@ import { prisma } from './prisma';
 import { winProbabilities, oddsFromProbabilities, mulberry32, drawFinishOrder } from './horseRace';
 
 const RACE_SIZE = 7;
-const BETTING_DURATION_MS = 30_000;
-const MIN_RACE_DURATION_MS = 30_000;
-const MAX_RACE_DURATION_MS = 45_000;
+// Betting window: 7 seconds from the moment the race's betting round
+// ("kupon") is created — short and urgent by design, so viewers commit fast
+// and the live race itself is the main event.
+const BETTING_DURATION_MS = 7_000;
+// Race duration: 10-20 seconds, with variance so it doesn't feel mechanically
+// identical every round. Short enough to keep the loop fast, long enough that
+// the live tick animation in RaceTrack still reads as an actual race rather
+// than an instant cut to the result.
+const MIN_RACE_DURATION_MS = 10_000;
+const MAX_RACE_DURATION_MS = 20_000;
 const FINISHED_PAUSE_MS = 5_000; // how long the "kazanan: X" screen shows before the next round auto-starts
 const OWNER_BONUS_RATE = 0.1;
 
@@ -19,12 +26,17 @@ export type RaceEntryView = {
   luckRating: number;
   oddsValue: number;
   finishPosition: number | null;
+  ownerCount: number;
+  // Top 3 investors by stake, for a "kimin atı bu" social-proof line — not
+  // the full owner list, so the payload stays small even for a popular horse.
+  topOwners: string[];
 };
 
 export type CurrentRaceView =
   | {
       id: string;
       phase: 'BETTING' | 'RACING' | 'FINISHED';
+      createdAt: string;
       bettingEndsAt: string;
       raceEndsAt: string;
       seed: number;
@@ -32,7 +44,17 @@ export type CurrentRaceView =
     }
   | { error: 'NOT_ENOUGH_HORSES' };
 
-const raceInclude = { entries: { include: { horse: true }, orderBy: { horseId: 'asc' } } } as const;
+// Ownership rows are included alongside each entry's horse so the race view
+// can show co-owner counts/names without a second round-trip per horse —
+// one query for the whole race, same as the rest of this file's pattern.
+const raceInclude = {
+  entries: {
+    include: {
+      horse: { include: { ownerships: { include: { user: { select: { username: true } } } } } },
+    },
+    orderBy: { horseId: 'asc' },
+  },
+} as const;
 
 // The standard Prisma pattern for typing a query result shaped by a reused
 // `include` object — `Prisma.HorseRaceGetPayload` derives the exact type
@@ -44,20 +66,26 @@ function toView(race: RaceWithEntries): CurrentRaceView {
   return {
     id: race.id,
     phase: race.phase as 'BETTING' | 'RACING' | 'FINISHED',
+    createdAt: race.createdAt.toISOString(),
     bettingEndsAt: race.bettingEndsAt.toISOString(),
     raceEndsAt: race.raceEndsAt.toISOString(),
     seed: race.seed,
-    entries: race.entries.map((e) => ({
-      horseId: e.horseId,
-      horseName: e.horse.name,
-      number: e.horse.number,
-      color: e.horse.color,
-      speedRating: e.horse.speedRating,
-      formRating: e.horse.formRating,
-      luckRating: e.horse.luckRating,
-      oddsValue: e.oddsValue,
-      finishPosition: e.finishPosition,
-    })),
+    entries: race.entries.map((e) => {
+      const ownerships = [...e.horse.ownerships].sort((a, b) => b.staInvested - a.staInvested);
+      return {
+        horseId: e.horseId,
+        horseName: e.horse.name,
+        number: e.horse.number,
+        color: e.horse.color,
+        speedRating: e.horse.speedRating,
+        formRating: e.horse.formRating,
+        luckRating: e.horse.luckRating,
+        oddsValue: e.oddsValue,
+        finishPosition: e.finishPosition,
+        ownerCount: ownerships.length,
+        topOwners: ownerships.slice(0, 3).map((o) => o.user.username),
+      };
+    }),
   };
 }
 

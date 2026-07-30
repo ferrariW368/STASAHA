@@ -1,3 +1,5 @@
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import AdBanner from '@/components/AdBanner';
@@ -6,6 +8,7 @@ import SectionLabel from '@/components/SectionLabel';
 import Marquee from '@/components/Marquee';
 import MatchGallery from './MatchGallery';
 import FrameworkAcronym from './FrameworkAcronym';
+import HorseRaceBoard, { type RaceBoardRow, type MyHorseBetRow } from './HorseRaceBoard';
 import { computeUserScore } from '@/lib/score';
 
 const MARKET_TAGS = [
@@ -23,6 +26,12 @@ const transferStageLabel: Record<string, { text: string; className: string }> = 
 };
 
 export default async function HomePage() {
+  const session = await getServerSession(authOptions);
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const tomorrowStart = new Date(todayStart);
+  tomorrowStart.setDate(tomorrowStart.getDate() + 1);
+
   const allMatches = await prisma.match.findMany({
     where: { status: { not: 'cancelled' } },
     include: { homeTeam: true, awayTeam: true },
@@ -74,15 +83,73 @@ export default async function HomePage() {
       : []),
   ];
 
-  const [totalMatches, totalBets, totalPlayerCount, balanceSum] = await Promise.all([
+  const [
+    totalMatches,
+    totalBets,
+    totalPlayerCount,
+    balanceSum,
+    todayHorseRaceCount,
+    todayHorseBetCount,
+    todayHorseRaces,
+    currentUser,
+  ] = await Promise.all([
     prisma.match.count({ where: { status: { not: 'cancelled' } } }),
     prisma.bet.count(),
     prisma.user.count({ where: { role: 'user' } }),
     prisma.user.aggregate({ _sum: { staBalance: true } }),
+    prisma.horseRace.count({ where: { createdAt: { gte: todayStart, lt: tomorrowStart } } }),
+    prisma.horseBet.count({ where: { createdAt: { gte: todayStart, lt: tomorrowStart } } }),
+    prisma.horseRace.findMany({
+      where: { createdAt: { gte: todayStart, lt: tomorrowStart } },
+      include: {
+        entries: {
+          include: { horse: { select: { name: true, number: true } } },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    }),
+    session?.user?.name
+      ? prisma.user.findUnique({
+          where: { username: session.user.name },
+          select: {
+            horseBets: {
+              include: { horse: { select: { name: true, number: true } } },
+              orderBy: { createdAt: 'desc' },
+              take: 8,
+            },
+          },
+        })
+      : null,
   ]);
+  const raceBoardRows: RaceBoardRow[] = todayHorseRaces.map((race, index) => ({
+    id: race.id,
+    raceNumber: index + 1,
+    phase: race.phase as RaceBoardRow['phase'],
+    createdAt: race.createdAt.toISOString(),
+    bettingEndsAt: race.bettingEndsAt.toISOString(),
+    raceEndsAt: race.raceEndsAt.toISOString(),
+    top3: race.entries
+      .filter((entry) => entry.finishPosition !== null && entry.finishPosition <= 3)
+      .map((entry) => ({
+        position: entry.finishPosition!,
+        name: entry.horse.name,
+        number: entry.horse.number,
+      })),
+  }));
+  const myHorseBets: MyHorseBetRow[] = (currentUser?.horseBets ?? []).map((bet) => ({
+    id: bet.id,
+    horseName: bet.horse.name,
+    horseNumber: bet.horse.number,
+    stake: bet.stake,
+    potentialWin: bet.potentialWin,
+    status: bet.status as MyHorseBetRow['status'],
+    createdAt: bet.createdAt.toISOString(),
+  }));
   const stats = [
     { value: `${totalMatches}`, label: 'Oynanan Maç', detail: 'İptal edilenler hariç, kurulmuş tüm maçlar.' },
-    { value: `${totalBets}`, label: 'Kupon', detail: 'Şimdiye kadar oluşturulan toplam kupon sayısı.' },
+    { value: `${totalBets}`, label: 'Futbol Kuponu', detail: 'Şimdiye kadar oluşturulan toplam futbol kuponu.' },
+    { value: `${todayHorseRaceCount}`, label: 'Bugünkü Yarış', detail: 'Bugün oluşturulan toplam at yarışı turu.' },
+    { value: `${todayHorseBetCount}`, label: 'Bugünkü Yarış Kuponu', detail: 'Bugün oluşturulan toplam at yarışı kuponu.' },
     { value: `${totalPlayerCount}`, label: 'Kayıtlı Oyuncu', detail: 'STA hesabı olan gerçek kullanıcı sayısı.' },
     { value: `${(balanceSum._sum.staBalance ?? 0).toLocaleString('tr-TR')}`, label: 'STA Dolaşımda', detail: 'Tüm kullanıcıların toplam bakiyesi.' },
   ];
@@ -187,7 +254,23 @@ export default async function HomePage() {
 
       <Reveal delayMs={80}>
         <section className="mb-10">
-          <SectionLabel number="04" label="RAKAMLARLA" />
+          <SectionLabel number="04" label="CANLI YARIŞ" />
+          <div className="mb-4 flex items-end justify-between gap-4">
+            <div>
+              <h2 className="font-display text-2xl tracking-wide text-text-primary">STA YARIŞ PANOSU</h2>
+              <p className="text-sm text-text-muted">Bugünün canlı sonuçları, kalkış sırasıyla.</p>
+            </div>
+            <span className="shrink-0 rounded-full border border-ferrari-red/40 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-ferrari-red">
+              ● canlı
+            </span>
+          </div>
+          <HorseRaceBoard initialRows={raceBoardRows} myBets={myHorseBets} isLoggedIn={Boolean(session?.user?.name)} />
+        </section>
+      </Reveal>
+
+      <Reveal delayMs={80}>
+        <section className="mb-10">
+          <SectionLabel number="05" label="RAKAMLARLA" />
           <div className="grid grid-cols-2 gap-3">
             {stats.map((s) => (
               <div key={s.label} className="group rounded-xl border border-line bg-pitch-night-raised p-4">
@@ -205,7 +288,7 @@ export default async function HomePage() {
       {transferNews.length > 0 && (
         <Reveal delayMs={80}>
           <section className="mb-10">
-            <SectionLabel number="05" label="TRANSFERLER" />
+            <SectionLabel number="06" label="TRANSFERLER" />
             <h2 className="mb-2 font-display text-2xl tracking-wide text-text-primary">📰 Transfer Haberleri</h2>
             <ul className="flex flex-col gap-2">
               {transferNews.map((n) => {
@@ -234,7 +317,7 @@ export default async function HomePage() {
 
       <Reveal delayMs={80}>
         <section>
-          <SectionLabel number="06" label="LİDERLİK" />
+          <SectionLabel number="07" label="LİDERLİK" />
           <div className="mb-2 flex items-center justify-between">
             <h2 className="font-display text-2xl tracking-wide text-text-primary">Liderlik Tablosu</h2>
             <Link href="/leaderboard" className="text-sm font-medium text-gold">Tümünü gör</Link>

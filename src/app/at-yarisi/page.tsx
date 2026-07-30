@@ -3,9 +3,24 @@
 import { useEffect, useState } from 'react';
 import RaceTrack from '@/components/RaceTrack';
 import { placeHorseBet } from '@/actions/horseRace';
-import type { CurrentRaceView } from '@/lib/horseRaceEngine';
+import type { CurrentRaceView, RaceEntryView } from '@/lib/horseRaceEngine';
 
 const POLL_MS = 2000;
+
+// "X kişi bu ata ortak" social-proof line — shown next to every horse,
+// during betting AND while the race is live, using data that already rides
+// along on the same /current payload (no extra fetch, see horseRaceEngine.ts).
+function OwnerBadge({ entry }: { entry: RaceEntryView }) {
+  if (entry.ownerCount === 0) return null;
+  const names = entry.topOwners.join(', ');
+  const extra = entry.ownerCount - entry.topOwners.length;
+  return (
+    <span className="text-xs text-text-muted">
+      👥 {names}
+      {extra > 0 ? ` +${extra}` : ''} ortak
+    </span>
+  );
+}
 
 export default function HorseRacePage() {
   const [race, setRace] = useState<CurrentRaceView | null>(null);
@@ -65,6 +80,19 @@ export default function HorseRacePage() {
         raceEndsAt={race.raceEndsAt}
         seed={race.seed}
       />
+
+      {/* Owner/co-owner roster — visible in every phase, not just betting,
+          so viewers watching the live race can see whose horse is running. */}
+      <div className="mt-3 flex flex-col gap-1.5">
+        {race.entries.map((e) => (
+          <div key={e.horseId} className="flex items-center justify-between rounded-lg border border-line bg-pitch-night-raised px-3 py-1.5">
+            <span className="text-sm text-text-primary">
+              #{e.number ?? '?'} {e.horseName}
+            </span>
+            <OwnerBadge entry={e} />
+          </div>
+        ))}
+      </div>
 
       {race.phase === 'BETTING' && (
         <div className="mt-4 flex flex-col gap-2">
