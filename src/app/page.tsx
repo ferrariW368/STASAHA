@@ -9,6 +9,7 @@ import Marquee from '@/components/Marquee';
 import MatchGallery from './MatchGallery';
 import FrameworkAcronym from './FrameworkAcronym';
 import HorseRaceBoard, { type RaceBoardRow, type MyHorseBetRow } from './HorseRaceBoard';
+import HorseRaceStatsWidget, { type HorseBetStatRow } from './HorseRaceStatsWidget';
 import { computeUserScore } from '@/lib/score';
 
 const MARKET_TAGS = [
@@ -115,7 +116,6 @@ export default async function HomePage() {
             horseBets: {
               include: { horse: { select: { name: true, number: true } } },
               orderBy: { createdAt: 'desc' },
-              take: 8,
             },
           },
         })
@@ -139,7 +139,7 @@ export default async function HomePage() {
     // HorseRaceBoard.tsx's own merge logic) fills this in client-side.
     betCount: 0,
   }));
-  const myHorseBets: MyHorseBetRow[] = (currentUser?.horseBets ?? []).map((bet) => ({
+  const myHorseBets: MyHorseBetRow[] = (currentUser?.horseBets ?? []).slice(0, 8).map((bet) => ({
     id: bet.id,
     horseName: bet.horse.name,
     horseNumber: bet.horse.number,
@@ -147,6 +147,12 @@ export default async function HomePage() {
     potentialWin: bet.potentialWin,
     status: bet.status as MyHorseBetRow['status'],
     createdAt: bet.createdAt.toISOString(),
+  }));
+  const horseBetStats: HorseBetStatRow[] = (currentUser?.horseBets ?? []).map((bet) => ({
+    horseName: bet.horse.name,
+    status: bet.status as HorseBetStatRow['status'],
+    stake: bet.stake,
+    potentialWin: bet.potentialWin,
   }));
   const stats = [
     { value: `${totalMatches}`, label: 'Oynanan Maç', detail: 'İptal edilenler hariç, kurulmuş tüm maçlar.' },
@@ -268,6 +274,9 @@ export default async function HomePage() {
             </span>
           </div>
           <HorseRaceBoard initialRows={raceBoardRows} myBets={myHorseBets} isLoggedIn={Boolean(session?.user?.name)} />
+          <div className="mt-4">
+            <HorseRaceStatsWidget isLoggedIn={Boolean(session?.user?.name)} bets={horseBetStats} />
+          </div>
         </section>
       </Reveal>
 
