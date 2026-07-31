@@ -135,6 +135,9 @@ export default async function HomePage() {
         name: entry.horse.name,
         number: entry.horse.number,
       })),
+    // The server-side query has no betCount data — only the live poll (see
+    // HorseRaceBoard.tsx's own merge logic) fills this in client-side.
+    betCount: 0,
   }));
   const myHorseBets: MyHorseBetRow[] = (currentUser?.horseBets ?? []).map((bet) => ({
     id: bet.id,
