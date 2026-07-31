@@ -1,11 +1,32 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import RaceTrack from '@/components/RaceTrack';
+import RaceResultOverlay, { type RaceOverlayResult } from '@/components/RaceResultOverlay';
 import { placeHorseBet } from '@/actions/horseRace';
 import type { CurrentRaceView, RaceEntryView } from '@/lib/horseRaceEngine';
 
 const POLL_MS = 2000;
+
+// Mirrors the FINISHED_PAUSE_MS constant in src/lib/horseRaceEngine.ts (not
+// exported from there — kept in sync manually, the spec fixes this value at
+// 5s and doesn't change it, so a duplicated literal is an acceptable trade
+// against exporting an internal engine constant for one client-side read).
+const FINISHED_PAUSE_MS = 5_000;
+
+function secondsUntil(iso: string): number {
+  return Math.max(0, Math.ceil((new Date(iso).getTime() - Date.now()) / 1000));
+}
+
+function finishedPauseEndsAt(raceEndsAt: string): string {
+  return new Date(new Date(raceEndsAt).getTime() + FINISHED_PAUSE_MS).toISOString();
+}
+
+function bannerText(race: Extract<CurrentRaceView, { phase: string }>, remaining: number): string {
+  if (race.phase === 'BETTING') return `🎫 Bahisler ${remaining}sn sonra kapanıyor`;
+  if (race.phase === 'RACING') return `🏇 Yarış ${remaining}sn sonra bitiyor`;
+  return `🏁 Sonuçlandı — yeni tur ${remaining}sn sonra başlıyor`;
+}
 
 // "X kişi bu ata ortak" social-proof line — shown next to every horse,
 // during betting AND while the race is live, using data that already rides
@@ -28,13 +49,44 @@ export default function HorseRacePage() {
   const [stake, setStake] = useState(100);
   const [message, setMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // Lazy initializer (function form) so Date.now() is read once at mount,
+  // not during every render body evaluation (react-hooks/purity). The
+  // interval effect below then re-reads it every second.
+  const [nowTick, setNowTick] = useState(() => Date.now());
+  const [overlayResult, setOverlayResult] = useState<RaceOverlayResult | null>(null);
+  const prevBetStatusRef = useRef<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     async function poll() {
       const res = await fetch('/api/horse-race/current');
       const data: CurrentRaceView = await res.json();
-      if (!cancelled) setRace(data);
+      if (!cancelled) {
+        setRace(data);
+        if (!('error' in data) && data.myBet) {
+          const prevStatus = prevBetStatusRef.current;
+          const currentStatus = data.myBet.status;
+          const alreadyShownKey = `shown-horse-result-${data.id}`;
+          if (
+            prevStatus === 'pending' &&
+            currentStatus !== 'pending' &&
+            !sessionStorage.getItem(alreadyShownKey)
+          ) {
+            sessionStorage.setItem(alreadyShownKey, '1');
+            const winningEntry = data.entries.find((e) => e.finishPosition === 1);
+            setOverlayResult({
+              status: currentStatus,
+              horseName: data.myBet.horseName,
+              stake: data.myBet.stake,
+              potentialWin: data.myBet.potentialWin,
+              winningHorseName: winningEntry?.horseName ?? data.myBet.horseName,
+            });
+          }
+          prevBetStatusRef.current = currentStatus;
+        } else if (!('error' in data)) {
+          prevBetStatusRef.current = null;
+        }
+      }
     }
     poll();
     const interval = setInterval(poll, POLL_MS);
@@ -42,6 +94,11 @@ export default function HorseRacePage() {
       cancelled = true;
       clearInterval(interval);
     };
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => setNowTick(Date.now()), 1000);
+    return () => clearInterval(interval);
   }, []);
 
   if (!race) {
@@ -73,6 +130,22 @@ export default function HorseRacePage() {
         <span className={race.phase === 'RACING' ? 'live-pulse text-ferrari-red' : 'text-gold'}>{phaseLabel}</span>
       </p>
 
+      <div
+        key={nowTick}
+        className="mb-3 rounded-lg border border-line bg-pitch-night-raised px-3 py-2 text-center text-xs font-medium text-text-primary sm:text-sm"
+      >
+        {bannerText(
+          race,
+          secondsUntil(
+            race.phase === 'FINISHED'
+              ? finishedPauseEndsAt(race.raceEndsAt)
+              : race.phase === 'BETTING'
+                ? race.bettingEndsAt
+                : race.raceEndsAt
+          )
+        )}
+      </div>
+
       <RaceTrack
         entries={race.entries}
         phase={race.phase}
@@ -89,7 +162,12 @@ export default function HorseRacePage() {
             <span className="text-sm text-text-primary">
               #{e.number ?? '?'} {e.horseName}
             </span>
-            <OwnerBadge entry={e} />
+            <div className="flex items-center gap-2">
+              {race.phase !== 'FINISHED' && (
+                <span className="text-xs text-text-muted">🎟️ {e.betCount} kupon</span>
+              )}
+              <OwnerBadge entry={e} />
+            </div>
           </div>
         ))}
       </div>
@@ -135,6 +213,10 @@ export default function HorseRacePage() {
         <p className="mt-4 text-center font-display text-xl tracking-wide text-gold">
           🏆 Kazanan: {race.entries.find((e) => e.finishPosition === 1)?.horseName}
         </p>
+      )}
+
+      {overlayResult && (
+        <RaceResultOverlay result={overlayResult} onDismiss={() => setOverlayResult(null)} />
       )}
     </main>
   );
