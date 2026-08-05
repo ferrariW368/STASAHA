@@ -11,7 +11,10 @@ export default async function HorseShopPage() {
   const horses = await prisma.horse.findMany({
     where: { active: true },
     include: {
-      ownerships: true,
+      ownerships: {
+        include: { user: { select: { username: true } } },
+        orderBy: { staInvested: 'desc' },
+      },
       // Last 5 finished races this horse ran in, newest first — just enough
       // to show a "form" strip without pulling the whole race history.
       raceEntries: {
@@ -76,7 +79,12 @@ export default async function HorseShopPage() {
 
               <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-muted">
                 <span>
-                  👥 {coOwnerCount > 0 ? `${coOwnerCount} ortak` : 'henüz ortak yok'}
+                  {coOwnerCount > 0
+                    ? `👥 ${horse.ownerships
+                        .slice(0, 3)
+                        .map((o) => o.user.username)
+                        .join(', ')}${coOwnerCount > 3 ? ` +${coOwnerCount - 3}` : ''} ortak`
+                    : '👥 henüz ortak yok'}
                 </span>
                 {races > 0 && (
                   <span>
