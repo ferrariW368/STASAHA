@@ -68,8 +68,8 @@ export default function HorseRacePage() {
           const currentStatus = data.myBet.status;
           const alreadyShownKey = `shown-horse-result-${data.id}`;
           if (
-            prevStatus === 'pending' &&
             currentStatus !== 'pending' &&
+            prevStatus !== currentStatus &&
             !sessionStorage.getItem(alreadyShownKey)
           ) {
             sessionStorage.setItem(alreadyShownKey, '1');
@@ -130,20 +130,19 @@ export default function HorseRacePage() {
         <span className={race.phase === 'RACING' ? 'live-pulse text-ferrari-red' : 'text-gold'}>{phaseLabel}</span>
       </p>
 
-      <div
-        key={nowTick}
-        className="mb-3 rounded-lg border border-line bg-pitch-night-raised px-3 py-2 text-center text-xs font-medium text-text-primary sm:text-sm"
-      >
-        {bannerText(
-          race,
-          secondsUntil(
-            race.phase === 'FINISHED'
-              ? finishedPauseEndsAt(race.raceEndsAt)
-              : race.phase === 'BETTING'
-                ? race.bettingEndsAt
-                : race.raceEndsAt
-          )
-        )}
+      <div className="mb-3 rounded-lg border border-line bg-pitch-night-raised px-3 py-2 text-center text-xs font-medium text-text-primary sm:text-sm">
+        <span>
+          {bannerText(
+            race,
+            secondsUntil(
+              race.phase === 'FINISHED'
+                ? finishedPauseEndsAt(race.raceEndsAt)
+                : race.phase === 'BETTING'
+                  ? race.bettingEndsAt
+                  : race.raceEndsAt
+            )
+          )}
+        </span>
       </div>
 
       <RaceTrack
