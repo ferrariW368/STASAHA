@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import FerrariBetBanner from '@/components/FerrariBetBanner';
+import { LeftBanner, RightBanner, MobileBanner } from '@/components/FerrariBetBanner';
 import IntroSplash from '@/components/IntroSplash';
 import Footer from '@/components/Footer';
 import FullscreenNav from '@/components/FullscreenNav';
@@ -54,8 +54,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </div>
           </div>
         </header>
-        <FerrariBetBanner />
-        {children}
+        <MobileBanner />
+        <div className="lg:grid lg:grid-cols-[9rem_1fr_9rem]">
+          <LeftBanner />
+          <div>{children}</div>
+          <RightBanner />
+        </div>
         <Footer />
       </body>
     </html>

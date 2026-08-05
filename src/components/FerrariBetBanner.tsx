@@ -51,18 +51,26 @@ function MobileBannerStrip() {
   );
 }
 
-export default function FerrariBetBanner() {
+export function LeftBanner() {
   return (
-    <>
-      <div className="fixed left-4 top-1/2 z-0 hidden h-[600px] max-h-[80vh] w-36 -translate-y-1/2 lg:block">
-        <SideBannerContent />
-      </div>
-      <div className="fixed right-4 top-1/2 z-0 hidden h-[600px] max-h-[80vh] w-36 -translate-y-1/2 lg:block">
-        <SideBannerContent />
-      </div>
-      <div className="lg:hidden">
-        <MobileBannerStrip />
-      </div>
-    </>
+    <div className="sticky top-1/2 z-0 hidden h-[600px] max-h-[80vh] -translate-y-1/2 lg:block">
+      <SideBannerContent />
+    </div>
+  );
+}
+
+export function RightBanner() {
+  return (
+    <div className="sticky top-1/2 z-0 hidden h-[600px] max-h-[80vh] -translate-y-1/2 lg:block">
+      <SideBannerContent />
+    </div>
+  );
+}
+
+export function MobileBanner() {
+  return (
+    <div className="lg:hidden">
+      <MobileBannerStrip />
+    </div>
   );
 }
