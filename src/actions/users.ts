@@ -85,7 +85,7 @@ export async function updateUserProfile(
   return {};
 }
 
-export async function deleteUser(userId: string) {
+export async function deleteUser(userId: string): Promise<{ error?: string }> {
   const authError = await requireAdmin();
   if (authError) return authError;
   const target = await prisma.user.findUnique({ where: { id: userId } });
