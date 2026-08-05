@@ -20,6 +20,7 @@ export const authOptions: AuthOptions = {
         if (!user) return null;
         const valid = await bcrypt.compare(credentials.password, user.passwordHash);
         if (!valid) return null;
+        if (user.status === 'banned') return null;
         return { id: user.id, name: user.username, role: user.role };
       },
     }),
