@@ -13,6 +13,7 @@ model User {
   passwordHash String
   staBalance   Int     @default(1000)
   role         String  @default("user") // "user" | "admin"
+  status       String  @default("active") // "active" | "banned"
   createdAt    DateTime @default(now())
   bets         Bet[]
   lineups      Lineup[]
