@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { updatePlayerProfile, transferPlayer } from '@/actions/players';
 import { addPlayer } from '@/actions/teams';
+import DeletePlayerButton from './DeletePlayerButton';
 
 export default async function AdminPlayersPage() {
   const [players, teams] = await Promise.all([
@@ -124,9 +125,12 @@ export default async function AdminPlayersPage() {
                 />
               </label>
 
-              <button className="pop-interactive mt-1 self-start rounded-full border border-line px-3 py-1.5 text-xs font-semibold text-text-primary">
-                Kaydet
-              </button>
+              <div className="mt-1 flex items-center justify-between">
+                <button className="pop-interactive self-start rounded-full border border-line px-3 py-1.5 text-xs font-semibold text-text-primary">
+                  Kaydet
+                </button>
+                <DeletePlayerButton playerId={p.id} playerName={p.name} />
+              </div>
             </form>
           </div>
         ))}
