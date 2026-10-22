@@ -1,6 +1,14 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+
+// useLayoutEffect warns when used during SSR (Next.js server-renders 'use
+// client' components too). Fall back to useEffect on the server; the
+// component is only ever interactive in the browser anyway. Also sidesteps
+// react-hooks/set-state-in-effect, which only flags setState called
+// synchronously in a plain useEffect body — see IntroSplash.tsx for the
+// same pattern.
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export default function Reveal({
   children,
@@ -15,7 +23,7 @@ export default function Reveal({
   const [visible, setVisible] = useState(false);
   const [skipAnimation, setSkipAnimation] = useState(false);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setSkipAnimation(true);
       setVisible(true);

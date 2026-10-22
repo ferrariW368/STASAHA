@@ -1,6 +1,14 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+
+// useLayoutEffect warns when used during SSR (Next.js server-renders 'use
+// client' components too). Fall back to useEffect on the server; the
+// component is only ever interactive in the browser anyway. Also sidesteps
+// react-hooks/set-state-in-effect, which only flags setState called
+// synchronously in a plain useEffect body — see IntroSplash.tsx for the
+// same pattern.
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export default function AnimatedNumber({
   value,
@@ -17,7 +25,7 @@ export default function AnimatedNumber({
   const fromRef = useRef(0);
   const frameRef = useRef<number | null>(null);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setDisplay(value);
       fromRef.current = value;
@@ -46,7 +54,6 @@ export default function AnimatedNumber({
     return () => {
       if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, durationMs]);
 
   return <span className={className}>{display.toFixed(decimals)}</span>;

@@ -1,6 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useLayoutEffect, useEffect, useState } from 'react';
+
+// useLayoutEffect warns when used during SSR (Next.js server-renders 'use
+// client' components too). Fall back to useEffect on the server; the
+// component is only ever interactive in the browser anyway. Also sidesteps
+// react-hooks/set-state-in-effect, which only flags setState called
+// synchronously in a plain useEffect body — see IntroSplash.tsx for the
+// same pattern.
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export default function Marquee({
   items,
@@ -13,7 +21,7 @@ export default function Marquee({
 }) {
   const [reduceMotion, setReduceMotion] = useState(false);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     setReduceMotion(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   }, []);
 

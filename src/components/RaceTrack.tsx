@@ -19,6 +19,7 @@ export default function RaceTrack({
 }) {
   const frameRef = useRef<number | null>(null);
   const runnerRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const badgeRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   // The finish order is fully determined by (entries' ratings, seed) — the
   // exact same pure functions the server uses at settlement (Task 3). This
@@ -45,11 +46,18 @@ export default function RaceTrack({
 
     if (phase !== 'RACING') {
       if (phase === 'FINISHED') {
+        const winnerId = finishOrder[0];
         for (const entry of entries) {
           setRunnerPosition(entry.horseId, rankByHorseId.get(entry.horseId) === 0 ? 1 : 0.95);
+          const badge = badgeRefs.current[entry.horseId];
+          if (badge) badge.classList.toggle('jackpot-pulse', entry.horseId === winnerId);
         }
       } else {
-        for (const entry of entries) setRunnerPosition(entry.horseId, 0);
+        for (const entry of entries) {
+          setRunnerPosition(entry.horseId, 0);
+          const badge = badgeRefs.current[entry.horseId];
+          if (badge) badge.classList.remove('jackpot-pulse');
+        }
       }
       return;
     }
@@ -98,6 +106,9 @@ export default function RaceTrack({
             className="absolute inset-y-0 left-0 w-[calc(100%-1.5rem)] will-change-transform"
           >
             <div
+              ref={(node) => {
+                badgeRefs.current[entry.horseId] = node;
+              }}
               className="absolute top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full text-xs font-bold text-pitch-night"
               style={{ backgroundColor: entry.color }}
             >

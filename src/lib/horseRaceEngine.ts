@@ -1,18 +1,18 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from './prisma';
-import { winProbabilities, oddsFromProbabilities, mulberry32, drawFinishOrder } from './horseRace';
+import { winProbabilities, oddsFromProbabilities, mulberry32, drawFinishOrder, simulatedBetCount } from './horseRace';
 
 const RACE_SIZE = 7;
 // Betting window: 7 seconds from the moment the race's betting round
 // ("kupon") is created — short and urgent by design, so viewers commit fast
 // and the live race itself is the main event.
 const BETTING_DURATION_MS = 7_000;
-// Race duration: 10-20 seconds, with variance so it doesn't feel mechanically
+// Race duration: 15-30 seconds, with variance so it doesn't feel mechanically
 // identical every round. Short enough to keep the loop fast, long enough that
 // the live tick animation in RaceTrack still reads as an actual race rather
 // than an instant cut to the result.
-const MIN_RACE_DURATION_MS = 10_000;
-const MAX_RACE_DURATION_MS = 20_000;
+const MIN_RACE_DURATION_MS = 15_000;
+const MAX_RACE_DURATION_MS = 30_000;
 const FINISHED_PAUSE_MS = 5_000; // how long the "kazanan: X" screen shows before the next round auto-starts
 const OWNER_BONUS_RATE = 0.1;
 
@@ -30,7 +30,18 @@ export type RaceEntryView = {
   // Top 3 investors by stake, for a "kimin atı bu" social-proof line — not
   // the full owner list, so the payload stays small even for a popular horse.
   topOwners: string[];
+  // Real HorseBet count for this horse in this race, plus a small simulated
+  // boost while real volume is low (see simulatedBetCount in horseRace.ts).
+  betCount: number;
 };
+
+type MyBetView = {
+  horseId: string;
+  horseName: string;
+  stake: number;
+  potentialWin: number;
+  status: 'pending' | 'won' | 'lost';
+} | null;
 
 export type CurrentRaceView =
   | {
@@ -41,6 +52,7 @@ export type CurrentRaceView =
       raceEndsAt: string;
       seed: number;
       entries: RaceEntryView[];
+      myBet: MyBetView;
     }
   | { error: 'NOT_ENOUGH_HORSES' };
 
@@ -62,7 +74,32 @@ const raceInclude = {
 // hand-written interface that could drift from the real query shape.
 type RaceWithEntries = Prisma.HorseRaceGetPayload<{ include: typeof raceInclude }>;
 
-function toView(race: RaceWithEntries): CurrentRaceView {
+async function loadRealBetCounts(raceId: string): Promise<Map<string, number>> {
+  const groups = await prisma.horseBet.groupBy({
+    by: ['horseId'],
+    where: { raceId },
+    _count: { _all: true },
+  });
+  return new Map(groups.map((g) => [g.horseId, g._count._all]));
+}
+
+async function loadMyBet(raceId: string, userId: string | undefined): Promise<MyBetView> {
+  if (!userId) return null;
+  const bet = await prisma.horseBet.findUnique({
+    where: { userId_raceId: { userId, raceId } },
+    include: { horse: { select: { name: true } } },
+  });
+  if (!bet) return null;
+  return {
+    horseId: bet.horseId,
+    horseName: bet.horse.name,
+    stake: bet.stake,
+    potentialWin: bet.potentialWin,
+    status: bet.status as 'pending' | 'won' | 'lost',
+  };
+}
+
+function toView(race: RaceWithEntries, realBetCounts: Map<string, number>, myBet: MyBetView): CurrentRaceView {
   return {
     id: race.id,
     phase: race.phase as 'BETTING' | 'RACING' | 'FINISHED',
@@ -70,8 +107,10 @@ function toView(race: RaceWithEntries): CurrentRaceView {
     bettingEndsAt: race.bettingEndsAt.toISOString(),
     raceEndsAt: race.raceEndsAt.toISOString(),
     seed: race.seed,
-    entries: race.entries.map((e) => {
+    entries: race.entries.map((e, index) => {
       const ownerships = [...e.horse.ownerships].sort((a, b) => b.staInvested - a.staInvested);
+      const realCount = realBetCounts.get(e.horseId) ?? 0;
+      const rng = mulberry32(race.seed + index + 5000);
       return {
         horseId: e.horseId,
         horseName: e.horse.name,
@@ -84,8 +123,10 @@ function toView(race: RaceWithEntries): CurrentRaceView {
         finishPosition: e.finishPosition,
         ownerCount: ownerships.length,
         topOwners: ownerships.slice(0, 3).map((o) => o.user.username),
+        betCount: realCount + simulatedBetCount(realCount, e.oddsValue, rng),
       };
     }),
+    myBet,
   };
 }
 
@@ -130,7 +171,7 @@ async function startNewRace(): Promise<CurrentRaceView> {
     include: raceInclude,
   });
 
-  return toView(race);
+  return toView(race, new Map(), null);
 }
 
 async function settleRace(raceId: string): Promise<void> {
@@ -193,7 +234,7 @@ async function settleRace(raceId: string): Promise<void> {
   });
 }
 
-export async function getCurrentRace(): Promise<CurrentRaceView> {
+export async function getCurrentRace(userId?: string): Promise<CurrentRaceView> {
   const now = new Date();
   let race = await prisma.horseRace.findFirst({ orderBy: { createdAt: 'desc' }, include: raceInclude });
 
@@ -211,5 +252,6 @@ export async function getCurrentRace(): Promise<CurrentRaceView> {
     race = await prisma.horseRace.findUniqueOrThrow({ where: { id: race.id }, include: raceInclude });
   }
 
-  return toView(race);
+  const [realBetCounts, myBet] = await Promise.all([loadRealBetCounts(race.id), loadMyBet(race.id, userId)]);
+  return toView(race, realBetCounts, myBet);
 }

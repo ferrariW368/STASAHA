@@ -13,11 +13,25 @@ model User {
   passwordHash String
   staBalance   Int     @default(1000)
   role         String  @default("user") // "user" | "admin"
+  status       String  @default("active") // "active" | "banned"
   createdAt    DateTime @default(now())
   bets         Bet[]
   lineups      Lineup[]
   horseOwnerships HorseOwnership[]
   horseBets       HorseBet[]
+  adminActions    AdminActionLog[] @relation("AdminActions")
+  targetedActions AdminActionLog[] @relation("TargetedActions")
+}
+
+model AdminActionLog {
+  id           String   @id @default(cuid())
+  adminUserId  String
+  adminUser    User     @relation("AdminActions", fields: [adminUserId], references: [id])
+  targetUserId String?
+  targetUser   User?    @relation("TargetedActions", fields: [targetUserId], references: [id], onDelete: SetNull)
+  action       String   // "DELETE_USER" | "EDIT_USER" | "RESET_PASSWORD" | "ADJUST_BALANCE"
+  detail       String?
+  createdAt    DateTime @default(now())
 }
 
 model Team {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { compositeScore, winProbabilities, oddsFromProbabilities, mulberry32, drawFinishOrder } from '../src/lib/horseRace';
+import { compositeScore, winProbabilities, oddsFromProbabilities, mulberry32, drawFinishOrder, simulatedBetCount } from '../src/lib/horseRace';
 
 describe('compositeScore', () => {
   it('weighs speed highest, then form, then luck', () => {
@@ -99,5 +99,48 @@ describe('drawFinishOrder', () => {
       if (order[0] === 'strong') strongWins++;
     }
     expect(strongWins).toBeGreaterThan(140); // expect roughly 90% x 200 = 180, allow generous margin
+  });
+});
+
+describe('simulatedBetCount', () => {
+  it('returns 0 once real betting volume reaches the threshold', () => {
+    const rng = mulberry32(1);
+    expect(simulatedBetCount(5, 2.0, rng)).toBe(0);
+    expect(simulatedBetCount(9, 2.0, rng)).toBe(0);
+  });
+
+  it('returns an integer in [0, 4] below the threshold', () => {
+    const rng = mulberry32(2);
+    for (let i = 0; i < 50; i++) {
+      const n = simulatedBetCount(0, 3.0, rng);
+      expect(Number.isInteger(n)).toBe(true);
+      expect(n).toBeGreaterThanOrEqual(0);
+      expect(n).toBeLessThanOrEqual(4);
+    }
+  });
+
+  it('favors lower odds (favorites) with a higher expected boost than longshots', () => {
+    const trials = 300;
+    let favoriteSum = 0;
+    let longshotSum = 0;
+    const favoriteRng = mulberry32(10);
+    const longshotRng = mulberry32(10);
+    for (let i = 0; i < trials; i++) {
+      favoriteSum += simulatedBetCount(0, 1.3, favoriteRng);
+      longshotSum += simulatedBetCount(0, 15, longshotRng);
+    }
+    expect(favoriteSum / trials).toBeGreaterThan(longshotSum / trials);
+  });
+
+  it('is deterministic for a fixed rng sequence', () => {
+    const seqA: number[] = [];
+    const rngA = mulberry32(42);
+    for (let i = 0; i < 5; i++) seqA.push(simulatedBetCount(0, 2.5, rngA));
+
+    const seqB: number[] = [];
+    const rngB = mulberry32(42);
+    for (let i = 0; i < 5; i++) seqB.push(simulatedBetCount(0, 2.5, rngB));
+
+    expect(seqA).toEqual(seqB);
   });
 });

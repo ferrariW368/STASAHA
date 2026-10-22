@@ -73,3 +73,21 @@ export function drawFinishOrder(horseIds: string[], probabilities: number[], rng
   }
   return order;
 }
+
+// Below this many *real* HorseBet rows for a horse in a race, the board adds
+// a small deterministic "simulated" boost so a freshly-started race doesn't
+// look dead before real players have placed bets. At/above this threshold,
+// real traffic has taken over and the boost silently disappears (returns 0).
+const SIMULATED_BET_COUNT_THRESHOLD = 5;
+const SIMULATED_BET_COUNT_MAX_BOOST = 4;
+
+export function simulatedBetCount(realCount: number, oddsValue: number, rng: () => number): number {
+  if (realCount >= SIMULATED_BET_COUNT_THRESHOLD) return 0;
+  // oddsValue is clamped to [MIN_ODDS, MAX_ODDS] = [1.3, 15] upstream by
+  // oddsFromProbabilities. Map it to a [0, 1] "favorite-ness" — 1 at the
+  // shortest odds (biggest favorite), 0 at the longest (biggest longshot) —
+  // then bias the roll toward the max boost for favorites.
+  const favoriteness = 1 - (oddsValue - MIN_ODDS) / (MAX_ODDS - MIN_ODDS);
+  const biased = Math.pow(rng(), 1 - favoriteness * 0.7); // lower exponent skews rolls upward
+  return Math.round(biased * SIMULATED_BET_COUNT_MAX_BOOST);
+}
